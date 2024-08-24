@@ -86,23 +86,23 @@ esphome:
       - light.addressable_set: #H5
         id: leds
         range_from: 27
-        range_to: 33
+        range_to: 34
         red: 50%
         green: 6%
         blue: 40%
         color_brightness: 20%
       - light.addressable_set: #M3
         id: leds
-        range_from: 34
-        range_to: 50
+        range_from: 35
+        range_to: 51
         red: 0%
         green: 35%
         blue: 64%
         color_brightness: 20%
       - light.addressable_set: #M1
         id: leds
-        range_from: 51
-        range_to: 60
+        range_from: 52
+        range_to: 61
         red: 100%
         green: 85%
         blue: 0%

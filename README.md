@@ -26,7 +26,7 @@ LED Display for the Budapest Metro and Suburban railway network
 | 19      | 57          | M2/M1/M3 - Deák Ferenc tér |
 | 20      | 60          | M2 - Astoria |
 | 21      | 63          | M2 - Blaha Lujza tér |
-| 22      | 66          | M2/M4 - Keleti Pályaudvar |
+| 22      | 66          | M2/M4 - Keleti pályaudvar |
 | 23      | 69          | M2 - Puskás Ferenc Stadion |
 | 24      | 72          | M2 - Pillangó utca |
 | 25      | 75          | M2/H9 - Örs vezér tere |
@@ -38,30 +38,31 @@ LED Display for the Budapest Metro and Suburban railway network
 | 31      | 93          | H5 - Filatorigát |
 | 32      | 96          | H5 - Kaszásdűlő |
 | 33      | 99          | H5 - Aquincum |
-| 34      | 102          | M3 - Újpest-központ |
-| 35      | 105         | M3 - Újpest-városkapu |
-| 36      | 108         | M3 - Gyöngyösi utca |
-| 37      | 111         | M3 - Forgách utca |
-| 38      | 114         | M3 - Göncz Árpád városközpont |
-| 39      | 117         | M3 - Lehel tér |
-| 40      | 120         | M3 - Nyugati pályaudvar |
-| 41      | 123         | M3 - Arany János utca |
-| 42      | 126         | M3 - Ferenciek tere |
-| 43      | 129         | M3 - Corvin-negyed |
-| 44      | 132         | M3 - Semmelweis Klinikák |
-| 45      | 135         | M3 - Nagyvárad tér |
-| 46      | 138         | M3 - Népliget |
-| 47      | 141         | M3 - Ecseri út |
-| 48      | 144         | M3 - Pöttyös utca |
-| 49      | 147         | M3 - Határ út |
-| 50      | 150         | M3 - Kőbánya-Kispest |
-| 51      | 153         | M1 - Vörösmarty tér |
-| 52      | 156         | M1 - Bajcsy-Zsilinszky út |
-| 53      | 159         | M1 - Opera |
-| 54      | 162         | M1 - Oktogon |
-| 55      | 165         | M1 - Vörösmarty utca |
-| 56      | 168         | M1 - Kodály körönd |
-| 57      | 171         | M1 - Bajza utca |
-| 58      | 174         | M1 - Hősök tere |
-| 59      | 177         | M1 - Széchenyi fürdő |
-| 60      | 180         | M1 - Mexikói út |
+| 34      | 102         | H5 - Rómaifürdő |
+| 35      | 105         | M3 - Újpest-központ |
+| 36      | 108         | M3 - Újpest-városkapu |
+| 37      | 111         | M3 - Gyöngyösi utca |
+| 38      | 114         | M3 - Forgách utca |
+| 39      | 117         | M3 - Göncz Árpád városközpont |
+| 40      | 120         | M3 - Lehel tér |
+| 41      | 123         | M3 - Nyugati pályaudvar |
+| 42      | 126         | M3 - Arany János utca |
+| 43      | 129         | M3 - Ferenciek tere |
+| 44      | 132         | M3 - Corvin-negyed |
+| 45      | 135         | M3 - Semmelweis Klinikák |
+| 46      | 138         | M3 - Nagyvárad tér |
+| 47      | 141         | M3 - Népliget |
+| 48      | 144         | M3 - Ecseri út |
+| 49      | 147         | M3 - Pöttyös utca |
+| 50      | 150         | M3 - Határ út |
+| 51      | 153         | M3 - Kőbánya-Kispest |
+| 52      | 156         | M1 - Vörösmarty tér |
+| 53      | 159         | M1 - Bajcsy-Zsilinszky út |
+| 54      | 162         | M1 - Opera |
+| 55      | 165         | M1 - Oktogon |
+| 56      | 168         | M1 - Vörösmarty utca |
+| 57      | 171         | M1 - Kodály körönd |
+| 58      | 174         | M1 - Bajza utca |
+| 59      | 177         | M1 - Hősök tere |
+| 60      | 180         | M1 - Széchenyi fürdő |
+| 61      | 183         | M1 - Mexikói út |
