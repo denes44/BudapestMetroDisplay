@@ -44,25 +44,26 @@ LED Display for the Budapest Metro and Suburban railway network
 | 37      | 111         | M3 - Gyöngyösi utca |
 | 38      | 114         | M3 - Forgách utca |
 | 39      | 117         | M3 - Göncz Árpád városközpont |
-| 40      | 120         | M3 - Lehel tér |
-| 41      | 123         | M3 - Nyugati pályaudvar |
-| 42      | 126         | M3 - Arany János utca |
-| 43      | 129         | M3 - Ferenciek tere |
-| 44      | 132         | M3 - Corvin-negyed |
-| 45      | 135         | M3 - Semmelweis Klinikák |
-| 46      | 138         | M3 - Nagyvárad tér |
-| 47      | 141         | M3 - Népliget |
-| 48      | 144         | M3 - Ecseri út |
-| 49      | 147         | M3 - Pöttyös utca |
-| 50      | 150         | M3 - Határ út |
-| 51      | 153         | M3 - Kőbánya-Kispest |
-| 52      | 156         | M1 - Vörösmarty tér |
-| 53      | 159         | M1 - Bajcsy-Zsilinszky út |
-| 54      | 162         | M1 - Opera |
-| 55      | 165         | M1 - Oktogon |
-| 56      | 168         | M1 - Vörösmarty utca |
-| 57      | 171         | M1 - Kodály körönd |
-| 58      | 174         | M1 - Bajza utca |
-| 59      | 177         | M1 - Hősök tere |
-| 60      | 180         | M1 - Széchenyi fürdő |
-| 61      | 183         | M1 - Mexikói út |
+| 40      | 120         | M3 - Dózsa György út |
+| 41      | 123         | M3 - Lehel tér |
+| 42      | 126         | M3 - Nyugati pályaudvar |
+| 43      | 129         | M3 - Arany János utca |
+| 44      | 132         | M3 - Ferenciek tere |
+| 45      | 135         | M3 - Corvin-negyed |
+| 46      | 138         | M3 - Semmelweis Klinikák |
+| 47      | 141         | M3 - Nagyvárad tér |
+| 48      | 144         | M3 - Népliget |
+| 49      | 147         | M3 - Ecseri út |
+| 50      | 150         | M3 - Pöttyös utca |
+| 51      | 153         | M3 - Határ út |
+| 52      | 156         | M3 - Kőbánya-Kispest |
+| 53      | 159         | M1 - Vörösmarty tér |
+| 54      | 162         | M1 - Bajcsy-Zsilinszky út |
+| 55      | 165         | M1 - Opera |
+| 56      | 168         | M1 - Oktogon |
+| 57      | 171         | M1 - Vörösmarty utca |
+| 58      | 174         | M1 - Kodály körönd |
+| 59      | 177         | M1 - Bajza utca |
+| 60      | 180         | M1 - Hősök tere |
+| 61      | 183         | M1 - Széchenyi fürdő |
+| 62      | 186         | M1 - Mexikói út |
