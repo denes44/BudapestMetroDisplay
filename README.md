@@ -8,7 +8,7 @@ LED Display for the Budapest Metro and Suburban railway network
 | 1       | 3           | H6 - Kén utca |
 | 2       | 6           | H6 - Közvágóhíd |
 | 3       | 9           | H7 - Szabadkikötő |
-| 4       | 12           | H7 - Müpa - Nemzeti Színház |
+| 4       | 12          | H7 - Müpa - Nemzeti Színház |
 | 5       | 15          | H7 - Boráros tér |
 | 6       | 18          | M4 - Kelenföld vasútállomás |
 | 7       | 21          | M4 - Bikás park |
