@@ -1,0 +1,26 @@
+packages:
+  api: !include common_api.yaml
+  
+wifi:
+  id: wifi_component
+  ssid: !secret esphome_wifi_ssid
+  password: !secret esphome_wifi_pass
+  use_address: ${ip}
+  fast_connect: true
+  
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: ${friendly_name}
+    password: !secret esphome_ap_pass
+
+captive_portal:
+
+sensor:
+  - platform: wifi_signal
+    name: Wifi
+    id: wifi_signal_strength
+    update_interval: 60s
+    filters:
+    - sliding_window_moving_average:
+        window_size: 15
+        send_every: 15

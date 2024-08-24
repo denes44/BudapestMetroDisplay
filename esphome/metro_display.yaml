@@ -1,0 +1,173 @@
+substitutions:
+  name: metro_display
+  ip: 192.168.x.x
+  friendly_name: Metro Display
+  
+packages:
+  wifi_api: !include common/common_wifi_api.yaml
+  common_stuff: !include common/common_stuff.yaml
+
+esphome:
+  on_boot:
+    priority: 800
+    then:
+      - light.addressable_set: #H6
+        id: leds
+        range_from: 0
+        range_to: 2
+        red: 50%
+        green: 29%
+        blue: 0%
+        color_brightness: 20%
+      - light.addressable_set: #H7
+        id: leds
+        range_from: 3
+        range_to: 5
+        red: 92%
+        green: 44%
+        blue: 1%
+        color_brightness: 20%
+      - light.addressable_set: #M4/1
+        id: leds
+        range_from: 6
+        range_to: 11
+        red: 28%
+        green: 65%
+        blue: 25%
+        color_brightness: 20%
+      - light.addressable_set: #M4/2
+        id: leds
+        range_from: 13
+        range_to: 14
+        red: 28%
+        green: 65%
+        blue: 25%
+        color_brightness: 20%
+      - light.addressable_set: #M2/1
+        id: leds
+        range_from: 15
+        range_to: 16
+        red: 89%
+        green: 12%
+        blue: 9%
+        color_brightness: 20%
+      - light.addressable_set: #M2/2
+        id: leds
+        range_from: 18
+        range_to: 18
+        red: 89%
+        green: 12%
+        blue: 9%
+        color_brightness: 20%
+      - light.addressable_set: #M2/3
+        id: leds
+        range_from: 20
+        range_to: 21
+        red: 89%
+        green: 12%
+        blue: 9%
+        color_brightness: 20%
+      - light.addressable_set: #M2/4
+        id: leds
+        range_from: 23
+        range_to: 24
+        red: 0%
+        green: 0%
+        blue: 0%
+        color_brightness: 20%
+      - light.addressable_set: #H9
+        id: leds
+        range_from: 26
+        range_to: 26
+        red: 92%
+        green: 46%
+        blue: 43%
+        color_brightness: 20%
+      - light.addressable_set: #H5
+        id: leds
+        range_from: 27
+        range_to: 33
+        red: 50%
+        green: 6%
+        blue: 40%
+        color_brightness: 20%
+      - light.addressable_set: #M3
+        id: leds
+        range_from: 34
+        range_to: 50
+        red: 0%
+        green: 35%
+        blue: 64%
+        color_brightness: 20%
+      - light.addressable_set: #M1
+        id: leds
+        range_from: 51
+        range_to: 60
+        red: 100%
+        green: 85%
+        blue: 0%
+        color_brightness: 20%
+      - light.addressable_set: #M4/M3 Kálvin tér
+        id: leds
+        range_from: 12
+        range_to: 12
+        red: 0%
+        green: 100%
+        blue: 100%
+        color_brightness: 20%
+      - light.addressable_set: #M2/H5 Batthány tér
+        id: leds
+        range_from: 17
+        range_to: 17
+        red: 100%
+        green: 60%
+        blue: 0%
+        color_brightness: 20%
+      - light.addressable_set: #M1/M2/M3 Deák Ferenc tér
+        id: leds
+        range_from: 19
+        range_to: 19
+        red: 100%
+        green: 100%
+        blue: 100%
+        color_brightness: 20%
+      - light.addressable_set: #M2/M4 Keleti pályaudvar
+        id: leds
+        range_from: 22
+        range_to: 22
+        red: 100%
+        green: 35%
+        blue: 0%
+        color_brightness: 20%
+      - light.addressable_set: #M2/H9 Örs vezér tere
+        id: leds
+        range_from: 25
+        range_to: 25
+        red: 91%
+        green: 28%
+        blue: 26%
+        color_brightness: 20%
+      
+esp32:
+  board: adafruit_feather_esp32s3
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: leds
+    pin: GPIOxx
+    num_leds: 61
+    rmt_channel: 0
+    chipset: SK6812
+    rgb_order: GRB
+    name: ${friendly_name}
+    effects:
+      - e131:
+          universe: 1
+          channels: RGB
+      - wled:
+        # port: 21324
+        # blank_on_start: True
+        # sync_group_mask: 0
+
+e131:
+  method: multicast
