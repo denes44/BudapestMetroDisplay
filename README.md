@@ -1,7 +1,36 @@
 # BudapestMetroDisplay
 LED Display for the Budapest Metro and Suburban railway network
 
-## LED addresses
+## Software
+The control software is written in python.
+
+It gets the schedule, realtime and alert data from the [BKK OpenData](https://opendata.bkk.hu/home) portal.
+You need to obtain an API key for yourself to use the software.
+
+The software processes the data from the API and controls the LEDs via sACN (E1.31) protocol. 
+
+More information of the software can be found in the [software](software/README.md) folder.
+
+## Hardware
+### PCB Size
+The size of the PCB is 210 mm x 300 mm.
+It fits perfectly in an IKEA LOMVIKEN 21x30 cm picture frame (IKEA article number is 903.143.03). The edge of the PCB is designed to not interfere with the edge of the picture frame.
+
+### Controller
+The PCB is designed to accomodate an ESP32-S3 SuperMini controller as an internal controller.
+The task of the internal controller is to receive sACN (E1.31) data from the software and display it on the LEDs.
+
+For this, a couple different option can be used. The recommended is ESPHome, you can find the configuration to it in the [esphome](esphome) folder.
+WLED can also be used, since it supports sACN (E1.31).
+
+For more advanced uses (for example run the software on a more advanced controller), a 3 pole PH2.0 connector is available for an external controller.
+The data source for the LEDs can be selected by an SMD solder bridge.
+
+### LEDs
+63 pcs SK6805-EC20 2mm x 2mm LED for every stop.
+The power consumtion is 5 mA for each LED, so the total consumption for the LEDs is 315 mA
+
+#### LED addresses
 | LED no. | DMX address | Stop |
 | ------  | ----------- | ---- |
 | 0       | 0           | H6 - Pesterzsébet felső |
