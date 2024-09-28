@@ -9,6 +9,8 @@ jobs:
   build:
     name: Build ESPHome firmware to test the configuration
     runs-on: ubuntu-latest
-    uses: esphome/build-action@v4.0.2
-    with:
-      yaml-file: esphome/metro_display.yaml
+    steps:
+      - uses: actions/checkout@v4.1.7
+      - uses: esphome/build-action@v4.0.2
+        with:
+          yaml-file: esphome/metro_display.yaml
