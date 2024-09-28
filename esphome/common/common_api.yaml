@@ -2,8 +2,8 @@ esphome:
   name: ${name}
   friendly_name: ${friendly_name}
 
-mdns:
-  disabled: true
+# mdns:
+  # disabled: true
 
 # Enable logging
 logger:
