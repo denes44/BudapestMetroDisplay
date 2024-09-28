@@ -1,6 +1,9 @@
 name: Publish Python 🐍 distribution 📦 to PyPI and TestPyPI
 
-on: push
+on:
+  push:
+    paths:
+      - software/**
 
 jobs:
   build:
@@ -23,11 +26,10 @@ jobs:
       working-directory: software
       run: python3 -m build
     - name: Store the distribution packages
-      working-directory: software
       uses: actions/upload-artifact@v4
       with:
         name: python-package-distributions
-        path: dist/
+        path: software/dist/
 
   publish-to-pypi:
     name: >-
@@ -44,14 +46,14 @@ jobs:
 
     steps:
     - name: Download all the dists
-      working-directory: software
       uses: actions/download-artifact@v4
       with:
         name: python-package-distributions
-        path: dist/
+        path: software/dist/
     - name: Publish distribution 📦 to PyPI
-      working-directory: software
       uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        packages_dir: "software/dist"
       
   publish-to-testpypi:
     name: Publish Python 🐍 distribution 📦 to TestPyPI
@@ -67,16 +69,15 @@ jobs:
 
     steps:
     - name: Download all the dists
-      working-directory: software
       uses: actions/download-artifact@v4
       with:
         name: python-package-distributions
-        path: dist/
+        path: software/dist/
     - name: Publish distribution 📦 to TestPyPI
-      working-directory: software
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
+        packages_dir: "software/dist"
 
   github-release:
     name: >-
@@ -92,18 +93,16 @@ jobs:
 
     steps:
     - name: Download all the dists
-      working-directory: software
       uses: actions/download-artifact@v4
       with:
         name: python-package-distributions
-        path: dist/
+        path: software/dist/
     - name: Sign the dists with Sigstore
-      working-directory: software
       uses: sigstore/gh-action-sigstore-python@v2.1.1
       with:
         inputs: >-
-          ./dist/*.tar.gz
-          ./dist/*.whl
+          ./software/dist/*.tar.gz
+          ./software/dist/*.whl
     - name: Create GitHub Release
       working-directory: software
       env:
@@ -124,29 +123,3 @@ jobs:
         gh release upload
         '${{ github.ref_name }}' dist/**
         --repo '${{ github.repository }}'
-
-  publish-to-testpypi:
-    name: Publish Python 🐍 distribution 📦 to TestPyPI
-    needs:
-    - build
-    runs-on: ubuntu-latest
-
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/BudapestMetroDisplay
-
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-
-    steps:
-    - name: Download all the dists
-      working-directory: software
-      uses: actions/download-artifact@v4
-      with:
-        name: python-package-distributions
-        path: dist/
-    - name: Publish distribution 📦 to TestPyPI
-      working-directory: software
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
