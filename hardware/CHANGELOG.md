@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## AAB - 2024-09-04
 
-First manufactured version.
+First manufactured version
 
 ### Fixed
 - Fine tuned solder mask openings and LED positions
