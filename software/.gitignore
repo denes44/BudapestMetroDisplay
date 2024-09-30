@@ -1,0 +1,8 @@
+# Default ignored files
+resources/gui_bg.png
+resources/gui_bg_.png
+build/
+dist/
+eggs/
+*.egg*
+venv

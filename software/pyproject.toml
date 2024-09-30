@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=62.6", "wheel", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "BudapestMetroDisplay"
+dynamic = ["version","dependencies"]
+requires-python = ">=3.11"
+authors = [
+  {name = "denes44"},
+]
+maintainers = [
+  {name = "denes44"}
+]
+description = "Backgorund service for a BudapestMetroDisplay hardware LED display"
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3.11",
+  "License :: OSI Approved :: MIT License",
+  "Environment :: No Input/Output (Daemon)",
+  "Intended Audience :: End Users/Desktop",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Topic :: Artistic Software",
+  "Topic :: Multimedia"
+]
+
+[project.urls]
+Documentation = "https://github.com/denes44/BudapestMetroDisplay/README.md"
+Repository = "https://github.com/denes44/BudapestMetroDisplay.git"
+"Bug Tracker" = "https://github.com/denes44/BudapestMetroDisplay/issues"
+Changelog = "https://github.com/denes44/BudapestMetroDisplay/blob/master/CHANGELOG.md"
+
+[project.scripts]
+BudapestMetroDisplay = "BudapestMetroDisplay:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "BudapestMetroDisplay.__version__"}
+dependencies = {file = ["src/BudapestMetroDisplay/requirements.txt"]}
+
+[tool.setuptools_scm]
+version_file = "src/BudapestMetroDisplay/_version.py"  # Specify the file where the version will be written
+version_scheme = "post-release"  # Optional: choose a version scheme
+local_scheme = "node-and-date"   # Optional: add a local version (like commit hash)
