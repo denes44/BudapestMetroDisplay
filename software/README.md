@@ -6,6 +6,7 @@
 
 
 ### Proxmox
+
 You can easily run the software for this project in a Proxmox LXC.
 
 This is a basic Debian LXC with python, and this software automatically installated and configured.
@@ -23,13 +24,16 @@ This script is customized from the Debian LXC install script, from tteck's Proxm
 The different configuration options can be changed by environmental values.
 
 ### Public transport data
+
 #### BKK OpenData API key
+
 This is the only required value, you need to obtain your own API key from the [BKK OpenData](https://opendata.bkk.hu/home) portal.
 ```
 BKK_API_KEY = "your_api_key"
 ```
 
 ### API update details
+
 These are the configurable parameters for updating the public transport data:
 ```
 BKK_API_UPDATE_INTERVAL = 2 # Delay between consecutive API calls in seconds
@@ -52,6 +56,7 @@ Also very different values might cause the application to function not as intend
 For example the value of `BKK_API_UPDATE_REGULAR` might affect the detection of out of service stops. Make sure that this value is higher than the maximum following distance of the vehicles.
 
 ### sACN settings
+
 You can change the default universe and fps of the sACN (E1.31) data that is sent out:
 ```
 SACN_UNIVERSE = 1 # DMX universe to send out data with the sACN protocol
@@ -59,6 +64,7 @@ SACN_FPS = 1 # Idle update frequency (automatically goes higher during fade time
 ```
 
 ### LED settings
+
 The default fade time of the LEDs can also be changed:
 ```
 LED_FADE_TIME = 1.0 # Fade time in seconds for the LED turn on and off action
