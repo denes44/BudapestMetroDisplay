@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## Unreleased
 
 ### Added
+
 - Metro logo on the front of the PCB
 - Made for ESPHome logo on the back of the PCB
 
@@ -15,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 First manufactured version
 
 ### Fixed
+
 - Fine tuned solder mask openings and LED positions
 
 ## AAA - 2024-09-02
