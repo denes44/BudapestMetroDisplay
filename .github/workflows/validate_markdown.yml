@@ -20,6 +20,8 @@ jobs:
       with:
         globs: ${{ steps.changed-files.outputs.all_changed_files }}
         separator: ","
+        fix: true
+        config: '.github/rules/custom.markdownlint.jsonc'
   markdown-link-check:
     name: Check links
     runs-on: ubuntu-latest
