@@ -14,16 +14,20 @@ More information of the software can be found in the [software](software/README.
 ## Hardware
 ### PCB Size
 The size of the PCB is 210 mm x 300 mm.
+
 It fits perfectly in an IKEA LOMVIKEN 21x30 cm picture frame (IKEA article number is 903.143.03). The edge of the PCB is designed to not interfere with the edge of the picture frame.
+There is a template available to cut out areas of the back of the picture frame, so the components can fit: [hardware/pcb_cutout.pdf](hardware/pcb_cutout.pdf)
 
 ### Controller
 The PCB is designed to accomodate an ESP32-S3 SuperMini controller as an internal controller.
 The task of the internal controller is to receive sACN (E1.31) data from the software and display it on the LEDs.
 
 For this, a couple different option can be used. The recommended is ESPHome, you can find the configuration to it in the [esphome](esphome) folder.
-WLED can also be used, since it supports sACN (E1.31).
+The control software has an extra feature, it can take account the global brightness that is set in ESPHome, so the LEDs won't go dark below 11% (between 0% and 11% the LED stays dark).
 
-For more advanced uses (for example run the software on a more advanced controller), a 3 pole PH2.0 connector is available for an external controller.
+WLED can also be used, since it supports sACN (E1.31), but the brightness compensation feature won't be available
+
+For more advanced uses (for example run the software directly on a more advanced controller), a 3 pole PH2.0 connector is available for an external controller.
 The data source for the LEDs can be selected by an SMD solder bridge.
 
 ### LEDs
