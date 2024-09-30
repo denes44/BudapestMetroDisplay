@@ -85,8 +85,7 @@ that is sent out:
 
 ```text
 SACN_UNIVERSE = 1 # DMX universe to send out data with the sACN protocol
-SACN_FPS = 1 # Idle update frequency (automatically goes higher during
-fade time)
+SACN_FPS = 1 # Idle update frequency (automatically goes higher during fade time)
 ```
 
 ### LED settings
