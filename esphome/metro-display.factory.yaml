@@ -1,0 +1,48 @@
+packages:
+  # Include all of the core configuration
+  core: !include metro-display.yaml
+
+esphome:
+  # This will allow for project identification,
+  # configuration and updates.
+  project:
+    name: BudapestMetroDisplay
+    version: dev # This will be replaced by the github workflows with the `release` version
+    platformio_options:
+    board_build.flash_mode: dio
+
+esp32:
+  board: adafruit_feather_esp32s3
+  framework:
+    type: esp-idf
+    version: recommended
+
+# This should point to the public location of the yaml file that will be adopted.
+# In this case it is the core yaml file that does not contain the extra things
+# that are provided by this factory yaml file as the user does not need these once adopted.
+dashboard_import:
+  package_import_url: github://denes44/BudapestMetroDisplay/esphome/metro-display.yaml@main
+
+# API is a requirement of the dashboard import.
+api:
+
+# OTA is required for Over-the-Air updating
+ota:
+  platform: esphome
+  
+wifi:
+  # Set up a wifi access point
+  ap:
+
+# In combination with the `ap` this allows the user
+# to provision wifi credentials to the device.
+captive_portal:
+
+# Sets up Bluetooth LE (Only on ESP32) to allow the user
+# to provision wifi credentials to the device.
+esp32_improv:
+  authorizer: none
+
+# Sets up the improv via serial client for Wi-Fi provisioning.
+# Handy if your device has a usb port for the user to add credentials when they first get it.
+improv_serial:
