@@ -26,13 +26,11 @@ from datetime import datetime, timedelta, time
 import requests
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
-from tzlocal import get_localzone
 
 import aps_helpers
 import led_control
 from _version import __version__
 from config import settings
-from led_control import DEFAULT_COLORS
 from stops import stops_led, stop_no_service
 
 logger = logging.getLogger(__name__)
@@ -558,9 +556,6 @@ def calculate_schedule_interval(json_response, reference_id: str):
         )
         return
 
-    # Get stopId, when there is only one stop in the response
-    stop_id_global = json_response["data"]["entry"].get("stopId", None)
-
     # Get stopTimes from TransitArrivalsAndDepartures
     stop_times = json_response["data"]["entry"].get("stopTimes", [])
     if len(stop_times) < 2:
@@ -681,7 +676,7 @@ def process_alerts(json_response, reference_id):
                     continue
 
                 # Check whether the stop is operational now
-                if stop_no_service[stop_id] == False:
+                if not stop_no_service[stop_id]:
                     # Check if we have a schedule for this stop_id,
                     # because if we have, then the stop is not really out of service
                     soonest_job = aps_helpers.find_soonest_job_by_argument(
@@ -704,5 +699,5 @@ def process_alerts(json_response, reference_id):
                         # Calculate the default color for this stop according to which route is operation for the stop
                         led_control.calculate_default_color(stops_led[stop_id])
                         # Change the LED color to the default color if there is no ongoing LED action for this LED
-                        if not led_locks[led_index].locked():
+                        if not led_control.led_locks[stops_led[stop_id]].locked():
                             led_control.reset_led_to_default(stops_led[stop_id])

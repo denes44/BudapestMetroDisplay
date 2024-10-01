@@ -229,8 +229,7 @@ stop_names = {
     "BKK_19795280": "Örs vezér tere",
 }
 
-led_rectangles = [None] * 63
-
+led_rectangles = [None] * len(led_positions)
 
 # Width and height of the rectangles (LEDs)
 RECT_WIDTH = 10
@@ -334,13 +333,13 @@ def create_filtered_job_table(scheduler, route_id):
     job_table.pack(fill=tk.BOTH, expand=True)
 
     for col in columns:
-        job_table.heading(col, text=col, command=lambda c=col: sort_by(job_table, c, 0))
+        job_table.heading(col, text=col)
         job_table.column(col, width=100, anchor=tk.CENTER)
 
     filter_jobs_by_route(job_table, scheduler, route_id)
 
 
-def create_route_buttons(canvas):
+def create_route_buttons(my_canvas):
     """Create buttons for each route_id in ROUTE_COLORS and position them at the top-left corner."""
     from led_control import ROUTE_COLORS
 
@@ -352,14 +351,14 @@ def create_route_buttons(canvas):
     for route_id, color in ROUTE_COLORS.items():
         color_hex = rgb_to_color_string(color)
         btn = tk.Button(
-            canvas,
+            my_canvas,
             text=route_id,
             bg=color_hex,
             command=lambda rid=route_id: create_filtered_job_table(
                 bkk_opendata.departure_scheduler, rid
             ),
         )
-        canvas.create_window(
+        my_canvas.create_window(
             x_offset + col * 110, y_offset + row * 40, window=btn, anchor="nw"
         )  # Positioning buttons
         col += 1

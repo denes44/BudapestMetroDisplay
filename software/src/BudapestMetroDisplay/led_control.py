@@ -222,7 +222,7 @@ def calculate_default_color(led_index: int):
             f"Battyány tér, M2:{route_status['BKK_5200']} H5:{route_status['BKK_H5']}"
         )
         if (
-                route_status["BKK_5200"] == True and route_status["BKK_H5"] == True
+                route_status["BKK_5200"] and route_status["BKK_H5"]
         ):  # Both M2 and H5 are operational
             DEFAULT_COLORS[led_index] = (
                 int(255 * settings.led.dim_ratio),

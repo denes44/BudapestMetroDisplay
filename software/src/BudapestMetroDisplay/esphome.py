@@ -22,7 +22,6 @@
 import logging
 import threading
 
-import led_control
 from config import settings
 
 from _version import __version__

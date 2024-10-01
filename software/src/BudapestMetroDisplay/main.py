@@ -25,16 +25,14 @@ import asyncio
 import logging
 import signal
 import sys
-import threading
 import time
 
 import bkk_opendata
-import esphome
 import gui
 import led_control
 import log
-from stops import stops_metro, stops_railway, alert_routes
 from config import settings
+from stops import stops_metro, stops_railway, alert_routes
 
 if settings.esphome.used:
     from esphome import start_background_loop, connect_and_subscribe
