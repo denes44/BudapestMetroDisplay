@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=62.6", "wheel", "setuptools-scm"]
+requires = ["setuptools>=62.6", "wheel", "setuptools-git-versioning>=2.0,<3"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -36,11 +36,20 @@ Changelog = "https://github.com/denes44/BudapestMetroDisplay/blob/master/CHANGEL
 [project.scripts]
 BudapestMetroDisplay = "BudapestMetroDisplay:main"
 
+[tool.setuptools.package-data]
+# include VERSION file to a package
+BudapestMetroDisplay = ["VERSION"]
+
+[tool.setuptools]
+# this package will read some included files in runtime, avoid installing it as .zip
+zip-safe = false
+
 [tool.setuptools.dynamic]
-version = {attr = "BudapestMetroDisplay.__version__"}
 dependencies = {file = ["src/BudapestMetroDisplay/requirements.txt"]}
 
-[tool.setuptools_scm]
-version_file = "src/BudapestMetroDisplay/_version.py"  # Specify the file where the version will be written
-version_scheme = "post-release"  # Optional: choose a version scheme
-local_scheme = "node-and-date"   # Optional: add a local version (like commit hash)
+[tool.setuptools-git-versioning]
+enabled = true
+version_file = "src/BudapestMetroDisplay/VERSION"
+count_commits_from_version_file = true
+dev_template = "{tag}.{branch}{ccount}"
+dirty_template = "{tag}.{branch}{ccount}"
