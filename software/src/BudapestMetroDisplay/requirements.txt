@@ -1,0 +1,13 @@
+APScheduler~=3.10.1
+requests~=2.31.0
+sacn~=1.5
+configparser~=6.0.0
+SQLAlchemy~=2.0.20
+sqlitedict~=2.1.0
+numpy~=2.1.1
+
+platformdirs~=4.3.6
+tzlocal~=5.2
+pydantic~=2.9.2
+pydantic-settings~=2.5.2
+aioesphomeapi~=27.0.0

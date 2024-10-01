@@ -1,0 +1,6 @@
+# Default ignored files
+TODO
+log/
+__pycache__/
+.idea/
+qodana.yaml
