@@ -51,5 +51,5 @@ dependencies = {file = ["src/BudapestMetroDisplay/requirements.txt"]}
 enabled = true
 version_file = "src/BudapestMetroDisplay/VERSION"
 count_commits_from_version_file = true
-dev_template = "{tag}.{branch}{ccount}"
-dirty_template = "{tag}.{branch}{ccount}"
+dev_template = "{tag}.dev{ccount}"
+dirty_template = "{tag}.dev{ccount}"
