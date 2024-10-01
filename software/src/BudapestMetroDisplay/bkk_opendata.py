@@ -590,7 +590,7 @@ def calculate_schedule_interval(json_response, reference_id: str):
         # CASE #7: No valid time data is available
         else:
             logger.warning(
-                f"No valid arrival/departure time found when updating stop {stop_id}, route {route_id} during schedule interval calculation"
+                f"No valid arrival/departure time found when updating route {route_id} during schedule interval calculation"
             )
             continue
         i += 1
