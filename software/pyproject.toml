@@ -12,8 +12,9 @@ authors = [
 maintainers = [
   {name = "denes44"}
 ]
-description = "Backgorund service for a BudapestMetroDisplay hardware LED display"
-readme = "README.md"
+#description = "Backgorund service for a BudapestMetroDisplay hardware LED display"
+description = "Backgorund service"
+# readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = [
   "Development Status :: 3 - Alpha",
