@@ -81,6 +81,11 @@ def main():
     parser.add_argument(
         "--trace", action="store_true", help="Enable trace mode for verbose output."
     )
+    parser.add_argument(
+        "--gui", action="store_true", help="Enable GUI."
+    )
+    # Parse command-line arguments
+    args = parser.parse_args()
 
     # Set up logging with or without debug mode
     log.setup_logging(parser)
@@ -104,7 +109,8 @@ def main():
     led_control.activate_sacn()
 
     # Start the GUI
-    gui.start_gui()
+    if args.gui:
+        gui.start_gui()
 
     try:
         while True:
