@@ -269,7 +269,7 @@ def get_rotated_rectangle(x, y, width, height, rotation):
 
 # Function to draw the LEDs as circles
 def draw_leds():
-    from led_control import get_led_color
+    from BudapestMetroDisplay.led_control import get_led_color
 
     for i, (x, y, rotation) in enumerate(led_positions):
         # Get the color from led_states (convert from flat list to RGB)
@@ -341,7 +341,7 @@ def create_filtered_job_table(scheduler, route_id):
 
 def create_route_buttons(my_canvas):
     """Create buttons for each route_id in ROUTE_COLORS and position them at the top-left corner."""
-    from led_control import ROUTE_COLORS
+    from BudapestMetroDisplay.led_control import ROUTE_COLORS
 
     row, col = 0, 0
     x_offset, y_offset = (

@@ -437,7 +437,7 @@ def update_sacn():
     """
     if sender is not None and sender[settings.sacn.universe].dmx_data is not None:
         if settings.esphome.used:
-            from esphome import brightness
+            from BudapestMetroDisplay.esphome import brightness
 
             # Create a new list with modified values
             modified_led_states = [

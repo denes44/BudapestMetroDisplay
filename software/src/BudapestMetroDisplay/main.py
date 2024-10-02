@@ -35,7 +35,7 @@ from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay.stops import stops_metro, stops_railway, alert_routes
 
 if settings.esphome.used:
-    from esphome import start_background_loop, connect_and_subscribe
+    from BudapestMetroDisplay.esphome import start_background_loop, connect_and_subscribe
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +66,10 @@ sys.excepthook = log.log_exception
 
 def main():
     global parser
+
+    if settings.esphome.used:
+        loop = start_background_loop()
+        loop.call_soon_threadsafe(asyncio.create_task, connect_and_subscribe())
 
     # Set up argument parser
     parser = argparse.ArgumentParser(
@@ -110,7 +114,4 @@ def main():
 
 
 if __name__ == "__main__":
-    if settings.esphome.used:
-        loop = start_background_loop()
-        loop.call_soon_threadsafe(asyncio.create_task, connect_and_subscribe())
     main()
