@@ -6,9 +6,19 @@ from tkinter import ttk
 
 from BudapestMetroDisplay import bkk_opendata
 
+logger = logging.getLogger(__name__)
+
+
+def on_closing():
+    """Handle the GUI window close event."""
+    logger.info("GUI window closed, stopping application...")
+    root.destroy()
+
+
 # Create the main window
 root = tk.Tk()
 root.title("BudapestMetroDisplay LED Test GUI")
+root.protocol("WM_DELETE_WINDOW", on_closing)
 
 # Create a Canvas to draw on
 canvas = tk.Canvas(root, width=700, height=1000)
