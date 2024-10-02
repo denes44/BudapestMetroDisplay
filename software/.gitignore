@@ -4,6 +4,9 @@ resources/gui_bg_.png
 .idea
 build/
 dist/
+log/
 eggs/
 *.egg*
 venv
+run.bat
+rebuild.bat
