@@ -4,28 +4,28 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "BudapestMetroDisplay"
-dynamic = ["version","dependencies"]
+dynamic = ["version", "dependencies"]
 requires-python = ">=3.11"
 authors = [
-  {name = "denes44"},
+    { name = "denes44" },
 ]
 maintainers = [
-  {name = "denes44"}
+    { name = "denes44" }
 ]
 #description = "Backgorund service for a BudapestMetroDisplay hardware LED display"
 description = "Backgorund service"
 # readme = "README.md"
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 classifiers = [
-  "Development Status :: 3 - Alpha",
-  "Programming Language :: Python :: 3.11",
-  "License :: OSI Approved :: MIT License",
-  "Environment :: No Input/Output (Daemon)",
-  "Intended Audience :: End Users/Desktop",
-  "Natural Language :: English",
-  "Operating System :: OS Independent",
-  "Topic :: Artistic Software",
-  "Topic :: Multimedia"
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Environment :: No Input/Output (Daemon)",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Artistic Software",
+    "Topic :: Multimedia"
 ]
 
 [project.urls]
@@ -46,7 +46,7 @@ BudapestMetroDisplay = ["VERSION"]
 zip-safe = false
 
 [tool.setuptools.dynamic]
-dependencies = {file = ["src/BudapestMetroDisplay/requirements.txt"]}
+dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools-git-versioning]
 enabled = true

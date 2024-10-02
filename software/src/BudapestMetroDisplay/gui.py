@@ -4,7 +4,7 @@ import os
 import tkinter as tk
 from tkinter import ttk
 
-import bkk_opendata
+from BudapestMetroDisplay import bkk_opendata
 
 # Create the main window
 root = tk.Tk()

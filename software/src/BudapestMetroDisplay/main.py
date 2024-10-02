@@ -27,12 +27,12 @@ import signal
 import sys
 import time
 
-import bkk_opendata
-import gui
-import led_control
-import log
-from config import settings
-from stops import stops_metro, stops_railway, alert_routes
+from BudapestMetroDisplay import bkk_opendata
+from BudapestMetroDisplay import gui
+from BudapestMetroDisplay import led_control
+from BudapestMetroDisplay import log
+from BudapestMetroDisplay.config import settings
+from BudapestMetroDisplay.stops import stops_metro, stops_railway, alert_routes
 
 if settings.esphome.used:
     from esphome import start_background_loop, connect_and_subscribe

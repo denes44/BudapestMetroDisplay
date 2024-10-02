@@ -31,12 +31,11 @@ from typing import Optional
 import sacn
 from sacn import sACNsender
 
-import stops
-from _version import __version__
-
-from config import settings
-from gui import change_gui_led_color
-from stops import stops_led, common_stops
+from BudapestMetroDisplay import stops
+from BudapestMetroDisplay.config import settings
+from BudapestMetroDisplay.gui import change_gui_led_color
+from BudapestMetroDisplay.stops import stops_led, common_stops
+from BudapestMetroDisplay._version import __version__
 
 logger = logging.getLogger(__name__)
 

@@ -25,7 +25,7 @@ import logging
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
-from _version import __version__
+from BudapestMetroDisplay._version import __version__
 
 logger = None
 

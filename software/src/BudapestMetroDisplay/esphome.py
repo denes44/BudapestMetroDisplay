@@ -19,13 +19,10 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
+import asyncio
 import logging
 import threading
 
-from config import settings
-
-from _version import __version__
-import asyncio
 from aioesphomeapi import (
     APIClient,
     APIConnectionError,
@@ -33,6 +30,9 @@ from aioesphomeapi import (
     EntityState,
     LightState,
 )
+
+from BudapestMetroDisplay._version import __version__
+from BudapestMetroDisplay.config import settings
 
 logger = logging.getLogger(__name__)
 brightness: float = 1.0

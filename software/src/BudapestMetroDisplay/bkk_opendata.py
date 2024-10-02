@@ -27,11 +27,11 @@ import requests
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
 
-import aps_helpers
-import led_control
-from _version import __version__
-from config import settings
-from stops import stops_led, stop_no_service
+from BudapestMetroDisplay import aps_helpers
+from BudapestMetroDisplay import led_control
+from BudapestMetroDisplay._version import __version__
+from BudapestMetroDisplay.config import settings
+from BudapestMetroDisplay.stops import stops_led, stop_no_service
 
 logger = logging.getLogger(__name__)
 # Set the logging level for urllib3 to INFO

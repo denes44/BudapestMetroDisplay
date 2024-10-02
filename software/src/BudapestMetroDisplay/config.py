@@ -22,7 +22,7 @@
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import Union
 
-from pydantic import Field, validator
+from pydantic import Field, validator, field_validator
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -61,11 +61,11 @@ class SACNConfig(BaseSettings):
     )
     fps: int = Field(default=60, ge=1, description="Idle update frequency")
 
-    @validator("unicast_ip", pre=True)
+    @field_validator("unicast_ip", mode="before")
     def validate_ip(cls, value):
         return ip_address(value)
 
-    @validator("unicast_ip")
+    @field_validator("unicast_ip")
     def check_unicast_ip(cls, value, values):
         if not values.get("multicast") and not value:
             raise ValueError("unicast_ip must be a valid IP address when using unicast")
@@ -108,7 +108,7 @@ class ESPHomeConfig(BaseSettings):
     )
     api_key: str = Field(default="", description="The API key of the ESPHome device")
 
-    @validator("device_ip", pre=True)
+    @field_validator("device_ip", mode="before")
     def validate_ip(cls, value):
         return ip_address(value)
 
