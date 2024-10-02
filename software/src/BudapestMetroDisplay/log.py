@@ -22,6 +22,7 @@
 
 # Define logger globally
 import logging
+import os
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
@@ -102,16 +103,21 @@ def setup_logging(parser):
     else:
         logger.setLevel(logging.INFO)
 
+    # Ensure the log directory exists
+    log_directory = "log"
+    if not os.path.exists(log_directory):
+        os.makedirs(log_directory)
+
     # Create a rotating file handler
     file_handler = RotatingFileHandler(
-        "log/application.log",
+        os.path.join(log_directory, "application.log"),
         maxBytes=5 * 1024 * 1024,  # 5 MB file size limit
         backupCount=10,  # Keep up to 10 backup log files
     )
 
     # Create a rotating file handler
     file_handler_error = RotatingFileHandler(
-        "log/application_error.log",
+        os.path.join(log_directory, "application_error.log"),
         maxBytes=5 * 1024 * 1024,  # 5 MB file size limit
         backupCount=5,  # Keep up to 5 backup log files
     )
