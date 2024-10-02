@@ -35,7 +35,7 @@ Repository = "https://github.com/denes44/BudapestMetroDisplay.git"
 Changelog = "https://github.com/denes44/BudapestMetroDisplay/blob/master/CHANGELOG.md"
 
 [project.scripts]
-BudapestMetroDisplay = "BudapestMetroDisplay:main"
+BudapestMetroDisplay = "BudapestMetroDisplay.main:main"
 
 [tool.setuptools.package-data]
 # include VERSION file to a package
