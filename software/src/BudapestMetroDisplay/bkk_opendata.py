@@ -633,7 +633,7 @@ def calculate_schedule_interval(json_response, reference_id: str):
         elif route_id.startswith("BKK_H"):  # Suburban railway
             ACTION_DELAY[route_id] = 45
 
-    logger.info(
+    logger.debug(
         f"Recalculated LED turn off delay for route {route_id}, schedule delay: {difference:.1f} min, new delay: {ACTION_DELAY[route_id]} sec"
     )
 
