@@ -686,12 +686,12 @@ def process_alerts(json_response, reference_id):
                     if soonest_job is not None:
                         # We found at least one schedule for this stop, so we'll ignore the NO_SERVICE alert
                         logger.debug(
-                            f"Found NO_SERVICE alert {alert_details["id"]} for stop {stop_id}, route {route_id}, but there are active schedules for that stop, so we'll ignore that"
+                            f"Found NO_SERVICE alert {alert_details['id']} for stop {stop_id}, route {route_id}, but there are active schedules for that stop, so we'll ignore that"
                         )
                     else:
                         # No schedule found for this stop, so we'll process the NO_SERVICE alert
                         logger.debug(
-                            f"Found NO_SERVICE alert {alert_details["id"]} for stop {stop_id}, route {route_id}"
+                            f"Found NO_SERVICE alert {alert_details['id']} for stop {stop_id}, route {route_id}"
                         )
                         # Set the no_service flag for this stop
                         stop_no_service[stop_id] = True
