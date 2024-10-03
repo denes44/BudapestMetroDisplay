@@ -131,7 +131,7 @@ def setup_logging(parser):
     # Add a custom log entry at program start to separate runs
     separator = "=" * 50
     start_logger.info(separator)
-    start_logger.info(f"Program started at {datetime.now()}, version {__version__}")
+    start_logger.info(f"Program started at {datetime.now()}")
     start_logger.info(separator)
     # Remove the handler after logging the start messages
     start_logger.removeHandler(file_handler)

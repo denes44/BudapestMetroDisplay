@@ -32,6 +32,7 @@ from BudapestMetroDisplay import led_control
 from BudapestMetroDisplay import log
 from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay.stops import stops_metro, stops_railway, alert_routes
+from BudapestMetroDisplay._version import __version__
 
 if settings.esphome.used:
     from BudapestMetroDisplay.esphome import start_background_loop, connect_and_subscribe
@@ -83,7 +84,7 @@ def main():
 
     # Set up logging with or without debug mode
     log.setup_logging(parser)
-    logger.info("Program started")
+    logger.info(f"Program started, version {__version__}")
 
     # Register the exit handler for signals (e.g., Ctrl+C)
     signal.signal(signal.SIGINT, handle_exit_signal)
