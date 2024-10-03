@@ -33,7 +33,6 @@ from sacn import sACNsender
 
 from BudapestMetroDisplay import stops
 from BudapestMetroDisplay.config import settings
-from BudapestMetroDisplay.gui import change_gui_led_color
 from BudapestMetroDisplay.stops import stops_led, common_stops
 from BudapestMetroDisplay._version import __version__
 
@@ -173,8 +172,6 @@ def fade_color(
 
             # Update the sACN values
             update_sacn()
-            # Update GUI
-            change_gui_led_color(led_index, (r, g, b))
 
             time.sleep(delay)
 
@@ -182,7 +179,6 @@ def fade_color(
         with led_lock:
             led_states[led_index * 3: led_index * 3 + 3] = [r2, g2, b2]
         update_sacn()
-        change_gui_led_color(led_index, target_color)
 
 
 def calculate_default_color(led_index: int):

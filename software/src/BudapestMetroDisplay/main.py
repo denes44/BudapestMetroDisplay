@@ -28,7 +28,6 @@ import sys
 import time
 
 from BudapestMetroDisplay import bkk_opendata
-from BudapestMetroDisplay import gui
 from BudapestMetroDisplay import led_control
 from BudapestMetroDisplay import log
 from BudapestMetroDisplay.config import settings
@@ -81,11 +80,6 @@ def main():
     parser.add_argument(
         "--trace", action="store_true", help="Enable trace mode for verbose output."
     )
-    parser.add_argument(
-        "--gui", action="store_true", help="Enable GUI."
-    )
-    # Parse command-line arguments
-    args = parser.parse_args()
 
     # Set up logging with or without debug mode
     log.setup_logging(parser)
@@ -107,10 +101,6 @@ def main():
     led_control.reset_leds_to_default()
     # Start sending LED data via sACN
     led_control.activate_sacn()
-
-    # Start the GUI
-    if args.gui:
-        gui.start_gui()
 
     try:
         while True:
