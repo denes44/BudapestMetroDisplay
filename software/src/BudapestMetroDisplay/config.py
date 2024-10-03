@@ -43,9 +43,9 @@ class LEDConfig(BaseSettings):
         description="Fade time in seconds for the LED turn on and off action",
     )
 
-    class Config:
-        env_prefix = "LED_"  # Only load env variables starting with LED_
-        frozen = True  # Make this settings class immutable
+    model_config = SettingsConfigDict(
+        env_prefix="LED_", frozen=True
+    )
 
 
 class SACNConfig(BaseSettings):
@@ -70,9 +70,9 @@ class SACNConfig(BaseSettings):
             raise ValueError("unicast_ip must be a valid IP address when using unicast")
         return value
 
-    class Config:
-        env_prefix = "SACN_"  # Only load env variables starting with SACN_
-        frozen = True  # Make this settings class immutable
+    model_config = SettingsConfigDict(
+        env_prefix="SACN_", frozen=True
+    )
 
 
 class BKKConfig(BaseSettings):
@@ -92,9 +92,9 @@ class BKKConfig(BaseSettings):
         description="Update frequency for alerts for non-realtime routes in seconds",
     )
 
-    class Config:
-        env_prefix = "BKK_"  # Only load env variables starting with BKK_
-        frozen = True  # Make this settings class immutable
+    model_config = SettingsConfigDict(
+        env_prefix="BKK_", frozen=True
+    )
 
 
 class ESPHomeConfig(BaseSettings):
@@ -102,10 +102,10 @@ class ESPHomeConfig(BaseSettings):
         default=False,
         description="Whether to use brightness data from ESPHome to determine the minimum brightness",
     )
-    device_ip: IPvAnyAddress = Field(
+    device_ip: Optional[IPvAnyAddress] = Field(
         default=None, description="The IP address of the ESPHome device"
     )
-    api_key: str = Field(default=None, description="The API key of the ESPHome device")
+    api_key: Optional[str] = Field(default=None, description="The API key of the ESPHome device")
 
     @field_validator("device_ip", "api_key")
     def check_unicast_ip(cls, value, info: ValidationInfo):
@@ -113,9 +113,9 @@ class ESPHomeConfig(BaseSettings):
             raise ValueError("Device IP and API key must be filled out when using ESPHome")
         return value
 
-    class Config:
-        env_prefix = "ESPHOME_"  # Only load env variables starting with LED_
-        frozen = True  # Make this settings class immutable
+    model_config = SettingsConfigDict(
+        env_prefix="ESPHOME_", frozen=True
+    )
 
 
 class AppConfig(BaseSettings):
