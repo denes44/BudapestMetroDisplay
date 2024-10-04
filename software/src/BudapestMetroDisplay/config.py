@@ -102,10 +102,10 @@ class ESPHomeConfig(BaseSettings):
         default=False,
         description="Whether to use brightness data from ESPHome to determine the minimum brightness",
     )
-    device_ip: IPvAnyAddress = Field(
+    device_ip: Optional[IPvAnyAddress] = Field(
         default=None, description="The IP address of the ESPHome device"
     )
-    api_key: str = Field(default=None, description="The API key of the ESPHome device")
+    api_key: Optional[str] = Field(default=None, description="The API key of the ESPHome device")
 
     @field_validator("device_ip", "api_key")
     def check_unicast_ip(cls, value, info: ValidationInfo):
