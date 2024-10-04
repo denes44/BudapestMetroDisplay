@@ -32,7 +32,7 @@ from aioesphomeapi import (
 )
 
 from BudapestMetroDisplay._version import __version__
-from BudapestMetroDisplay.config import settings
+from BudapestMetroDisplay.main import settings
 
 logger = logging.getLogger(__name__)
 brightness: float = 1.0

@@ -32,7 +32,7 @@ import sacn
 from sacn import sACNsender
 
 from BudapestMetroDisplay import stops
-from BudapestMetroDisplay.config import settings
+from BudapestMetroDisplay.main import settings
 from BudapestMetroDisplay.stops import stops_led, common_stops
 from BudapestMetroDisplay._version import __version__
 

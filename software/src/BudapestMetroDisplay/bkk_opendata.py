@@ -30,7 +30,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from BudapestMetroDisplay import aps_helpers
 from BudapestMetroDisplay import led_control
 from BudapestMetroDisplay._version import __version__
-from BudapestMetroDisplay.config import settings
+from BudapestMetroDisplay.main import settings
 from BudapestMetroDisplay.stops import stops_led, stop_no_service
 
 logger = logging.getLogger(__name__)
