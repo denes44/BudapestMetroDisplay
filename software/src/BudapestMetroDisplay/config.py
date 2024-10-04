@@ -39,7 +39,7 @@ class LEDConfig(BaseSettings):
     )
     fade_time: float = Field(
         default=1.0,
-        gt=0,
+        ge=0,
         description="Fade time in seconds for the LED turn on and off action",
     )
 
@@ -76,7 +76,7 @@ class SACNConfig(BaseSettings):
 
 
 class BKKConfig(BaseSettings):
-    api_key: str = Field(description="API key for the BKK OpenData portal")
+    api_key: str = Field(min_length=1, description="API key for the BKK OpenData portal")
     api_update_interval: int = Field(
         default=2, gt=0, description="Delay between consecutive API calls in seconds"
     )
@@ -105,12 +105,18 @@ class ESPHomeConfig(BaseSettings):
     device_ip: Optional[IPvAnyAddress] = Field(
         default=None, description="The IP address of the ESPHome device"
     )
-    api_key: Optional[str] = Field(default=None, description="The API key of the ESPHome device")
+    api_key: Optional[str] = Field(min_length=1, default=None, description="The API key of the ESPHome device")
 
-    @field_validator("device_ip", "api_key")
+    @field_validator("device_ip")
     def check_unicast_ip(cls, value, info: ValidationInfo):
         if "used" in info.data and info.data["used"] and value is None:
-            raise ValueError("Device IP and API key must be filled out when using ESPHome")
+            raise ValueError("Device IP must be filled out when using ESPHome")
+        return value
+
+    @field_validator("api_key")
+    def check_api_key(cls, value, info: ValidationInfo):
+        if "used" in info.data and info.data["used"] and (value is None or len(value) == 0):
+            raise ValueError("API key must be filled out when using ESPHome")
         return value
 
     model_config = SettingsConfigDict(
@@ -119,15 +125,10 @@ class ESPHomeConfig(BaseSettings):
 
 
 class AppConfig(BaseSettings):
-    try:
-        led: LEDConfig = LEDConfig()
-        sacn: SACNConfig = SACNConfig()
-        bkk: BKKConfig = BKKConfig()
-        esphome: ESPHomeConfig = ESPHomeConfig()
-    except ValidationError as e:
-        logger.error("Configuration Error: Please check your environment variables")
-        logger.error(e)
-        sys.exit(1)  # Exit the application with a non-zero status code
+    led: LEDConfig = LEDConfig()
+    sacn: SACNConfig = SACNConfig()
+    bkk: BKKConfig = BKKConfig()
+    esphome: ESPHomeConfig = ESPHomeConfig()
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", frozen=True
