@@ -10,3 +10,4 @@ eggs/
 venv
 run.bat
 rebuild.bat
+*__pycache__*
