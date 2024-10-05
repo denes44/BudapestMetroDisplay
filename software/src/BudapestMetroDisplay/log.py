@@ -26,8 +26,6 @@ import os
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
-from BudapestMetroDisplay._version import __version__
-
 logger = None
 
 # Define the custom log level
