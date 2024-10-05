@@ -27,14 +27,16 @@ import signal
 import sys
 import time
 
+from BudapestMetroDisplay.config import AppConfig
+
+settings = AppConfig()
+
 from BudapestMetroDisplay import bkk_opendata
 from BudapestMetroDisplay import led_control
 from BudapestMetroDisplay import log
-from BudapestMetroDisplay.config import AppConfig
+from BudapestMetroDisplay import webserver
 from BudapestMetroDisplay.stops import stops_metro, stops_railway, alert_routes
 from BudapestMetroDisplay._version import __version__
-
-settings = AppConfig()
 
 if settings.esphome.used:
     from BudapestMetroDisplay.esphome import start_background_loop, connect_and_subscribe
@@ -104,6 +106,8 @@ def main():
     led_control.reset_leds_to_default()
     # Start sending LED data via sACN
     led_control.activate_sacn()
+
+    webserver.start_webserver()
 
     try:
         while True:
