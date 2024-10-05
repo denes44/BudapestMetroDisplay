@@ -54,3 +54,8 @@ version_file = "src/BudapestMetroDisplay/VERSION"
 count_commits_from_version_file = true
 dev_template = "{tag}.dev{ccount}"
 dirty_template = "{tag}.dev{ccount}"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  ".", "src",
+]
