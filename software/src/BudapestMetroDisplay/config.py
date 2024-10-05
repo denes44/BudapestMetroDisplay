@@ -20,10 +20,9 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 import logging
-import sys
 from typing import Optional
 
-from pydantic import Field, field_validator, IPvAnyAddress, ValidationError
+from pydantic import Field, field_validator, IPvAnyAddress
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
