@@ -32,11 +32,11 @@ jobs:
         ruff check --output-format=github .
       continue-on-error: true
     - name: Run tests
-        run: pytest --cov --cov-report=xml
+      run: pytest --cov --cov-report=xml
     - name: Upload results to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
     - name: Install pypa/build
       run: >-
         python3 -m
