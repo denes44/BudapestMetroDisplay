@@ -381,7 +381,7 @@ def store_departures(json_response, reference_id: str):
                 and "predictedDepartureTime" in stop_time
                 and not stop_time.get("uncertain", False)
         ):
-            # Arrival time is different than the departure, lets use the difference between them for the LED turn off delay
+            # Arrival time is different from the departure, lets use the difference between them for the LED turn off delay
             if stop_time.get("predictedArrivalTime") != stop_time.get(
                     "predictedDepartureTime"
             ):
@@ -415,7 +415,7 @@ def store_departures(json_response, reference_id: str):
             delay = ACTION_DELAY[route_id]
         # CASE #4: Both arrival and departure time available as scheduled time [middle stop, no realtime data]
         elif "arrivalTime" in stop_time and "departureTime" in stop_time:
-            # Arrival time is different than the departure, lets use the difference between them for the LED turn off delay
+            # Arrival time is different from the departure, lets use the difference between them for the LED turn off delay
             if stop_time.get("arrivalTime") != stop_time.get("departureTime"):
                 arrival_time = stop_time.get("arrivalTime")
                 delay = stop_time.get("departureTime") - stop_time.get("arrivalTime")
@@ -479,7 +479,7 @@ def action_to_execute(
 ):
     """
     Changes the LED of the specified stop(stop_id) to the associated color if the route (route_id),
-    and schedules the turn off of the LED in APScheduler according to the delay parameter.
+    and schedules the turn-off of the LED in APScheduler according to the delay parameter.
 
     :param stop_id: stopId from the BKK OpenData API
     :param route_id: routeId from the BKK OpenData API
@@ -529,14 +529,14 @@ def calculate_schedule_interval(json_response, reference_id: str):
             or "entry" not in json_response["data"]
     ):
         logger.error(
-            f"No valid schedule data in API response for schedule inervals for {reference_id}"
+            f"No valid schedule data in API response for schedule intervals for {reference_id}"
         )
         return
 
     # Check if we exceeded the query limit
     if json_response["data"].get("limitExceeded", "false") == "true":
         logger.warning(
-            f"Query limit is exceeded when updating schedule inervals for {reference_id}"
+            f"Query limit is exceeded when updating schedule intervals for {reference_id}"
         )
 
     # Get routeId
@@ -552,7 +552,7 @@ def calculate_schedule_interval(json_response, reference_id: str):
         route_id = list(json_response["data"]["references"]["routes"].keys())[0]
     else:
         logger.warning(
-            f"No route IDs found or the list is empty when updating schedule inervals for {reference_id}"
+            f"No route IDs found or the list is empty when updating schedule intervals for {reference_id}"
         )
         return
 
@@ -560,7 +560,7 @@ def calculate_schedule_interval(json_response, reference_id: str):
     stop_times = json_response["data"]["entry"].get("stopTimes", [])
     if len(stop_times) < 2:
         logger.debug(
-            f"Not enough schedule data found when updating schedule inervals for {reference_id}"
+            f"Not enough schedule data found when updating schedule intervals for {reference_id}"
         )
         return
 
@@ -603,7 +603,7 @@ def calculate_schedule_interval(json_response, reference_id: str):
     if "time" not in data[0] or "time" not in data[1]:
         # No valid schedule data found, set the difference to -1
         logger.warning(
-            f"No valid schedule data found when updating schedule inervals for {reference_id}"
+            f"No valid schedule data found when updating schedule intervals for {reference_id}"
         )
         difference = -1
     else:
