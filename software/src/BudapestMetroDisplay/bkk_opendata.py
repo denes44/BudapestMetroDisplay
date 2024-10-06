@@ -528,8 +528,7 @@ def store_departures(json_response, reference_id: str):
             # lets use the difference between them for the LED turn off delay
             if stop_time.get("arrivalTime") != stop_time.get("departureTime"):
                 arrival_time = stop_time.get("arrivalTime")
-                delay = stop_time.get("departureTime") \
-                        - stop_time.get("arrivalTime")
+                delay = stop_time.get("departureTime") - stop_time.get("arrivalTime")
             # Arrival time is the same as the departure,
             # use predefined delay for LED turn off
             else:

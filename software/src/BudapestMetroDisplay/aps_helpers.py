@@ -86,7 +86,9 @@ def find_soonest_job_by_argument(
         # Check if the job has the specified argument and value
         if len(job_args) > arg_position and job_args[arg_position] == search_value:
             if soonest_job is None or (
-                    job.next_run_time and job.next_run_time < soonest_job.next_run_time):
+                    job.next_run_time and
+                    job.next_run_time < soonest_job.next_run_time
+            ):
                 soonest_job = job
 
     return soonest_job
