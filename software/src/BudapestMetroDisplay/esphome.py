@@ -48,7 +48,7 @@ def on_state_change(state: EntityState):
 
     # Check if this is a light entity
     if isinstance(state, LightState):
-        brightness = state.brightness if hasattr(state, "brightness") else None
+        brightness = state.brightness if hasattr(state, "brightness") else 1.0
         logger.debug(f"ESPHome Light brightness updated to {brightness * 100:.0f}%")
 
 
