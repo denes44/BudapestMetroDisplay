@@ -3,7 +3,6 @@ import os
 from pydantic import ValidationError
 import pytest
 
-# noqa: E402
 # Mock environment variables before importing the module
 # LED Configuration
 os.environ["LED_DIM_RATIO"] = "0.3"
@@ -28,7 +27,7 @@ os.environ["ESPHOME_DEVICE_IP"] = "192.168.1.2"
 os.environ["ESPHOME_API_KEY"] = "0LTLKmoTVR0BO3xppXQkIBVb0VzDLZFqAplYnADTbOY="
 
 from BudapestMetroDisplay.config import AppConfig, LEDConfig, SACNConfig, BKKConfig, \
-    ESPHomeConfig
+    ESPHomeConfig  # noqa: E402
 
 
 def test_app_config_initializes_correctly():

@@ -41,8 +41,7 @@ def count_jobs_by_argument(
     i = 0
     for job in scheduler.get_jobs():
         job_args = job.args
-        if len(job_args) > arg_position and job_args[
-            arg_position] == search_value:
+        if len(job_args) > arg_position and job_args[arg_position] == search_value:
             i += 1
     return i
 
@@ -64,8 +63,7 @@ def get_jobs_by_argument(
     for job in jobs:
         job_args = job.args
         # Check if the argument matches
-        if len(job_args) > arg_position and job.args[
-            arg_position] == search_value:
+        if len(job_args) > arg_position and job.args[arg_position] == search_value:
             filtered_jobs.append(job)
 
     return filtered_jobs
@@ -89,9 +87,7 @@ def find_soonest_job_by_argument(
         if len(job_args) > arg_position and job_args[
             arg_position] == search_value:
             if soonest_job is None or (
-                    job.next_run_time and
-                    job.next_run_time < soonest_job.next_run_time
-            ):
+                    job.next_run_time and job.next_run_time < soonest_job.next_run_time):
                 soonest_job = job
 
     return soonest_job
@@ -107,8 +103,7 @@ def calculate_average_time_between_jobs(filtered_jobs: list[Job]) -> Optional[
         or None, when the time cannot be determined
     """
     # Extract the next run times and sort them
-    run_times = [job.next_run_time for job in filtered_jobs if
-                 job.next_run_time]
+    run_times = [job.next_run_time for job in filtered_jobs if job.next_run_time]
     run_times = sorted(run_times)
 
     if len(run_times) < 2:
