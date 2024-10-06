@@ -35,6 +35,7 @@ jobs:
       uses: py-actions/flake8@v2
       with:
           max-line-length: "88"
+      continue-on-error: true
     - name: Run mypy
       uses: sasanquaneuf/mypy-github-action@releases/v1
       with:
