@@ -27,10 +27,7 @@ import signal
 import sys
 import time
 
-from BudapestMetroDisplay.config import AppConfig
-
-settings = AppConfig()
-
+from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay import bkk_opendata
 from BudapestMetroDisplay import led_control
 from BudapestMetroDisplay import log
