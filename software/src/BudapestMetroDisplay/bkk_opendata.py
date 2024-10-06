@@ -22,6 +22,7 @@
 
 from datetime import datetime, timedelta, time
 import logging
+from typing import List, Dict, Any
 
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -54,8 +55,7 @@ API_SCHEDULE_PARAMETERS = {
         "minutesBefore": 0,
         "minutesAfter": round(settings.bkk.api_update_realtime * 2 / 60),
         "limit": 100,
-        "nextSchedule": timedelta(
-            seconds=int(settings.bkk.api_update_realtime)),
+        "nextSchedule": timedelta(seconds=settings.bkk.api_update_realtime),
     },
 }
 
@@ -218,8 +218,7 @@ def fetch_schedule_for_stops(stop_set, schedule_type: str):
     # Get schedule data for all stops in the stop set
     params = {
         "stopId": list(stop_set[1]),
-        "minutesBefore": API_SCHEDULE_PARAMETERS[schedule_type][
-            "minutesBefore"],
+        "minutesBefore": API_SCHEDULE_PARAMETERS[schedule_type]["minutesBefore"],
         "minutesAfter": API_SCHEDULE_PARAMETERS[schedule_type]["minutesAfter"],
         "limit": API_SCHEDULE_PARAMETERS[schedule_type]["limit"],
         "onlyDepartures": "false",
@@ -704,7 +703,7 @@ def calculate_schedule_interval(json_response, reference_id: str):
         return
 
     # Variable to store the necessary data from the first two relevant stops
-    data = [{} for _ in range(2)]
+    data: List[Dict[str, Any]] = [{} for _ in range(2)]
 
     # Iterate through the TransitScheduleStopTimes
     # in the TransitArrivalsAndDepartures
