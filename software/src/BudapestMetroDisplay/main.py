@@ -1,24 +1,24 @@
 #  MIT License
 #
-#  Copyright (c) 2024 denes44
+#  Copyright (c) 2024 [fullname]
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
+#  of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation
+#  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#  and/or sell copies of the Software, and to permit persons to whom
+#  the Software is furnished to do so, subject to the following conditions:
 #
-#  The above copyright notice and this permission notice shall be included in all
-#  copies or substantial portions of the Software.
+#  The above copyright notice and this permission notice shall be included
+#  in all copies or substantial portions of the Software.
 #
 #  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 #  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-#  SOFTWARE.
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+#  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#  OTHER DEALINGS IN THE SOFTWARE.
 
 import argparse
 import asyncio
@@ -32,11 +32,12 @@ from BudapestMetroDisplay import bkk_opendata
 from BudapestMetroDisplay import led_control
 from BudapestMetroDisplay import log
 from BudapestMetroDisplay import webserver
-from BudapestMetroDisplay.stops import stops_metro, stops_railway, alert_routes
 from BudapestMetroDisplay._version import __version__
+from BudapestMetroDisplay.stops import stops_metro, stops_railway, alert_routes
 
 if settings.esphome.used:
-    from BudapestMetroDisplay.esphome import start_background_loop, connect_and_subscribe
+    from BudapestMetroDisplay.esphome import start_background_loop, \
+        connect_and_subscribe
 
 logger = logging.getLogger(__name__)
 
@@ -77,10 +78,14 @@ def main():
         description="Run the BKK Opendata and LED Control Program."
     )
     parser.add_argument(
-        "--debug", action="store_true", help="Enable debug mode for verbose output."
+        "--debug",
+        action="store_true",
+        help="Enable debug mode for verbose output."
     )
     parser.add_argument(
-        "--trace", action="store_true", help="Enable trace mode for verbose output."
+        "--trace",
+        action="store_true",
+        help="Enable trace mode for verbose output."
     )
 
     # Set up logging with or without debug mode

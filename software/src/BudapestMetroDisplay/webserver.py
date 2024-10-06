@@ -1,24 +1,24 @@
 #  MIT License
 #
-#  Copyright (c) 2024 denes44
+#  Copyright (c) 2024 [fullname]
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
+#  of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation
+#  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#  and/or sell copies of the Software, and to permit persons to whom
+#  the Software is furnished to do so, subject to the following conditions:
 #
-#  The above copyright notice and this permission notice shall be included in all
-#  copies or substantial portions of the Software.
+#  The above copyright notice and this permission notice shall be included
+#  in all copies or substantial portions of the Software.
 #
 #  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 #  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-#  SOFTWARE.
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+#  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#  OTHER DEALINGS IN THE SOFTWARE.
 
 import threading
 
@@ -180,7 +180,8 @@ def get_schedules(route_id):
             job_info = {
                 'id': job.id,
                 'name': job.name,
-                'next_run_time': job.next_run_time.isoformat() if job.next_run_time else None,
+                'next_run_time':
+                    job.next_run_time.isoformat() if job.next_run_time else None,
                 'trigger': str(job.trigger),
                 'stop_name': stop_names.get(job.args[0], 'Unknown'),
                 'arg1': job.args[1],
@@ -189,7 +190,8 @@ def get_schedules(route_id):
                 'arg4': job.args[4]
             }
             job_list.append(job_info)
-    return render_template('schedules.html', jobs=job_list, route_colors=ROUTE_COLORS)
+    return render_template(
+        'schedules.html', jobs=job_list, route_colors=ROUTE_COLORS)
 
 
 def start_webserver():

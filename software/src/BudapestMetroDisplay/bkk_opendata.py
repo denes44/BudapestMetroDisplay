@@ -1,24 +1,24 @@
 #  MIT License
 #
-#  Copyright (c) 2024 denes44
+#  Copyright (c) 2024 [fullname]
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
+#  of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation
+#  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#  and/or sell copies of the Software, and to permit persons to whom
+#  the Software is furnished to do so, subject to the following conditions:
 #
-#  The above copyright notice and this permission notice shall be included in all
-#  copies or substantial portions of the Software.
+#  The above copyright notice and this permission notice shall be included
+#  in all copies or substantial portions of the Software.
 #
 #  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 #  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-#  SOFTWARE.
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+#  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#  OTHER DEALINGS IN THE SOFTWARE.
 
 import logging
 from datetime import datetime, timedelta, time
@@ -54,11 +54,13 @@ API_SCHEDULE_PARAMETERS = {
         "minutesBefore": 0,
         "minutesAfter": round(settings.bkk.api_update_realtime * 2 / 60),
         "limit": 100,
-        "nextSchedule": timedelta(seconds=int(settings.bkk.api_update_realtime)),
+        "nextSchedule": timedelta(
+            seconds=int(settings.bkk.api_update_realtime)),
     },
 }
 
-# Default delay to turn off the LED when there is no separate arrival and departure time is available
+# Default delay to turn off the LED
+# when there is no separate arrival and departure time is available
 ACTION_DELAY = {
     "BKK_5100": 10,  # M1
     "BKK_5200": 10,  # M2
@@ -75,14 +77,15 @@ ACTION_DELAY = {
 logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
 logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
 
-# Initialize APScheduler with a persistent job store for scheduling the departures (when we turn on the LEDs)
+# Initialize APScheduler with a persistent job store
+# for scheduling the departures (when we turn on the LEDs)
 departure_scheduler = BackgroundScheduler(
-    # jobstores={"default": SQLAlchemyJobStore(url="sqlite:///db/stop_schedules.sqlite")}
     jobstores={"default": MemoryJobStore()}  # Use in-memory job storage
 )
 departure_scheduler.start()
 
-# Initialize scheduler with MemoryJobStore for scheduling turning off the LEDs after departure
+# Initialize scheduler with MemoryJobStore
+# for scheduling turning off the LEDs after departure
 led_scheduler = BackgroundScheduler(
     jobstores={"default": MemoryJobStore()}  # Use in-memory job storage
 )
@@ -97,26 +100,32 @@ api_update_scheduler.start()
 
 def create_schedule_updates(stop_sets, schedule_type: str):
     """
-    Creates schedules in APScheduler for the API requests to update the data for the provided stops.
+    Creates schedules in APScheduler for the API requests
+    to update the data for the provided stops.
 
-    :param stop_sets: A tuple which consist the stop set name as a string and a tuple with the stop ids
-    :param schedule_type: REGULAR or REALTIME, affects the API update parameters
+    :param stop_sets: A tuple which consist the stop set name as a string
+    and a tuple with the stop ids
+    :param schedule_type: REGULAR or REALTIME,
+    affects the API update parameters
     """
     # Store the current time when we started the update process
     start_time = datetime.now()
     i = 0  # Value for delaying the schedules from each other for initial updates
 
-    # Check if the supplied schedule_type parameter is valid, and the API call parameters are available in API_SCHEDULE_PARAMETERS
+    # Check if the supplied schedule_type parameter is valid,
+    # and the API call parameters are available in API_SCHEDULE_PARAMETERS
     if schedule_type not in API_SCHEDULE_PARAMETERS:
         logging.error(f"Invalid schedule type request: {schedule_type}")
         return
 
     logging.info(
-        f"Starting updating the {schedule_type} schedules for stop set ({', '.join(stop_set for stop_set, _ in stop_sets)})"
+        f"Starting updating the {schedule_type} schedules for stop set \
+        ({', '.join(stop_set for stop_set, _ in stop_sets)})"
     )
 
     for stop_set in stop_sets:
-        # Schedule the API calls from each other by settings.bkk.api_update_interval starting from the current time
+        # Schedule the API calls from each other by settings.bkk.api_update_interval
+        # starting from the current time
         delay = i * settings.bkk.api_update_interval
         i += 1
         job_time = start_time + timedelta(seconds=delay)  # job start time
@@ -129,17 +138,20 @@ def create_schedule_updates(stop_sets, schedule_type: str):
             run_date=job_time,
             args=[stop_set, schedule_type],
             id=job_id,
-            replace_existing=True,  # If the job exists, it will be replaced with the new time
+            replace_existing=True,
+            # If the job exists, it will be replaced with the new time
         )
 
         logger.debug(
-            f"Scheduling {schedule_type} API updates for stop set {stop_set[0]} at {str(job_time)}."
+            f"Scheduling {schedule_type} API updates for stop set \
+            {stop_set[0]} at {str(job_time)}."
         )
 
 
 def create_alert_updates(routes):
     """
-    Creates schedules in APScheduler for the API requests to update the alerts for the provided routes.
+    Creates schedules in APScheduler for the API requests
+    to update the alerts for the provided routes.
 
     :param routes: A tuple which consist the route ids
     """
@@ -151,7 +163,8 @@ def create_alert_updates(routes):
     logging.info(f"Starting updating the alerts for routes {routes}")
 
     for route_id in routes:
-        # Schedule the API calls from each other by settings.bkk.api_update_interval starting from the current time
+        # Schedule the API calls from each other by settings.bkk.api_update_interval
+        # starting from the current time
         delay = i * settings.bkk.api_update_interval
         i += 1
         job_time = start_time + timedelta(seconds=delay)  # job start time
@@ -164,7 +177,8 @@ def create_alert_updates(routes):
             run_date=job_time,
             args=[route_id],
             id=job_id,
-            replace_existing=True,  # If the job exists, it will be replaced with the new time
+            replace_existing=True,
+            # If the job exists, it will be replaced with the new time
         )
 
         logger.debug(
@@ -175,9 +189,11 @@ def create_alert_updates(routes):
 def fetch_schedule_for_stops(stop_set, schedule_type: str):
     """
     Callback function for the APScheduler jobs.
-    Makes an arrivals-and-departures-for-stop API request to the BKK OpenData server for the supplied stops.
+    Makes an arrivals-and-departures-for-stop API request to the BKK OpenData server
+    for the supplied stops.
 
-    :param stop_set: A tuple which consist the stop set name as a string and a tuple with the stop ids we want to get the schedules for
+    :param stop_set: A tuple which consist the stop set name as a string
+        and a tuple with the stop ids we want to get the schedules for
     :param schedule_type: REGULAR or REALTIME, affects the API update parameters
     """
 
@@ -191,7 +207,8 @@ def fetch_schedule_for_stops(stop_set, schedule_type: str):
     else:
         # Otherwise schedule the next update according to the configuration
         job_time = (
-                datetime.now() + API_SCHEDULE_PARAMETERS[schedule_type]["nextSchedule"]
+                datetime.now() + API_SCHEDULE_PARAMETERS[schedule_type][
+            "nextSchedule"]
         )
 
     url = f"{API_BASE_URL}arrivals-and-departures-for-stop"
@@ -201,7 +218,8 @@ def fetch_schedule_for_stops(stop_set, schedule_type: str):
     # Get schedule data for all stops in the stop set
     params = {
         "stopId": list(stop_set[1]),
-        "minutesBefore": API_SCHEDULE_PARAMETERS[schedule_type]["minutesBefore"],
+        "minutesBefore": API_SCHEDULE_PARAMETERS[schedule_type][
+            "minutesBefore"],
         "minutesAfter": API_SCHEDULE_PARAMETERS[schedule_type]["minutesAfter"],
         "limit": API_SCHEDULE_PARAMETERS[schedule_type]["limit"],
         "onlyDepartures": "false",
@@ -217,64 +235,81 @@ def fetch_schedule_for_stops(stop_set, schedule_type: str):
             store_departures(response.json(), stop_set[0])
 
             logger.debug(
-                f"Successfully updated {schedule_type} schedules for stop set {stop_set[0]}. Next update scheduled for {str(job_time)}"
+                f"Successfully updated {schedule_type} schedules for stop set \
+                {stop_set[0]}. Next update scheduled for {str(job_time)}"
             )
         else:
             # Reschedule the failed action for 1 minute later
             job_time = datetime.now() + timedelta(minutes=1)
 
             logger.error(
-                f"Failed to update {schedule_type} schedules for stop set {stop_set[0]}: {response.status_code}. Rescheduled for {str(job_time)}."
+                f"Failed to update {schedule_type} schedules for stop set \
+                {stop_set[0]}: {response.status_code}. Rescheduled for {str(job_time)}."
             )
     except requests.exceptions.ReadTimeout as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
-            f"Timeout occurred when updating {schedule_type} schedules for stop set {stop_set[0]}. Rescheduled for {str(job_time)}.")
+            f"Timeout occurred when updating {schedule_type} schedules for stop set \
+            {stop_set[0]}. Rescheduled for {str(job_time)}.")
         logger.warning(e)
     except requests.exceptions.ConnectionError as e:
         job_time = datetime.now() + timedelta(minutes=5)
         logger.warning(
-            f"Connection error when updating {schedule_type} schedules for stop set {stop_set[0]}. Rescheduled for {str(job_time)}.")
+            f"Connection error when updating {schedule_type} schedules for stop set \
+            {stop_set[0]}. Rescheduled for {str(job_time)}.")
         logger.warning(e)
     except requests.exceptions.RequestException as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
-            f"Error when updating {schedule_type} schedules for stop set {stop_set[0]}. Rescheduled for {str(job_time)}.")
+            f"Error when updating {schedule_type} schedules for stop set {stop_set[0]}.\
+             Rescheduled for {str(job_time)}.")
         logger.warning(e)
 
-    # Get schedule data for the first stop in the stop set for the schedule interval calculation
+    # Get schedule data for the first stop in the stop set
+    # for the schedule interval calculation
     if schedule_type == "REGULAR":
         params["stopId"] = stop_set[1][0]
         try:
-            response = requests.get(url, headers=headers, params=params, timeout=5)
+            response = requests.get(url, headers=headers, params=params,
+                                    timeout=5)
 
             if response.status_code == 200:
                 calculate_schedule_interval((response.json()), stop_set[0])
 
                 logger.debug(
-                    f"Successfully updated schedules for stop set {stop_set[0]} for schedule interval calculation. Next update scheduled for {str(job_time)}"
+                    f"Successfully updated schedules for stop set {stop_set[0]} \
+                    for schedule interval calculation. \
+                    Next update scheduled for {str(job_time)}"
                 )
             else:
                 # Reschedule the failed action for 1 minute later
                 job_time = datetime.now() + timedelta(minutes=1)
 
                 logger.error(
-                    f"Failed to update schedules for stop set {stop_set[0]} for schedule interval calculation: {response.status_code}. Rescheduled for {str(job_time)}."
+                    f"Failed to update schedules for stop set {stop_set[0]} \
+                    for schedule interval calculation: {response.status_code}. \
+                    Rescheduled for {str(job_time)}."
                 )
         except requests.exceptions.ReadTimeout as e:
             job_time = datetime.now() + timedelta(minutes=1)
             logger.warning(
-                f"Timeout occurred when updating schedules for stop set {stop_set[0]} for schedule interval calculation. Next update scheduled for {str(job_time)}")
+                f"Timeout occurred when updating schedules for stop set {stop_set[0]} \
+                for schedule interval calculation. \
+                Next update scheduled for {str(job_time)}")
             logger.warning(e)
         except requests.exceptions.ConnectionError as e:
             job_time = datetime.now() + timedelta(minutes=5)
             logger.error(
-                f"Connection error when updating schedules for stop set {stop_set[0]} for schedule interval calculation. Next update scheduled for {str(job_time)}")
+                f"Connection error when updating schedules for stop set {stop_set[0]} \
+                for schedule interval calculation. \
+                Next update scheduled for {str(job_time)}")
             logger.error(e)
         except requests.exceptions.RequestException as e:
             job_time = datetime.now() + timedelta(minutes=1)
             logger.error(
-                f"Error when updating schedules for stop set {stop_set[0]} for schedule interval calculation. Next update scheduled for {str(job_time)}")
+                f"Error when updating schedules for stop set {stop_set[0]} \
+                for schedule interval calculation. \
+                Next update scheduled for {str(job_time)}")
             logger.error(e)
 
     job_id = f"{stop_set[0]}_{schedule_type}"
@@ -285,20 +320,23 @@ def fetch_schedule_for_stops(stop_set, schedule_type: str):
         run_date=job_time,
         args=[stop_set, schedule_type],
         id=job_id,
-        replace_existing=True,  # If the job exists, it will be replaced with the new time
+        replace_existing=True,
+        # If the job exists, it will be replaced with the new time
     )
 
 
 def fetch_alerts_for_route(route_id: str):
     """
     Callback function for the APScheduler jobs.
-    Makes a route-details API request to the BKK OpenData server for the supplied route_id.
+    Makes a route-details API request to the BKK OpenData server
+    for the supplied route_id.
 
     :param route_id: The id of the stop we want to get the details for
     """
 
     # Calculate next schedule time
-    job_time = datetime.now() + timedelta(minutes=settings.bkk.api_update_alerts)
+    job_time = datetime.now() + timedelta(
+        minutes=settings.bkk.api_update_alerts)
 
     url = f"{API_BASE_URL}route-details"
 
@@ -319,29 +357,34 @@ def fetch_alerts_for_route(route_id: str):
             process_alerts(response.json(), route_id)
 
             logger.debug(
-                f"Successfully updated alerts for route {route_id}. Next update scheduled for {str(job_time)}"
+                f"Successfully updated alerts for route {route_id}. \
+                Next update scheduled for {str(job_time)}"
             )
         else:
             # Reschedule the failed action for 1 minute later
             job_time = datetime.now() + timedelta(minutes=1)
 
             logger.error(
-                f"Failed to update alerts for route {route_id}: {response.status_code}. Rescheduled for {str(job_time)}."
+                f"Failed to update alerts for route {route_id}: {response.status_code}.\
+                 Rescheduled for {str(job_time)}."
             )
     except requests.exceptions.ReadTimeout as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
-            f"Timeout occurred when updating alerts for route {route_id}. Next update scheduled for {str(job_time)}")
+            f"Timeout occurred when updating alerts for route {route_id}. \
+            Next update scheduled for {str(job_time)}")
         logger.warning(e)
     except requests.exceptions.ConnectionError as e:
         job_time = datetime.now() + timedelta(minutes=5)
         logger.error(
-            f"Connection error when updating alerts for route {route_id}. Next update scheduled for {str(job_time)}")
+            f"Connection error when updating alerts for route {route_id}. \
+            Next update scheduled for {str(job_time)}")
         logger.error(e)
     except requests.exceptions.RequestException as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.error(
-            f"Error when updating alerts for route {route_id}. Next update scheduled for {str(job_time)}")
+            f"Error when updating alerts for route {route_id}. \
+            Next update scheduled for {str(job_time)}")
         logger.error(e)
 
     job_id = f"{route_id}_ALERTS"
@@ -352,14 +395,17 @@ def fetch_alerts_for_route(route_id: str):
         run_date=job_time,
         args=[route_id],
         id=job_id,
-        replace_existing=True,  # If the job exists, it will be replaced with the new time
+        replace_existing=True,
+        # If the job exists, it will be replaced with the new time
     )
 
 
 def store_departures(json_response, reference_id: str):
     """
-    Processes the ArrivalsAndDeparturesForStopOTPMethodResponse API response from the arrivals-and-departures-for-stop method.
-    As a result stores the retrieved departures in a persistent APScheduler instance which will control the LED states.
+    Processes the ArrivalsAndDeparturesForStopOTPMethodResponse API response
+    from the arrivals-and-departures-for-stop method.
+    As a result stores the retrieved departures in a persistent APScheduler instance
+    which will control the LED states.
 
     :param json_response: JSON return data from the BKK OpenData API
     :param reference_id: Internal reference to identify the API request in the logs
@@ -378,7 +424,8 @@ def store_departures(json_response, reference_id: str):
 
     # Check if we exceeded the query limit
     if json_response["data"].get("limitExceeded", "false") == "true":
-        logger.warning(f"Query limit is exceeded when updating stop(s) {reference_id}")
+        logger.warning(
+            f"Query limit is exceeded when updating stop(s) {reference_id}")
 
     # Get routeId
     if (
@@ -390,10 +437,12 @@ def store_departures(json_response, reference_id: str):
             "routes" in json_response["data"]["references"]
             and len(json_response["data"]["references"]["routes"]) > 0
     ):
-        route_id = list(json_response["data"]["references"]["routes"].keys())[0]
+        route_id = list(json_response["data"]["references"]["routes"].keys())[
+            0]
     else:
         logger.warning(
-            f"No route IDs found or the list is empty when updating stop(s) {reference_id}"
+            f"No route IDs found or the list is empty when updating stop(s) \
+            {reference_id}"
         )
         return
 
@@ -403,7 +452,8 @@ def store_departures(json_response, reference_id: str):
     # Get stopTimes from TransitArrivalsAndDepartures
     stop_times = json_response["data"]["entry"].get("stopTimes", [])
     if len(stop_times) == 0:
-        logger.debug(f"No schedule data found when updating stop(s) {reference_id}")
+        logger.debug(
+            f"No schedule data found when updating stop(s) {reference_id}")
 
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
     for stop_time in stop_times:
@@ -418,82 +468,104 @@ def store_departures(json_response, reference_id: str):
         # Check if we are interested in the provided stopId
         if stop_id not in stops_led:
             logger.debug(
-                f"Got update for stop {stop_id}, route {route_id}, but we don't need that, skipping"
+                f"Got update for stop {stop_id}, route {route_id}, \
+                but we don't need that, skipping"
             )
             continue
 
         # Get the predicted or scheduled departure and arrival times
-        # CASE #1: Both arrival and departure time available as predicted [middle stop with realtime data]
+        # CASE #1: Both arrival and departure time available as predicted
+        # [middle stop with realtime data]
         if (
                 "predictedArrivalTime" in stop_time
                 and "predictedDepartureTime" in stop_time
                 and not stop_time.get("uncertain", False)
         ):
-            # Arrival time is different from the departure, lets use the difference between them for the LED turn off delay
+            # Arrival time is different from the departure,
+            # lets use the difference between them for the LED turn off delay
             if stop_time.get("predictedArrivalTime") != stop_time.get(
                     "predictedDepartureTime"
             ):
                 arrival_time = stop_time.get("predictedArrivalTime")
-                delay = stop_time.get("predictedDepartureTime") - stop_time.get(
+                delay = stop_time.get(
+                    "predictedDepartureTime") - stop_time.get(
                     "predictedArrivalTime"
                 )
-            # Arrival time is the same as the departure, use predefined delay for LED turn off
+            # Arrival time is the same as the departure,
+            # use predefined delay for LED turn off
             else:
                 arrival_time = (
-                        stop_time.get("predictedDepartureTime") - ACTION_DELAY[route_id]
+                        stop_time.get("predictedDepartureTime") - ACTION_DELAY[
+                    route_id]
                 )
                 delay = ACTION_DELAY[route_id]
-        # CASE #2: Only predicted arrival time is available [end stop with realtime data]
+        # CASE #2: Only predicted arrival time is available
+        # [end stop with realtime data]
         # Use the predefined delay for LED turn off
         elif "predictedArrivalTime" in stop_time and not stop_time.get(
                 "uncertain", False
         ):
             arrival_time = (
-                    stop_time.get("predictedArrivalTime") - ACTION_DELAY[route_id]
+                    stop_time.get("predictedArrivalTime") - ACTION_DELAY[
+                route_id]
             )
             delay = ACTION_DELAY[route_id]
-        # CASE #3: Only predicted departure time is available [start stop with realtime data]
+        # CASE #3: Only predicted departure time is available
+        # [start stop with realtime data]
         # Use the predefined delay for LED turn off
         elif "predictedDepartureTime" in stop_time and not stop_time.get(
                 "uncertain", False
         ):
             arrival_time = (
-                    stop_time.get("predictedDepartureTime") - ACTION_DELAY[route_id]
+                    stop_time.get("predictedDepartureTime") - ACTION_DELAY[
+                route_id]
             )
             delay = ACTION_DELAY[route_id]
-        # CASE #4: Both arrival and departure time available as scheduled time [middle stop, no realtime data]
+        # CASE #4: Both arrival and departure time available as scheduled time
+        # [middle stop, no realtime data]
         elif "arrivalTime" in stop_time and "departureTime" in stop_time:
-            # Arrival time is different from the departure, lets use the difference between them for the LED turn off delay
+            # Arrival time is different from the departure,
+            # lets use the difference between them for the LED turn off delay
             if stop_time.get("arrivalTime") != stop_time.get("departureTime"):
                 arrival_time = stop_time.get("arrivalTime")
-                delay = stop_time.get("departureTime") - stop_time.get("arrivalTime")
-            # Arrival time is the same as the departure, use predefined delay for LED turn off
+                delay = stop_time.get("departureTime") - stop_time.get(
+                    "arrivalTime")
+            # Arrival time is the same as the departure,
+            # use predefined delay for LED turn off
             else:
-                arrival_time = stop_time.get("departureTime") - ACTION_DELAY[route_id]
+                arrival_time = stop_time.get("departureTime") - ACTION_DELAY[
+                    route_id]
                 delay = ACTION_DELAY[route_id]
-        # CASE #5: Only scheduled arrival time is available [end stop with no realtime data]
+        # CASE #5: Only scheduled arrival time is available
+        # [end stop with no realtime data]
         # Use the predefined delay for LED turn off
         elif "arrivalTime" in stop_time:
-            arrival_time = stop_time.get("arrivalTime") - ACTION_DELAY[route_id]
+            arrival_time = stop_time.get("arrivalTime") - ACTION_DELAY[
+                route_id]
             delay = ACTION_DELAY[route_id]
-        # CASE #3: Only scheduled departure time is available [start stop with no realtime data]
+        # CASE #6: Only scheduled departure time is available
+        # [start stop with no realtime data]
         # Use the predefined delay for LED turn off
         elif "departureTime" in stop_time:
-            arrival_time = stop_time.get("departureTime") - ACTION_DELAY[route_id]
+            arrival_time = stop_time.get("departureTime") - ACTION_DELAY[
+                route_id]
             delay = ACTION_DELAY[route_id]
         # CASE #7: No valid time data is available
         else:
             logger.warning(
-                f"No valid arrival/departure time found when updating stop {stop_id}, route {route_id}"
+                f"No valid arrival/departure time found \
+                when updating stop {stop_id}, route {route_id}"
             )
             continue
 
-        # We processed valid schedule data for this stop, that means that the stop is operational
+        # We processed valid schedule data for this stop,
+        # that means that the stop is operational
         if stop_no_service[stop_id]:
             stop_no_service[stop_id] = False
             # Reset the LED to the default color
             led_control.calculate_default_color(stops_led[stop_id])
-            # Change the LED color to the default color if there is no ongoing LED action for this LED
+            # Change the LED color to the default color
+            # if there is no ongoing LED action for this LED
             if not led_control.led_locks[stops_led[stop_id]].locked():
                 led_control.reset_led_to_default(stops_led[stop_id])
 
@@ -508,15 +580,21 @@ def store_departures(json_response, reference_id: str):
                 run_date=job_time,
                 args=[stop_id, route_id, trip_id, job_time, delay],
                 id=job_id,
-                replace_existing=True,  # If the job exists, it will be replaced with the new time
+                replace_existing=True,
+                # If the job exists, it will be replaced with the new time
             )
 
             logger.trace(
-                f"Scheduled action for departure: stop_id={stop_id}, route_id={route_id}, trip_id={trip_id}, departure_time={str(datetime.fromtimestamp(arrival_time))}"
+                f"Scheduled action for departure: stop_id={stop_id}, \
+                route_id={route_id}, trip_id={trip_id}, \
+                departure_time={str(datetime.fromtimestamp(arrival_time))}"
             )
         else:
             logger.trace(
-                f"Action for departure: stop_id={stop_id}, route_id={route_id}, trip_id={trip_id}, departure_time={str(datetime.fromtimestamp(arrival_time))} was in the past, skipping"
+                f"Action for departure: stop_id={stop_id}, route_id={route_id}, \
+                trip_id={trip_id}, \
+                departure_time={str(datetime.fromtimestamp(arrival_time))} \
+                was in the past, skipping"
             )
 
     # Check if there is any active alerts in the response and process them
@@ -526,24 +604,27 @@ def store_departures(json_response, reference_id: str):
 
 
 def action_to_execute(
-        stop_id: str, route_id: str, trip_id: str, job_time: datetime, delay: int
+        stop_id: str, route_id: str, trip_id: str, job_time: datetime,
+        delay: int
 ):
     """
-    Changes the LED of the specified stop(stop_id) to the associated color if the route (route_id),
-    and schedules the turn-off of the LED in APScheduler according to the delay parameter.
+    Changes the LED of the specified stop(stop_id) to the associated color,
+    and schedules the turn-off of the LED in APScheduler after the supplied delay.
 
     :param stop_id: stopId from the BKK OpenData API
     :param route_id: routeId from the BKK OpenData API
     :param trip_id: tripId from the BKK OpenData API
     :param job_time: The time this job was scheduled in APScheduler
-    :param delay: The amount of time needs to be elapsed in seconds between the turn on and turn off action
+    :param delay: The amount of time needs to be elapsed in seconds
+        between the turn on and turn off action
     """
     if job_time < datetime.now() - timedelta(seconds=20):
         logger.trace("Action trigger time is in the past, skipping")
         return
 
     logger.trace(
-        f"Action triggered for stop: {stop_id}, route: {route_id}, trip: {trip_id}, LED off delay: {delay} sec"
+        f"Action triggered for stop: {stop_id}, route: {route_id}, trip: {trip_id}, \
+        LED off delay: {delay} sec"
     )
 
     led_id = stops_led[stop_id]
@@ -560,14 +641,17 @@ def action_to_execute(
         run_date=led_job_time,
         args=[led_id],
         id=str(led_id),
-        replace_existing=True,  # If the job exists, it will be replaced with the new time
+        replace_existing=True,
+        # If the job exists, it will be replaced with the new time
     )
 
 
 def calculate_schedule_interval(json_response, reference_id: str):
     """
-    Processes the ArrivalsAndDeparturesForStopOTPMethodResponse API response from the arrivals-and-departures-for-stop method.
-    It checks time between the schedules for each route and updates the ACTION_DELAY dictionary accordingly.
+    Processes the ArrivalsAndDeparturesForStopOTPMethodResponse API response
+    from the arrivals-and-departures-for-stop method.
+    It checks time between the schedules for each route
+    and updates the ACTION_DELAY dictionary accordingly.
 
     :param json_response: JSON return data from the BKK OpenData API
     :param reference_id: Internal reference to identify the API request in the logs
@@ -580,14 +664,16 @@ def calculate_schedule_interval(json_response, reference_id: str):
             or "entry" not in json_response["data"]
     ):
         logger.error(
-            f"No valid schedule data in API response for schedule intervals for {reference_id}"
+            f"No valid schedule data in API response \
+            for schedule intervals for {reference_id}"
         )
         return
 
     # Check if we exceeded the query limit
     if json_response["data"].get("limitExceeded", "false") == "true":
         logger.warning(
-            f"Query limit is exceeded when updating schedule intervals for {reference_id}"
+            f"Query limit is exceeded when updating \
+            schedule intervals for {reference_id}"
         )
 
     # Get routeId
@@ -600,10 +686,12 @@ def calculate_schedule_interval(json_response, reference_id: str):
             "routes" in json_response["data"]["references"]
             and len(json_response["data"]["references"]["routes"]) > 0
     ):
-        route_id = list(json_response["data"]["references"]["routes"].keys())[0]
+        route_id = list(json_response["data"]["references"]["routes"].keys())[
+            0]
     else:
         logger.warning(
-            f"No route IDs found or the list is empty when updating schedule intervals for {reference_id}"
+            f"No route IDs found or the list is empty when updating \
+            schedule intervals for {reference_id}"
         )
         return
 
@@ -611,14 +699,16 @@ def calculate_schedule_interval(json_response, reference_id: str):
     stop_times = json_response["data"]["entry"].get("stopTimes", [])
     if len(stop_times) < 2:
         logger.debug(
-            f"Not enough schedule data found when updating schedule intervals for {reference_id}"
+            f"Not enough schedule data found when updating \
+            schedule intervals for {reference_id}"
         )
         return
 
     # Variable to store the necessary data from the first two relevant stops
     data = [{} for _ in range(2)]
 
-    # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
+    # Iterate through the TransitScheduleStopTimes
+    # in the TransitArrivalsAndDepartures
     i = 0
     for stop_time in stop_times:
         # Check if the stopHeadsign is the same as the first one
@@ -629,19 +719,23 @@ def calculate_schedule_interval(json_response, reference_id: str):
         data[i]["stopHeadsign"] = stop_time.get("stopHeadsign")
 
         # Get the scheduled departure or arrival times
-        # CASE #1: Both arrival and departure time available as scheduled time [middle stop, no realtime data]
+        # CASE #1: Both arrival and departure time available as scheduled time
+        # [middle stop, no realtime data]
         if "arrivalTime" in stop_time and "departureTime" in stop_time:
             data[i]["time"] = stop_time.get("departureTime")
-        # CASE #2: Only scheduled arrival time is available [end stop with no realtime data]
+        # CASE #2: Only scheduled arrival time is available
+        # [end stop with no realtime data]
         elif "arrivalTime" in stop_time:
             data[i]["time"] = stop_time.get("arrivalTime")
-        # CASE #3: Only scheduled departure time is available [start stop with no realtime data]
+        # CASE #3: Only scheduled departure time is available
+        # [start stop with no realtime data]
         elif "departureTime" in stop_time:
             data[i]["time"] = stop_time.get("departureTime")
-        # CASE #7: No valid time data is available
+        # CASE #4: No valid time data is available
         else:
             logger.warning(
-                f"No valid arrival/departure time found when updating route {route_id} during schedule interval calculation"
+                f"No valid arrival/departure time found when updating \
+                route {route_id} during schedule interval calculation"
             )
             continue
         i += 1
@@ -654,7 +748,8 @@ def calculate_schedule_interval(json_response, reference_id: str):
     if "time" not in data[0] or "time" not in data[1]:
         # No valid schedule data found, set the difference to -1
         logger.warning(
-            f"No valid schedule data found when updating schedule intervals for {reference_id}"
+            f"No valid schedule data found when updating \
+            schedule intervals for {reference_id}"
         )
         difference = -1
     else:
@@ -685,7 +780,8 @@ def calculate_schedule_interval(json_response, reference_id: str):
             ACTION_DELAY[route_id] = 45
 
     logger.debug(
-        f"Recalculated LED turn off delay for route {route_id}, schedule delay: {difference:.1f} min, new delay: {ACTION_DELAY[route_id]} sec"
+        f"Recalculated LED turn off delay for route {route_id}, \
+        schedule delay: {difference:.1f} min, new delay: {ACTION_DELAY[route_id]} sec"
     )
 
 
@@ -697,13 +793,15 @@ def process_alerts(json_response, reference_id):
             or "references" not in json_response["data"]
             or "alerts" not in json_response["data"]["references"]
     ):
-        logger.error(f"No valid alerts data in API response for stop(s) {reference_id}")
+        logger.error(
+            f"No valid alerts data in API response for stop(s) {reference_id}")
         return
 
     # Get stopTimes from TransitArrivalsAndDepartures
     alerts = json_response["data"]["references"].get("alerts")
     if len(alerts) == 0:
-        logger.debug(f"No alert data found when updating stop(s) {reference_id}")
+        logger.debug(
+            f"No alert data found when updating stop(s) {reference_id}")
 
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
     for alert_id, alert_details in alerts.items():
@@ -716,7 +814,8 @@ def process_alerts(json_response, reference_id):
             route_id = route.get("routeId", "")
             effect_type = route.get("effectType", "")
 
-            # If the effectType is not NO_SERVICE we don't process the TransitAlertRoute anymore
+            # If the effectType is not NO_SERVICE
+            # we don't process the TransitAlertRoute anymore
             if effect_type != "NO_SERVICE":
                 continue
 
@@ -735,20 +834,30 @@ def process_alerts(json_response, reference_id):
                     )
 
                     if soonest_job is not None:
-                        # We found at least one schedule for this stop, so we'll ignore the NO_SERVICE alert
+                        # We found at least one schedule for this stop,
+                        # so we'll ignore the NO_SERVICE alert
                         logger.debug(
-                            f"Found NO_SERVICE alert {alert_details['id']} for stop {stop_id}, route {route_id}, but there are active schedules for that stop, so we'll ignore that"
+                            f"Found NO_SERVICE alert {alert_details['id']} \
+                            for stop {stop_id}, route {route_id}, \
+                            but there are active schedules for that stop, \
+                            so we'll ignore that"
                         )
                     else:
-                        # No schedule found for this stop, so we'll process the NO_SERVICE alert
+                        # No schedule found for this stop,
+                        # so we'll process the NO_SERVICE alert
                         logger.debug(
-                            f"Found NO_SERVICE alert {alert_details['id']} for stop {stop_id}, route {route_id}"
+                            f"Found NO_SERVICE alert {alert_details['id']} \
+                            for stop {stop_id}, route {route_id}"
                         )
                         # Set the no_service flag for this stop
                         stop_no_service[stop_id] = True
 
-                        # Calculate the default color for this stop according to which route is operation for the stop
+                        # Calculate the default color for this stop according to
+                        # which route is operation for the stop
                         led_control.calculate_default_color(stops_led[stop_id])
-                        # Change the LED color to the default color if there is no ongoing LED action for this LED
-                        if not led_control.led_locks[stops_led[stop_id]].locked():
-                            led_control.reset_led_to_default(stops_led[stop_id])
+                        # Change the LED color to the default color
+                        # if there is no ongoing LED action for this LED
+                        if not led_control.led_locks[
+                            stops_led[stop_id]].locked():
+                            led_control.reset_led_to_default(
+                                stops_led[stop_id])

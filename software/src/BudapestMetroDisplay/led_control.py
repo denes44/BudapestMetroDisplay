@@ -1,24 +1,24 @@
 #  MIT License
 #
-#  Copyright (c) 2024 denes44
+#  Copyright (c) 2024 [fullname]
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
+#  of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation
+#  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#  and/or sell copies of the Software, and to permit persons to whom
+#  the Software is furnished to do so, subject to the following conditions:
 #
-#  The above copyright notice and this permission notice shall be included in all
-#  copies or substantial portions of the Software.
+#  The above copyright notice and this permission notice shall be included
+#  in all copies or substantial portions of the Software.
 #
 #  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 #  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-#  SOFTWARE.
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+#  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#  OTHER DEALINGS IN THE SOFTWARE.
 
 import inspect
 import logging
@@ -130,7 +130,8 @@ def find_key_by_value(d: dict[str, int], target_value: int):
 
 def find_keys_by_value(d: dict[str, int], target_value: int):
     """
-    Finds all keys in the supplied dictionary (d) that match the supplied value (target_value).
+    Finds all keys in the supplied dictionary (d)
+    that match the supplied value (target_value).
 
     :param d: A dictionary to look for values
     :param target_value: The value to look for in the dictionary
@@ -148,7 +149,8 @@ def fade_color(
         delay: float = 0.05,
 ):
     """
-    Fade from the current color to the target color over a number of steps of a specific LED (led_index).
+    Fade from the current color to the target color
+    over a number of steps of a specific LED (led_index).
 
     :param led_index: Index of the LED to update
     :param current_color: Tuple (r, g, b) representing the starting RGB color
@@ -175,7 +177,8 @@ def fade_color(
 
             time.sleep(delay)
 
-        # Ensure the final color is set correctly, to avoid rounding errors dealing with floats
+        # Ensure the final color is set correctly,
+        # to avoid rounding errors dealing with floats
         with led_lock:
             led_states[led_index * 3: led_index * 3 + 3] = [r2, g2, b2]
         update_sacn()
@@ -192,13 +195,15 @@ def calculate_default_color(led_index: int):
         route_id = route["route_id"]
         stop_ids = route["stop_ids"]
 
-        # Check if all stops in the stop_ids list have no service status for the current route
+        # Check if all stops in the stop_ids list
+        # have no service status for the current route
         if all(stops.stop_no_service.get(stop_id) for stop_id in stop_ids):
             route_status[route_id] = False
         else:
             route_status[route_id] = True
 
-    # Determine the default color based on which routes are operational at the specific stop/LED
+    # Determine the default color based on
+    # which routes are operational at the specific stop/LED
     if led_index == 12:  # Kálvin tér: M3,M4
         if (
                 route_status["BKK_5300"] and route_status["BKK_5400"]
@@ -315,11 +320,13 @@ def reset_led_to_default(led_index: int):
         ).start()
 
         logger.trace(
-            f"LED {led_index} fading from color {str(current_color)} to default color {str(DEFAULT_COLORS[led_index])}"
+            f"LED {led_index} fading from color {str(current_color)} \
+            to default color {str(DEFAULT_COLORS[led_index])}"
         )
     else:
         logger.error(
-            f"Invalid LED index {led_index} when trying to reset the value, caller: {inspect.stack()[1].function}"
+            f"Invalid LED index {led_index} when trying to reset the value, \
+            caller: {inspect.stack()[1].function}"
         )
 
 
@@ -358,11 +365,13 @@ def set_led_color(led_index: int, color: tuple[int, int, int]):
         ).start()
 
         logger.trace(
-            f"LED {led_index} fading from color {str(current_color)} to color {str(color)}"
+            f"LED {led_index} fading from color {str(current_color)} \
+            to color {str(color)}"
         )
     else:
         logger.error(
-            f"Invalid LED index {led_index} when trying to change the value, caller: {inspect.stack()[1].function}"
+            f"Invalid LED index {led_index} when trying to change the value, \
+            caller: {inspect.stack()[1].function}"
         )
 
 
@@ -382,7 +391,8 @@ def get_led_color(led_index: int):
             )
     else:
         logger.error(
-            f"Invalid LED index {led_index} when trying to get the value, caller: {inspect.stack()[1].function}"
+            f"Invalid LED index {led_index} when trying to get the value, \
+            caller: {inspect.stack()[1].function}"
         )
         return None
 
