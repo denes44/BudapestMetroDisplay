@@ -36,7 +36,7 @@ def test_app_config_initializes_correctly():
     assert config.led.fade_time == 5.3
 
     # sACN Configuration
-    assert config.sacn.multicast == False
+    assert not config.sacn.multicast
     assert config.sacn.unicast_ip.__str__() == "192.168.1.1"
     assert config.sacn.universe == 2
     assert config.sacn.fps == 15
@@ -49,7 +49,7 @@ def test_app_config_initializes_correctly():
     assert config.bkk.api_update_alerts == 123
 
     # ESPHome Configuration
-    assert config.esphome.used == True
+    assert config.esphome.used
     assert config.esphome.device_ip.__str__() == "192.168.1.2"
     assert config.esphome.api_key == "0LTLKmoTVR0BO3xppXQkIBVb0VzDLZFqAplYnADTbOY="
 
