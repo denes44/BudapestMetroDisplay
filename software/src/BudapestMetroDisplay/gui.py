@@ -248,10 +248,8 @@ RECT_HEIGHT = 10
 
 # Function to convert the LED's RGB state to a color string
 def rgb_to_color_string(color):
-    # if color[0] == 0 and color[1] == 0 and color[2] == 0:
-    #     return "#ffffff"  # If the color is black, draw it as white on the GUI
-    # else:
-    return f"#{color[0]:02x}{color[1]:02x}{color[2]:02x}"  # Converts RGB values to hex format
+    # Converts RGB values to hex format
+    return f"#{color[0]:02x}{color[1]:02x}{color[2]:02x}"
 
 
 # Function to get rotated points of a rectangle
@@ -350,7 +348,7 @@ def create_filtered_job_table(scheduler, route_id):
 
 
 def create_route_buttons(my_canvas):
-    """Create buttons for each route_id in ROUTE_COLORS and position them at the top-left corner."""
+    """Create buttons for each route_id in ROUTE_COLORS."""
     from BudapestMetroDisplay.led_control import ROUTE_COLORS
 
     row, col = 0, 0

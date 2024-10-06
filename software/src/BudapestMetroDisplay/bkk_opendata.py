@@ -857,6 +857,5 @@ def process_alerts(json_response, reference_id):
                         led_control.calculate_default_color(stops_led[stop_id])
                         # Change the LED color to the default color
                         # if there is no ongoing LED action for this LED
-                        if not led_control.led_locks[
-                            stops_led[stop_id]].locked():
+                        if not led_control.led_locks[stops_led[stop_id]].locked():
                             led_control.reset_led_to_default(stops_led[stop_id])
