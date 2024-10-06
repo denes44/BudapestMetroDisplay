@@ -1,20 +1,20 @@
-name: Publish Python 🐍 distribution 📦 to PyPI and TestPyPI
+name: Python 🐍 CI
 
 on:
   workflow_dispatch:
   push:
     paths:
       - software/src/**
+      - software/tests/**
+      - software/pyproject.toml
 
 jobs:
-  build:
-    name: Test and build distribution 📦
+  test:
+    name: Lint and test code
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
     - name: Set up Python 3.11
       uses: actions/setup-python@v5
       with:
@@ -24,15 +24,22 @@ jobs:
       working-directory: software
       run: |
         python -m pip install --upgrade pip
-        pip install pytest pytest-cov
+        pip install pytest pytest-cov ruff mypy
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with Ruff
       working-directory: software
       run: |
-        pip install ruff
         ruff check --output-format=github .
       continue-on-error: true
-    - name: Run tests
+    - name: Run flake8
+      uses: py-actions/flake8@v2
+    - name: Run mypy
+      uses: sasanquaneuf/mypy-github-action@releases/v1
+      with:
+        checkName: 'test'   # NOTE: this needs to be the same as the job name
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Run pytest
       working-directory: software
       run: pytest --cov --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
     - name: Upload coverage to Codecov
@@ -44,6 +51,22 @@ jobs:
       uses: codecov/test-results-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+  
+  build:
+    name: Build distribution 📦
+    runs-on: ubuntu-latest
+    needs:
+    - test
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        cache: 'pip'
     - name: Install pypa/build
       working-directory: software
       run: >-
