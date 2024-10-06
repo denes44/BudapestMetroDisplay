@@ -4,11 +4,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from BudapestMetroDisplay.main import settings
-
 # Mock environment variables before importing the module
 os.environ["BKK_API_KEY"] = "test_api_key"
+# noqa E402
 
+from BudapestMetroDisplay.main import settings
 from BudapestMetroDisplay import led_control
 from BudapestMetroDisplay import stops
 

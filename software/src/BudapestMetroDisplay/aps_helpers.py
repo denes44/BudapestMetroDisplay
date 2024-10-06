@@ -22,9 +22,9 @@
 
 from typing import Optional, Any
 
-import numpy as np
 from apscheduler.job import Job
 from apscheduler.schedulers.base import BaseScheduler
+import numpy as np
 
 
 def count_jobs_by_argument(

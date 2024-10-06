@@ -30,6 +30,8 @@ from BudapestMetroDisplay.config import AppConfig, LEDConfig, SACNConfig, BKKCon
     ESPHomeConfig
 
 
+# noqa E402
+
 def test_app_config_initializes_correctly():
     config = AppConfig()
     # LED Configuration

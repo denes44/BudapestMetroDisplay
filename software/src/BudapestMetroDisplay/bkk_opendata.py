@@ -20,12 +20,12 @@
 #  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
 
-import logging
 from datetime import datetime, timedelta, time
+import logging
 
-import requests
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
+import requests
 
 from BudapestMetroDisplay import aps_helpers
 from BudapestMetroDisplay import led_control
@@ -207,8 +207,8 @@ def fetch_schedule_for_stops(stop_set, schedule_type: str):
     else:
         # Otherwise schedule the next update according to the configuration
         job_time = (
-                datetime.now() + API_SCHEDULE_PARAMETERS[schedule_type][
-            "nextSchedule"]
+                datetime.now()
+                + API_SCHEDULE_PARAMETERS[schedule_type]["nextSchedule"]
         )
 
     url = f"{API_BASE_URL}arrivals-and-departures-for-stop"
@@ -495,8 +495,8 @@ def store_departures(json_response, reference_id: str):
             # use predefined delay for LED turn off
             else:
                 arrival_time = (
-                        stop_time.get("predictedDepartureTime") - ACTION_DELAY[
-                    route_id]
+                        stop_time.get("predictedDepartureTime")
+                        - ACTION_DELAY[route_id]
                 )
                 delay = ACTION_DELAY[route_id]
         # CASE #2: Only predicted arrival time is available
@@ -506,8 +506,8 @@ def store_departures(json_response, reference_id: str):
                 "uncertain", False
         ):
             arrival_time = (
-                    stop_time.get("predictedArrivalTime") - ACTION_DELAY[
-                route_id]
+                    stop_time.get("predictedArrivalTime")
+                    - ACTION_DELAY[route_id]
             )
             delay = ACTION_DELAY[route_id]
         # CASE #3: Only predicted departure time is available
@@ -517,8 +517,8 @@ def store_departures(json_response, reference_id: str):
                 "uncertain", False
         ):
             arrival_time = (
-                    stop_time.get("predictedDepartureTime") - ACTION_DELAY[
-                route_id]
+                    stop_time.get("predictedDepartureTime")
+                    - ACTION_DELAY[route_id]
             )
             delay = ACTION_DELAY[route_id]
         # CASE #4: Both arrival and departure time available as scheduled time
@@ -528,8 +528,8 @@ def store_departures(json_response, reference_id: str):
             # lets use the difference between them for the LED turn off delay
             if stop_time.get("arrivalTime") != stop_time.get("departureTime"):
                 arrival_time = stop_time.get("arrivalTime")
-                delay = stop_time.get("departureTime") - stop_time.get(
-                    "arrivalTime")
+                delay = stop_time.get("departureTime") \
+                        - stop_time.get("arrivalTime")
             # Arrival time is the same as the departure,
             # use predefined delay for LED turn off
             else:
@@ -743,7 +743,7 @@ def calculate_schedule_interval(json_response, reference_id: str):
         if i == 2:
             break
 
-    ## Calculate the difference between the two schedules
+    # Calculate the difference between the two schedules
     # Check if the departure times are available for both stops
     if "time" not in data[0] or "time" not in data[1]:
         # No valid schedule data found, set the difference to -1
@@ -859,5 +859,4 @@ def process_alerts(json_response, reference_id):
                         # if there is no ongoing LED action for this LED
                         if not led_control.led_locks[
                             stops_led[stop_id]].locked():
-                            led_control.reset_led_to_default(
-                                stops_led[stop_id])
+                            led_control.reset_led_to_default(stops_led[stop_id])
