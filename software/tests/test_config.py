@@ -26,7 +26,7 @@ os.environ["ESPHOME_USED"] = "True"
 os.environ["ESPHOME_DEVICE_IP"] = "192.168.1.2"
 os.environ["ESPHOME_API_KEY"] = "0LTLKmoTVR0BO3xppXQkIBVb0VzDLZFqAplYnADTbOY="
 
-from src.BudapestMetroDisplay.config import AppConfig, LEDConfig, SACNConfig, BKKConfig, ESPHomeConfig
+from BudapestMetroDisplay.config import AppConfig, LEDConfig, SACNConfig, BKKConfig, ESPHomeConfig
 
 
 def test_app_config_initializes_correctly():
