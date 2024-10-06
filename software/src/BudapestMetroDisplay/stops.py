@@ -358,65 +358,65 @@ common_stops = {
         {
             "name": "M3",
             "route_id": "BKK_5300",
-            "stop_ids": ("BKK_F01290", "BKK_F01289"),
+            "stop_ids": ["BKK_F01290", "BKK_F01289"],
         },
         {
             "name": "M4",
             "route_id": "BKK_5400",
-            "stop_ids": ("BKK_056227", "BKK_056228"),
+            "stop_ids": ["BKK_056227", "BKK_056228"],
         },
     ),
     17: (
         {
             "name": "M2",
             "route_id": "BKK_5200",
-            "stop_ids": ("BKK_F00063", "BKK_F00062"),
+            "stop_ids": ["BKK_F00063", "BKK_F00062"],
         },
         {
             "name": "H5",
             "route_id": "BKK_H5",
-            "stop_ids": ("BKK_09001187", "BKK_09001188", "BKK_09001189"),
+            "stop_ids": ["BKK_09001187", "BKK_09001188", "BKK_09001189"],
         },
     ),
     19: (
         {
             "name": "M1",
             "route_id": "BKK_5100",
-            "stop_ids": ("BKK_F00963", "BKK_F00962"),
+            "stop_ids": ["BKK_F00963", "BKK_F00962"],
         },
         {
             "name": "M2",
             "route_id": "BKK_5200",
-            "stop_ids": ("BKK_F00961", "BKK_F00960"),
+            "stop_ids": ["BKK_F00961", "BKK_F00960"],
         },
         {
             "name": "M3",
             "route_id": "BKK_5300",
-            "stop_ids": ("BKK_F00955", "BKK_F00954"),
+            "stop_ids": ["BKK_F00955", "BKK_F00954"],
         },
     ),
     22: (
         {
             "name": "M2",
             "route_id": "BKK_5200",
-            "stop_ids": ("BKK_F01336", "BKK_F01335"),
+            "stop_ids": ["BKK_F01336", "BKK_F01335"],
         },
         {
             "name": "M4",
             "route_id": "BKK_5400",
-            "stop_ids": ("BKK_056233", "BKK_056234"),
+            "stop_ids": ["BKK_056233", "BKK_056234"],
         },
     ),
     25: (
         {
             "name": "M2",
             "route_id": "BKK_5200",
-            "stop_ids": "BKK_F01749",
+            "stop_ids": ["BKK_F01749"],
         },
         {
             "name": "H8",
             "route_id": "BKK_H8",
-            "stop_ids": ("BKK_19795278", "BKK_19795279", "BKK_19795280"),
+            "stop_ids": ["BKK_19795278", "BKK_19795279", "BKK_19795280"],
         },
     ),
 }

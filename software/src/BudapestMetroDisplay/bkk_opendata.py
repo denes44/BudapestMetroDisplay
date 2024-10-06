@@ -492,7 +492,10 @@ def store_departures(json_response, reference_id: str):
         if stop_no_service[stop_id]:
             stop_no_service[stop_id] = False
             # Reset the LED to the default color
-            led_control.reset_led_to_default(stops_led[stop_id])
+            led_control.calculate_default_color(stops_led[stop_id])
+            # Change the LED color to the default color if there is no ongoing LED action for this LED
+            if not led_control.led_locks[stops_led[stop_id]].locked():
+                led_control.reset_led_to_default(stops_led[stop_id])
 
         # Schedule the action 10 seconds before the departure."""
         job_id = f"{stop_id}+{trip_id}"
