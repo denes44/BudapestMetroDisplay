@@ -263,6 +263,7 @@ def test_calculate_default_color_led12():
     led_test = 12  # Kálvin tér
     # Initialize the route status dictionary
     stops.stop_no_service = {stop_id: False for stop_id in stops.stops_led}
+    led_control.calculate_default_color(led_test)
     assert led_control.DEFAULT_COLORS[led_test] == (
         0, int(255 * settings.led.dim_ratio), int(255 * settings.led.dim_ratio))
     # Set the NO_SERVICE status for one direction of Kálvin tér M4
@@ -292,6 +293,7 @@ def test_calculate_default_color_led17():
     led_test = 17
     # Initialize the route status dictionary
     stops.stop_no_service = {stop_id: False for stop_id in stops.stops_led}
+    led_control.calculate_default_color(led_test)
     assert led_control.DEFAULT_COLORS[led_test] == (
         int(255 * settings.led.dim_ratio), 0, int(128 * settings.led.dim_ratio))
     # Set the NO_SERVICE status for one direction of Batthyányi tér M2
@@ -300,7 +302,7 @@ def test_calculate_default_color_led17():
     led_control.reset_leds_to_default()
     assert led_control.DEFAULT_COLORS[led_test] == (
         int(255 * settings.led.dim_ratio), 0, int(128 * settings.led.dim_ratio))
-    # Set the NO_SERVICE status for the other direction of Batthyányi tér M2
+    # Set the NO_SERVICE status for second direction of Batthyányi tér M2
     stops.stop_no_service["BKK_F00062"] = True
     led_control.calculate_default_color(led_test)
     led_control.reset_leds_to_default()
@@ -310,22 +312,28 @@ def test_calculate_default_color_led17():
     led_control.calculate_default_color(led_test)
     led_control.reset_leds_to_default()
     assert led_control.DEFAULT_COLORS[led_test] == led_control.ROUTE_COLORS_DIM["BKK_H5"]
-    # Set the NO_SERVICE status for second direction of Batthyányi tér M3
+    # Set the NO_SERVICE status for second direction of Batthyányi tér H5
     stops.stop_no_service["BKK_09001188"] = True
     led_control.calculate_default_color(led_test)
     led_control.reset_leds_to_default()
     assert led_control.DEFAULT_COLORS[led_test] == led_control.ROUTE_COLORS_DIM["BKK_H5"]
-    # Set the NO_SERVICE status for third direction of Batthyányi tér M3
+    # Set the NO_SERVICE status for third direction of Batthyányi tér H5
     stops.stop_no_service["BKK_09001189"] = True
     led_control.calculate_default_color(led_test)
     led_control.reset_leds_to_default()
     assert led_control.DEFAULT_COLORS[led_test] == (0, 0, 0)
+    # Clear the NO_SERVICE status for second direction of Batthyányi tér M2
+    stops.stop_no_service["BKK_F00062"] = False
+    led_control.calculate_default_color(led_test)
+    led_control.reset_leds_to_default()
+    assert led_control.DEFAULT_COLORS[led_test] == led_control.ROUTE_COLORS_DIM["BKK_5200"]
 
 
 def test_calculate_default_color_led22():
     led_test = 22  # Keleti pályaudvar
     # Initialize the route status dictionary
     stops.stop_no_service = {stop_id: False for stop_id in stops.stops_led}
+    led_control.calculate_default_color(led_test)
     assert led_control.DEFAULT_COLORS[led_test] == (
         int(255 * settings.led.dim_ratio), int(128 * settings.led.dim_ratio), 0)
     # Set the NO_SERVICE status for one direction of Keleti pályaudvar M4
@@ -334,7 +342,7 @@ def test_calculate_default_color_led22():
     led_control.reset_leds_to_default()
     assert led_control.DEFAULT_COLORS[led_test] == (
         int(255 * settings.led.dim_ratio), int(128 * settings.led.dim_ratio), 0)
-    # Set the NO_SERVICE status for the other direction of Keleti pályaudvar M4
+    # Set the NO_SERVICE status for second direction of Keleti pályaudvar M4
     stops.stop_no_service["BKK_056234"] = True
     led_control.calculate_default_color(led_test)
     led_control.reset_leds_to_default()
@@ -344,43 +352,57 @@ def test_calculate_default_color_led22():
     led_control.calculate_default_color(led_test)
     led_control.reset_leds_to_default()
     assert led_control.DEFAULT_COLORS[led_test] == led_control.ROUTE_COLORS_DIM["BKK_5200"]
-    # Set the NO_SERVICE status for one direction of Keleti pályaudvar M3
+    # Set the NO_SERVICE status for second direction of Keleti pályaudvar M3
     stops.stop_no_service["BKK_F01335"] = True
     led_control.calculate_default_color(led_test)
     led_control.reset_leds_to_default()
     assert led_control.DEFAULT_COLORS[led_test] == (0, 0, 0)
+    # Clear the NO_SERVICE status for second direction of Keleti pályaudvar M4
+    stops.stop_no_service["BKK_056234"] = False
+    led_control.calculate_default_color(led_test)
+    led_control.reset_leds_to_default()
+    assert led_control.DEFAULT_COLORS[led_test] == led_control.ROUTE_COLORS_DIM["BKK_5400"]
 
 
 def test_calculate_default_color_led25():
     led_test = 25  # Örs vezér tere
     # Initialize the route status dictionary
     stops.stop_no_service = {stop_id: False for stop_id in stops.stops_led}
+    led_control.calculate_default_color(led_test)
     assert led_control.DEFAULT_COLORS[led_test] == (
         int(255 * settings.led.dim_ratio), 0, int(48 * settings.led.dim_ratio))
     # Set the NO_SERVICE status for one direction of Örs vezér tere M2
     stops.stop_no_service["BKK_F01749"] = True
+    led_control.calculate_default_color(led_test)
+    led_control.reset_leds_to_default()
     assert led_control.DEFAULT_COLORS[led_test] == led_control.ROUTE_COLORS_DIM["BKK_H8"]
-    # Set the NO_SERVICE status for one direction of Örs vezér tere M3
+    # Set the NO_SERVICE status for one direction of Örs vezér tere H8
     stops.stop_no_service["BKK_19795278"] = True
     led_control.calculate_default_color(led_test)
     led_control.reset_leds_to_default()
     assert led_control.DEFAULT_COLORS[led_test] == led_control.ROUTE_COLORS_DIM["BKK_H8"]
-    # Set the NO_SERVICE status for second direction of Örs vezér tere M3
+    # Set the NO_SERVICE status for second direction of Örs vezér tere H8
     stops.stop_no_service["BKK_19795279"] = True
     led_control.calculate_default_color(led_test)
     led_control.reset_leds_to_default()
     assert led_control.DEFAULT_COLORS[led_test] == led_control.ROUTE_COLORS_DIM["BKK_H8"]
-    # Set the NO_SERVICE status for third direction of Örs vezér tere M3
+    # Set the NO_SERVICE status for third direction of Örs vezér tere H8
     stops.stop_no_service["BKK_19795280"] = True
     led_control.calculate_default_color(led_test)
     led_control.reset_leds_to_default()
     assert led_control.DEFAULT_COLORS[led_test] == (0, 0, 0)
+    # Clear the NO_SERVICE status for one direction of Örs vezér tere M2
+    stops.stop_no_service["BKK_F01749"] = False
+    led_control.calculate_default_color(led_test)
+    led_control.reset_leds_to_default()
+    assert led_control.DEFAULT_COLORS[led_test] == led_control.ROUTE_COLORS_DIM["BKK_5200"]
 
 
 def test_calculate_default_color_led19():
     led_test = 19  # Deák Ferenc tér
     # Initialize the route status dictionary
     stops.stop_no_service = {stop_id: False for stop_id in stops.stops_led}
+    led_control.calculate_default_color(led_test)
     assert led_control.DEFAULT_COLORS[led_test] == (
         int(255 * settings.led.dim_ratio), int(255 * settings.led.dim_ratio), int(255 * settings.led.dim_ratio))
     # Set the NO_SERVICE status for one direction of Deák Ferenc tér M1
