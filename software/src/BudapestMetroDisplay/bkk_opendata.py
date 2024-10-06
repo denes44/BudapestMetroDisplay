@@ -210,40 +210,72 @@ def fetch_schedule_for_stops(stop_set, schedule_type: str):
         "includeReferences": "routes,alerts",
         "key": settings.bkk.api_key,
     }
-    response = requests.get(url, headers=headers, params=params)
-
-    if response.status_code == 200:
-        store_departures(response.json(), stop_set[0])
-
-        logger.debug(
-            f"Successfully fetched {schedule_type} schedules for stop set {stop_set[0]}. Next update scheduled for {str(job_time)}"
-        )
-    else:
-        # Reschedule the failed action for 1 minute later
-        job_time = datetime.now() + timedelta(minutes=1)
-
-        logger.error(
-            f"Failed to fetch {schedule_type} schedules for stop set {stop_set[0]}: {response.status_code}. Rescheduled for {str(job_time)}."
-        )
-
-    # Get schedule data for the first stop in the stop set for the schedule interval calculation
-    if schedule_type == "REGULAR":
-        params["stopId"] = stop_set[1][0]
-        response = requests.get(url, headers=headers, params=params)
+    try:
+        response = requests.get(url, headers=headers, params=params, timeout=5)
 
         if response.status_code == 200:
-            calculate_schedule_interval((response.json()), stop_set[0])
+            store_departures(response.json(), stop_set[0])
 
             logger.debug(
-                f"Successfully fetched schedules for stop set {stop_set[0]} for schedule interval calculation. Next update scheduled for {str(job_time)}"
+                f"Successfully updated {schedule_type} schedules for stop set {stop_set[0]}. Next update scheduled for {str(job_time)}"
             )
         else:
             # Reschedule the failed action for 1 minute later
             job_time = datetime.now() + timedelta(minutes=1)
 
             logger.error(
-                f"Failed to fetch schedules for stop set {stop_set[0]} for schedule interval calculation: {response.status_code}. Rescheduled for {str(job_time)}."
+                f"Failed to update {schedule_type} schedules for stop set {stop_set[0]}: {response.status_code}. Rescheduled for {str(job_time)}."
             )
+    except requests.exceptions.ReadTimeout as e:
+        job_time = datetime.now() + timedelta(minutes=1)
+        logger.warning(
+            f"Timeout occurred when updating {schedule_type} schedules for stop set {stop_set[0]}. Rescheduled for {str(job_time)}.")
+        logger.warning(e)
+    except requests.exceptions.ConnectionError as e:
+        job_time = datetime.now() + timedelta(minutes=5)
+        logger.warning(
+            f"Connection error when updating {schedule_type} schedules for stop set {stop_set[0]}. Rescheduled for {str(job_time)}.")
+        logger.warning(e)
+    except requests.exceptions.RequestException as e:
+        job_time = datetime.now() + timedelta(minutes=1)
+        logger.warning(
+            f"Error when updating {schedule_type} schedules for stop set {stop_set[0]}. Rescheduled for {str(job_time)}.")
+        logger.warning(e)
+
+    # Get schedule data for the first stop in the stop set for the schedule interval calculation
+    if schedule_type == "REGULAR":
+        params["stopId"] = stop_set[1][0]
+        try:
+            response = requests.get(url, headers=headers, params=params, timeout=5)
+
+            if response.status_code == 200:
+                calculate_schedule_interval((response.json()), stop_set[0])
+
+                logger.debug(
+                    f"Successfully updated schedules for stop set {stop_set[0]} for schedule interval calculation. Next update scheduled for {str(job_time)}"
+                )
+            else:
+                # Reschedule the failed action for 1 minute later
+                job_time = datetime.now() + timedelta(minutes=1)
+
+                logger.error(
+                    f"Failed to update schedules for stop set {stop_set[0]} for schedule interval calculation: {response.status_code}. Rescheduled for {str(job_time)}."
+                )
+        except requests.exceptions.ReadTimeout as e:
+            job_time = datetime.now() + timedelta(minutes=1)
+            logger.warning(
+                f"Timeout occurred when updating schedules for stop set {stop_set[0]} for schedule interval calculation. Next update scheduled for {str(job_time)}")
+            logger.warning(e)
+        except requests.exceptions.ConnectionError as e:
+            job_time = datetime.now() + timedelta(minutes=5)
+            logger.error(
+                f"Connection error when updating schedules for stop set {stop_set[0]} for schedule interval calculation. Next update scheduled for {str(job_time)}")
+            logger.error(e)
+        except requests.exceptions.RequestException as e:
+            job_time = datetime.now() + timedelta(minutes=1)
+            logger.error(
+                f"Error when updating schedules for stop set {stop_set[0]} for schedule interval calculation. Next update scheduled for {str(job_time)}")
+            logger.error(e)
 
     job_id = f"{stop_set[0]}_{schedule_type}"
 
@@ -280,21 +312,37 @@ def fetch_alerts_for_route(route_id: str):
         "key": settings.bkk.api_key,
     }
 
-    response = requests.get(url, headers=headers, params=params)
+    try:
+        response = requests.get(url, headers=headers, params=params, timeout=5)
 
-    if response.status_code == 200:
-        process_alerts(response.json(), route_id)
+        if response.status_code == 200:
+            process_alerts(response.json(), route_id)
 
-        logger.debug(
-            f"Successfully fetched alerts for route {route_id}. Next update scheduled for {str(job_time)}"
-        )
-    else:
-        # Reschedule the failed action for 1 minute later
+            logger.debug(
+                f"Successfully updated alerts for route {route_id}. Next update scheduled for {str(job_time)}"
+            )
+        else:
+            # Reschedule the failed action for 1 minute later
+            job_time = datetime.now() + timedelta(minutes=1)
+
+            logger.error(
+                f"Failed to update alerts for route {route_id}: {response.status_code}. Rescheduled for {str(job_time)}."
+            )
+    except requests.exceptions.ReadTimeout as e:
         job_time = datetime.now() + timedelta(minutes=1)
-
+        logger.warning(
+            f"Timeout occurred when updating alerts for route {route_id}. Next update scheduled for {str(job_time)}")
+        logger.warning(e)
+    except requests.exceptions.ConnectionError as e:
+        job_time = datetime.now() + timedelta(minutes=5)
         logger.error(
-            f"Failed to fetch alerts for route {route_id}: {response.status_code}. Rescheduled for {str(job_time)}."
-        )
+            f"Connection error when updating alerts for route {route_id}. Next update scheduled for {str(job_time)}")
+        logger.error(e)
+    except requests.exceptions.RequestException as e:
+        job_time = datetime.now() + timedelta(minutes=1)
+        logger.error(
+            f"Error when updating alerts for route {route_id}. Next update scheduled for {str(job_time)}")
+        logger.error(e)
 
     job_id = f"{route_id}_ALERTS"
 
