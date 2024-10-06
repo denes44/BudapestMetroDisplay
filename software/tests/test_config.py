@@ -5,7 +5,7 @@ from pydantic import ValidationError
 
 # Mock environment variables before importing the module
 # LED Configuration
-os.environ["LED_DIM_RATIO"] = "0.333"
+os.environ["LED_DIM_RATIO"] = "0.3"
 os.environ["LED_FADE_TIME"] = "5.3"
 
 # sACN Configuration
@@ -32,27 +32,29 @@ from BudapestMetroDisplay.config import AppConfig, LEDConfig, SACNConfig, BKKCon
 def test_app_config_initializes_correctly():
     config = AppConfig()
     # LED Configuration
-    assert os.environ["LED_DIM_RATIO"] == "0.333"
-    assert os.environ["LED_FADE_TIME"] == "5.3"
+    assert config.led.dim_ratio == 0.3
+    assert config.led.fade_time == 5.3
 
     # sACN Configuration
-    assert os.environ["SACN_MULTICAST"] == "False"
-    assert os.environ["SACN_UNICAST_IP"] == "192.168.1.1"
-    assert os.environ["SACN_UNIVERSE"] == "2"
-    assert os.environ["SACN_FPS"] == "15"
+    assert config.sacn.multicast == False
+    assert config.sacn.unicast_ip.__str__() == "192.168.1.1"
+    assert config.sacn.universe == 2
+    assert config.sacn.fps == 15
 
     # BKK Configuration
-    assert os.environ["BKK_API_KEY"] == "test_api_key"
-    assert os.environ["BKK_API_UPDATE_INTERVAL"] == "6"
-    assert os.environ["BKK_API_UPDATE_REALTIME"] == "82"
-    assert os.environ["BKK_API_UPDATE_REGULAR"] == "3456"
-    assert os.environ["BKK_API_UPDATE_ALERTS"] == "123"
+    assert config.bkk.api_key == "test_api_key"
+    assert config.bkk.api_update_interval == 6
+    assert config.bkk.api_update_realtime == 82
+    assert config.bkk.api_update_regular == 3456
+    assert config.bkk.api_update_alerts == 123
 
     # ESPHome Configuration
-    assert os.environ["ESPHOME_USED"] == "True"
-    assert os.environ["ESPHOME_DEVICE_IP"] == "192.168.1.2"
-    assert os.environ["ESPHOME_API_KEY"] == "0LTLKmoTVR0BO3xppXQkIBVb0VzDLZFqAplYnADTbOY="
+    assert config.esphome.used == True
+    assert config.esphome.device_ip.__str__() == "192.168.1.2"
+    assert config.esphome.api_key == "0LTLKmoTVR0BO3xppXQkIBVb0VzDLZFqAplYnADTbOY="
 
+
+def test_delete_env_vars():
     # List of environment variable keys to delete
     env_vars = [
         "LED_DIM_RATIO", "LED_FADE_TIME",
@@ -61,7 +63,6 @@ def test_app_config_initializes_correctly():
         "BKK_API_UPDATE_ALERTS",
         "ESPHOME_USED", "ESPHOME_DEVICE_IP", "ESPHOME_API_KEY"
     ]
-
     # Delete each environment variable
     for var in env_vars:
         if var in os.environ:
