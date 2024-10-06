@@ -27,11 +27,13 @@ jobs:
         pip install pytest pytest-cov
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with Ruff
+      working-directory: software
       run: |
         pip install ruff
         ruff check --output-format=github .
       continue-on-error: true
     - name: Run tests
+      working-directory: software
       run: pytest --cov --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
@@ -43,6 +45,7 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
     - name: Install pypa/build
+      working-directory: software
       run: >-
         python3 -m
         pip install
