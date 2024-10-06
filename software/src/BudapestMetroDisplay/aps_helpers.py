@@ -84,8 +84,7 @@ def find_soonest_job_by_argument(
     for job in scheduler.get_jobs():
         job_args = job.args
         # Check if the job has the specified argument and value
-        if len(job_args) > arg_position and job_args[
-            arg_position] == search_value:
+        if len(job_args) > arg_position and job_args[arg_position] == search_value:
             if soonest_job is None or (
                     job.next_run_time and job.next_run_time < soonest_job.next_run_time):
                 soonest_job = job
@@ -93,8 +92,7 @@ def find_soonest_job_by_argument(
     return soonest_job
 
 
-def calculate_average_time_between_jobs(filtered_jobs: list[Job]) -> Optional[
-    float]:
+def calculate_average_time_between_jobs(filtered_jobs: list[Job]) -> Optional[float]:
     """
     Calculates the average time between the jobs supplied in a list
 
