@@ -1,9 +1,9 @@
 import threading
 from unittest.mock import MagicMock, patch
 
-import pytest, os
+import os
+import pytest
 
-from BudapestMetroDisplay.led_control import DEFAULT_COLORS
 from BudapestMetroDisplay.main import settings
 
 # Mock environment variables before importing the module

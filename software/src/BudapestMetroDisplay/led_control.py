@@ -32,9 +32,9 @@ import sacn
 from sacn import sACNsender
 
 from BudapestMetroDisplay import stops
-from BudapestMetroDisplay.main import settings
-from BudapestMetroDisplay.stops import stops_led, common_stops
 from BudapestMetroDisplay._version import __version__
+from BudapestMetroDisplay.main import settings
+from BudapestMetroDisplay.stops import common_stops
 
 logger = logging.getLogger(__name__)
 
