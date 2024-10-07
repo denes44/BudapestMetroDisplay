@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2024-
+## [0.1.0] - 2024-10-07
 
 ### Added
 
@@ -31,4 +31,4 @@ if the resulting value for the LED would fall under the turn on treshold of the 
 		- When a stop is served by multiple routes, if one of the routes is not operational, we change the background color accordingly
 		- The LED is turned off when there is no route that is operational for the given stop
 - Multi level loggin to file. The default log level is INFO, it can be changed by command line parameters to DEBUG or TRACE
-- Basic GUI for developement purposes and visualising the output without a hardware display
+- Basic webserver for checking the stored schedules
