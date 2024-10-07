@@ -30,19 +30,16 @@ jobs:
       working-directory: software
       run: |
         ruff check --output-format=github .
-      continue-on-error: true
     - name: Run flake8
       uses: py-actions/flake8@v2
       with:
           max-line-length: "88"
-      continue-on-error: true
     - name: Add mypy annotator
       uses: pr-annotators/mypy-pr-annotator@v1.0.0
     - name: Run mypy
       run: |
         pip install types-requests
         mypy --config-file=.github/rules/mypi.ini software/src/ 
-      continue-on-error: true
     - name: Run pytest
       working-directory: software
       run: pytest --cov --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
