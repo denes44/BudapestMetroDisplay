@@ -586,13 +586,13 @@ def store_departures(json_response, reference_id: str):
                 # If the job exists, it will be replaced with the new time
             )
 
-            logger.trace(
+            logger.trace(  # type: ignore[attr-defined]
                 f"Scheduled action for departure: stop_id={stop_id}, "
                 f"route_id={route_id}, trip_id={trip_id}, "
                 f"departure_time={str(datetime.fromtimestamp(arrival_time))}"
             )
         else:
-            logger.trace(
+            logger.trace(  # type: ignore[attr-defined]
                 f"Action for departure: stop_id={stop_id}, route_id={route_id}, "
                 f"trip_id={trip_id}, "
                 f"departure_time={str(datetime.fromtimestamp(arrival_time))} "
@@ -621,10 +621,11 @@ def action_to_execute(
         between the turn on and turn off action
     """
     if job_time < datetime.now() - timedelta(seconds=20):
-        logger.trace("Action trigger time is in the past, skipping")
+        logger.trace(  # type: ignore[attr-defined]
+            "Action trigger time is in the past, skipping")
         return
 
-    logger.trace(
+    logger.trace(  # type: ignore[attr-defined]
         f"Action triggered for stop: {stop_id}, route: {route_id}, trip: {trip_id}, "
         f"LED off delay: {delay} sec"
     )

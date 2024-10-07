@@ -320,7 +320,7 @@ def reset_led_to_default(led_index: int):
             args=(led_index, current_color, DEFAULT_COLORS[led_index], steps, delay),
         ).start()
 
-        logger.trace(
+        logger.trace(  # type: ignore[attr-defined]
             f"LED {led_index} fading from color {str(current_color)} "
             f"to default color {str(DEFAULT_COLORS[led_index])}"
         )
@@ -365,7 +365,7 @@ def set_led_color(led_index: int, color: tuple[int, int, int]):
             args=(led_index, current_color, color, steps, delay),
         ).start()
 
-        logger.trace(
+        logger.trace(  # type: ignore[attr-defined]
             f"LED {led_index} fading from color {str(current_color)} "
             f"to color {str(color)}"
         )

@@ -95,7 +95,7 @@ def setup_logging(parser):
     # Parse command-line arguments
     args = parser.parse_args()
     if args.trace:
-        logger.setLevel(logging.TRACE)
+        logger.setLevel(logging.TRACE)  # type: ignore[attr-defined]
     elif args.debug:
         logger.setLevel(logging.DEBUG)
     else:
@@ -155,8 +155,8 @@ def setup_logging(parser):
         logger.addHandler(file_handler_error)
         logger.addHandler(console_handler)
 
-    if logger.getEffectiveLevel() == logging.TRACE:
-        logger.trace("Trace level logging enabled")
+    if logger.getEffectiveLevel() == logging.TRACE:  # type: ignore[attr-defined]
+        logger.trace("Trace level logging enabled")  # type: ignore[attr-defined]
     elif logger.getEffectiveLevel() == logging.DEBUG:
         logger.debug("Debug level logging enabled")
 
