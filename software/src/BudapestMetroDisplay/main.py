@@ -22,17 +22,18 @@
 
 import argparse
 import asyncio
+from asyncio import AbstractEventLoop
 import logging
 import signal
 import sys
 import time
 
-from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay import bkk_opendata
 from BudapestMetroDisplay import led_control
 from BudapestMetroDisplay import log
 from BudapestMetroDisplay import webserver
 from BudapestMetroDisplay._version import __version__
+from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay.stops import stops_metro, stops_railway, alert_routes
 
 if settings.esphome.used:
@@ -42,6 +43,7 @@ if settings.esphome.used:
 logger = logging.getLogger(__name__)
 
 parser = None
+loop: AbstractEventLoop
 
 
 def handle_exit_signal(signum, frame):
@@ -67,7 +69,7 @@ sys.excepthook = log.log_exception
 
 
 def main():
-    global parser
+    global parser, loop
 
     if settings.esphome.used:
         loop = start_background_loop()
