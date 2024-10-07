@@ -19,9 +19,10 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 #  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
+from typing import Dict, Any, Tuple
 
 # Variable for associating the stopIds to the LEDs
-stops_led = {
+stops_led: dict[str, int] = {
     # M1-es Vörösmarty tér-tól Mexikói út-ig
     "BKK_F00965": 53,
     "BKK_F00963": 19,
@@ -192,7 +193,7 @@ stops_led = {
 
 # Variable for storing the routes with the stopIds for schedule updates
 # Only for metro lines, because these will only need REGULAR updates
-stops_metro = (
+stops_metro: tuple[tuple[str, tuple[str, ...]], ...] = (
     (
         "M1",
         (
@@ -321,7 +322,7 @@ stops_metro = (
 # Variable for storing the routes with the stopIds for schedule updates
 # Only for suburban railway lines,
 # because these will need both REGULAR and REALTIME updates
-stops_railway = (
+stops_railway: tuple[tuple[str, tuple[str, ...]], ...] = (
     (
         "H5",
         (
@@ -346,16 +347,16 @@ stops_railway = (
 # Variable for storing the routes that we want to update more frequently
 # than REGULAR updates to check for TravelAlarms
 # For REALTIME updated routes, this is not needed
-alert_routes = (
+alert_routes: tuple[str, ...] = (
     "BKK_5100",
     "BKK_5200",
     "BKK_5300",
     "BKK_5400",
 )
 # Variable to store if a stop is not serviced at the moment
-stop_no_service = {stop_id: False for stop_id in stops_led}
+stop_no_service: dict[str, bool] = {stop_id: False for stop_id in stops_led}
 
-common_stops = {
+common_stops: dict[int, tuple[dict[str, str | list[str]], ...]] = {
     12: (
         {
             "name": "M3",

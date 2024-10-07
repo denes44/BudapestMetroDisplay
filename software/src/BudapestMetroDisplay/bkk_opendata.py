@@ -22,7 +22,7 @@
 
 from datetime import datetime, timedelta, time
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union, Tuple
 
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -41,10 +41,10 @@ logging.getLogger("urllib3").setLevel(logging.INFO)
 logging.getLogger("requests").setLevel(logging.INFO)
 
 # Define base URL
-API_BASE_URL = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/"
+API_BASE_URL: str = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/"
 
 # Define the API request parameters for the different schedule updates
-API_SCHEDULE_PARAMETERS = {
+API_SCHEDULE_PARAMETERS: dict[str, dict[str, int | timedelta]] = {
     "REGULAR": {
         "minutesBefore": 0,
         "minutesAfter": round((settings.bkk.api_update_regular + 300) / 60),
@@ -61,7 +61,7 @@ API_SCHEDULE_PARAMETERS = {
 
 # Default delay to turn off the LED
 # when there is no separate arrival and departure time is available
-ACTION_DELAY = {
+ACTION_DELAY: dict[str, int] = {
     "BKK_5100": 10,  # M1
     "BKK_5200": 10,  # M2
     "BKK_5300": 10,  # M3
@@ -79,26 +79,27 @@ logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
 
 # Initialize APScheduler with a persistent job store
 # for scheduling the departures (when we turn on the LEDs)
-departure_scheduler = BackgroundScheduler(
+departure_scheduler: BackgroundScheduler = BackgroundScheduler(
     jobstores={"default": MemoryJobStore()}  # Use in-memory job storage
 )
 departure_scheduler.start()
 
 # Initialize scheduler with MemoryJobStore
 # for scheduling turning off the LEDs after departure
-led_scheduler = BackgroundScheduler(
+led_scheduler: BackgroundScheduler = BackgroundScheduler(
     jobstores={"default": MemoryJobStore()}  # Use in-memory job storage
 )
 led_scheduler.start()
 
 # Initialize scheduler with MemoryJobStore for scheduling the API updates
-api_update_scheduler = BackgroundScheduler(
+api_update_scheduler: BackgroundScheduler = BackgroundScheduler(
     jobstores={"default": MemoryJobStore()}  # Use in-memory job storage
 )
 api_update_scheduler.start()
 
 
-def create_schedule_updates(stop_sets, schedule_type: str):
+def create_schedule_updates(stop_sets: tuple[tuple[str, tuple[str, ...]], ...],
+                            schedule_type: str):
     """
     Creates schedules in APScheduler for the API requests
     to update the data for the provided stops.
@@ -126,10 +127,10 @@ def create_schedule_updates(stop_sets, schedule_type: str):
     for stop_set in stop_sets:
         # Schedule the API calls from each other by settings.bkk.api_update_interval
         # starting from the current time
-        delay = i * settings.bkk.api_update_interval
+        delay: int = i * settings.bkk.api_update_interval
         i += 1
-        job_time = start_time + timedelta(seconds=delay)  # job start time
-        job_id = f"{stop_set[0]}_{schedule_type}"  # job reference id
+        job_time: datetime = start_time + timedelta(seconds=delay)  # job start time
+        job_id: str = f"{stop_set[0]}_{schedule_type}"  # job reference id
 
         # Add the job to the scheduler
         api_update_scheduler.add_job(
@@ -148,7 +149,7 @@ def create_schedule_updates(stop_sets, schedule_type: str):
         )
 
 
-def create_alert_updates(routes):
+def create_alert_updates(routes: tuple[str, ...]):
     """
     Creates schedules in APScheduler for the API requests
     to update the alerts for the provided routes.
@@ -165,10 +166,10 @@ def create_alert_updates(routes):
     for route_id in routes:
         # Schedule the API calls from each other by settings.bkk.api_update_interval
         # starting from the current time
-        delay = i * settings.bkk.api_update_interval
+        delay: int = i * settings.bkk.api_update_interval
         i += 1
-        job_time = start_time + timedelta(seconds=delay)  # job start time
-        job_id = f"{route_id}_ALERTS"  # job reference id
+        job_time: datetime = start_time + timedelta(seconds=delay)  # job start time
+        job_id: str = f"{route_id}_ALERTS"  # job reference id
 
         # Add the job to the scheduler
         api_update_scheduler.add_job(
@@ -186,7 +187,8 @@ def create_alert_updates(routes):
         )
 
 
-def fetch_schedule_for_stops(stop_set, schedule_type: str):
+def fetch_schedule_for_stops(stop_set: tuple[str, tuple[str, ...]],
+                             schedule_type: str):
     """
     Callback function for the APScheduler jobs.
     Makes an arrivals-and-departures-for-stop API request to the BKK OpenData server
@@ -209,14 +211,14 @@ def fetch_schedule_for_stops(stop_set, schedule_type: str):
         job_time = (
                 datetime.now()
                 + API_SCHEDULE_PARAMETERS[schedule_type]["nextSchedule"]
-        )
+        )  # type: ignore
 
-    url = f"{API_BASE_URL}arrivals-and-departures-for-stop"
+    url: str = f"{API_BASE_URL}arrivals-and-departures-for-stop"
 
-    headers = {"Accept": "application/json"}
+    headers: dict[str, str] = {"Accept": "application/json"}
 
     # Get schedule data for all stops in the stop set
-    params = {
+    params: dict[str, Union[str, int, List[str]]] = {
         "stopId": list(stop_set[1]),
         "minutesBefore": API_SCHEDULE_PARAMETERS[schedule_type]["minutesBefore"],
         "minutesAfter": API_SCHEDULE_PARAMETERS[schedule_type]["minutesAfter"],
@@ -311,7 +313,7 @@ def fetch_schedule_for_stops(stop_set, schedule_type: str):
                 Next update scheduled for {str(job_time)}")
             logger.error(e)
 
-    job_id = f"{stop_set[0]}_{schedule_type}"
+    job_id: str = f"{stop_set[0]}_{schedule_type}"
 
     api_update_scheduler.add_job(
         fetch_schedule_for_stops,
@@ -337,11 +339,11 @@ def fetch_alerts_for_route(route_id: str):
     job_time = datetime.now() + timedelta(
         minutes=settings.bkk.api_update_alerts)
 
-    url = f"{API_BASE_URL}route-details"
+    url: str = f"{API_BASE_URL}route-details"
 
-    headers = {"Accept": "application/json"}
+    headers: dict[str, str] = {"Accept": "application/json"}
 
-    params = {
+    params: dict[str, Union[str, int]] = {
         "routeId": route_id,
         "appVersion": f"BudapestMetroDisplay {__version__}",
         "version": "4",
@@ -386,7 +388,7 @@ def fetch_alerts_for_route(route_id: str):
             Next update scheduled for {str(job_time)}")
         logger.error(e)
 
-    job_id = f"{route_id}_ALERTS"
+    job_id: str = f"{route_id}_ALERTS"
 
     api_update_scheduler.add_job(
         fetch_alerts_for_route,
@@ -431,12 +433,12 @@ def store_departures(json_response, reference_id: str):
             "routeIds" in json_response["data"]["entry"]
             and len(json_response["data"]["entry"]["routeIds"]) > 0
     ):
-        route_id = json_response["data"]["entry"].get("routeIds", [])[0]
+        route_id: str = json_response["data"]["entry"].get("routeIds", [])[0]
     elif (
             "routes" in json_response["data"]["references"]
             and len(json_response["data"]["references"]["routes"]) > 0
     ):
-        route_id = list(json_response["data"]["references"]["routes"].keys())[
+        route_id: str = list(json_response["data"]["references"]["routes"].keys())[
             0]
     else:
         logger.warning(
@@ -446,7 +448,7 @@ def store_departures(json_response, reference_id: str):
         return
 
     # Get stopId, when there is only one stop in the response
-    stop_id_global = json_response["data"]["entry"].get("stopId", None)
+    stop_id_global: str = json_response["data"]["entry"].get("stopId", None)
 
     # Get stopTimes from TransitArrivalsAndDepartures
     stop_times = json_response["data"]["entry"].get("stopTimes", [])
@@ -456,7 +458,7 @@ def store_departures(json_response, reference_id: str):
 
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
     for stop_time in stop_times:
-        trip_id = stop_time.get("tripId")
+        trip_id: str = stop_time.get("tripId")
 
         # Get stopId, when the response contains schedules for multiple stops
         if "stopId" in stop_time:
@@ -485,69 +487,68 @@ def store_departures(json_response, reference_id: str):
             if stop_time.get("predictedArrivalTime") != stop_time.get(
                     "predictedDepartureTime"
             ):
-                arrival_time = stop_time.get("predictedArrivalTime")
-                delay = stop_time.get(
+                arrival_time: int = stop_time.get("predictedArrivalTime")
+                delay: int = stop_time.get(
                     "predictedDepartureTime") - stop_time.get(
                     "predictedArrivalTime"
                 )
             # Arrival time is the same as the departure,
             # use predefined delay for LED turn off
             else:
-                arrival_time = (
+                arrival_time: int = (
                         stop_time.get("predictedDepartureTime")
                         - ACTION_DELAY[route_id]
                 )
-                delay = ACTION_DELAY[route_id]
+                delay: int = ACTION_DELAY[route_id]
         # CASE #2: Only predicted arrival time is available
         # [end stop with realtime data]
         # Use the predefined delay for LED turn off
         elif "predictedArrivalTime" in stop_time and not stop_time.get(
                 "uncertain", False
         ):
-            arrival_time = (
+            arrival_time: int = (
                     stop_time.get("predictedArrivalTime")
                     - ACTION_DELAY[route_id]
             )
-            delay = ACTION_DELAY[route_id]
+            delay: int = ACTION_DELAY[route_id]
         # CASE #3: Only predicted departure time is available
         # [start stop with realtime data]
         # Use the predefined delay for LED turn off
         elif "predictedDepartureTime" in stop_time and not stop_time.get(
                 "uncertain", False
         ):
-            arrival_time = (
+            arrival_time: int = (
                     stop_time.get("predictedDepartureTime")
                     - ACTION_DELAY[route_id]
             )
-            delay = ACTION_DELAY[route_id]
+            delay: int = ACTION_DELAY[route_id]
         # CASE #4: Both arrival and departure time available as scheduled time
         # [middle stop, no realtime data]
         elif "arrivalTime" in stop_time and "departureTime" in stop_time:
             # Arrival time is different from the departure,
             # lets use the difference between them for the LED turn off delay
             if stop_time.get("arrivalTime") != stop_time.get("departureTime"):
-                arrival_time = stop_time.get("arrivalTime")
-                delay = stop_time.get("departureTime") - stop_time.get("arrivalTime")
+                arrival_time: int = stop_time.get("arrivalTime")
+                delay: int = (stop_time.get("departureTime")
+                              - stop_time.get("arrivalTime"))
             # Arrival time is the same as the departure,
             # use predefined delay for LED turn off
             else:
-                arrival_time = stop_time.get("departureTime") - ACTION_DELAY[
+                arrival_time: int = stop_time.get("departureTime") - ACTION_DELAY[
                     route_id]
-                delay = ACTION_DELAY[route_id]
+                delay: int = ACTION_DELAY[route_id]
         # CASE #5: Only scheduled arrival time is available
         # [end stop with no realtime data]
         # Use the predefined delay for LED turn off
         elif "arrivalTime" in stop_time:
-            arrival_time = stop_time.get("arrivalTime") - ACTION_DELAY[
-                route_id]
-            delay = ACTION_DELAY[route_id]
+            arrival_time: int = stop_time.get("arrivalTime") - ACTION_DELAY[route_id]
+            delay: int = ACTION_DELAY[route_id]
         # CASE #6: Only scheduled departure time is available
         # [start stop with no realtime data]
         # Use the predefined delay for LED turn off
         elif "departureTime" in stop_time:
-            arrival_time = stop_time.get("departureTime") - ACTION_DELAY[
-                route_id]
-            delay = ACTION_DELAY[route_id]
+            arrival_time: int = stop_time.get("departureTime") - ACTION_DELAY[route_id]
+            delay: int = ACTION_DELAY[route_id]
         # CASE #7: No valid time data is available
         else:
             logger.warning(
@@ -568,8 +569,8 @@ def store_departures(json_response, reference_id: str):
                 led_control.reset_led_to_default(stops_led[stop_id])
 
         # Schedule the action 10 seconds before the departure."""
-        job_id = f"{stop_id}+{trip_id}"
-        job_time = datetime.fromtimestamp(arrival_time)
+        job_id: str = f"{stop_id}+{trip_id}"
+        job_time: datetime = datetime.fromtimestamp(arrival_time)
 
         if job_time > datetime.now():
             departure_scheduler.add_job(
@@ -625,7 +626,7 @@ def action_to_execute(
         LED off delay: {delay} sec"
     )
 
-    led_id = stops_led[stop_id]
+    led_id: int = stops_led[stop_id]
 
     # Change LED color according to the color of the route
     led_control.set_led_color(led_id, led_control.ROUTE_COLORS[route_id])
@@ -679,13 +680,12 @@ def calculate_schedule_interval(json_response, reference_id: str):
             "routeIds" in json_response["data"]["entry"]
             and len(json_response["data"]["entry"]["routeIds"]) > 0
     ):
-        route_id = json_response["data"]["entry"].get("routeIds", [])[0]
+        route_id: str = json_response["data"]["entry"].get("routeIds", [])[0]
     elif (
             "routes" in json_response["data"]["references"]
             and len(json_response["data"]["references"]["routes"]) > 0
     ):
-        route_id = list(json_response["data"]["references"]["routes"].keys())[
-            0]
+        route_id: str = list(json_response["data"]["references"]["routes"].keys())[0]
     else:
         logger.warning(
             f"No route IDs found or the list is empty when updating \
@@ -809,8 +809,8 @@ def process_alerts(json_response, reference_id):
 
         # Iterate the TransitAlertRoutes in the TransitAlert
         for route in alert_details["routes"]:
-            route_id = route.get("routeId", "")
-            effect_type = route.get("effectType", "")
+            route_id: str = route.get("routeId", "")
+            effect_type: str = route.get("effectType", "")
 
             # If the effectType is not NO_SERVICE
             # we don't process the TransitAlertRoute anymore

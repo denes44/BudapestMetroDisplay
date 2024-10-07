@@ -23,10 +23,11 @@
 import inspect
 import logging
 import threading
+from threading import Lock
 import time
 import uuid
 from math import ceil
-from typing import Optional
+from typing import Optional, Dict, Tuple, List, Any
 
 import sacn
 from sacn import sACNsender
@@ -39,7 +40,7 @@ from BudapestMetroDisplay.stops import common_stops
 logger = logging.getLogger(__name__)
 
 # The default LED color for the routes
-ROUTE_COLORS = {
+ROUTE_COLORS: dict[str, tuple[int, int, int]] = {
     "BKK_5100": (255, 255, 0),  # M1
     "BKK_5200": (255, 0, 0),  # M2
     "BKK_5300": (0, 0, 255),  # M3
@@ -52,7 +53,7 @@ ROUTE_COLORS = {
 }
 
 # The default dimmed LED color for the routes
-ROUTE_COLORS_DIM = {
+ROUTE_COLORS_DIM: dict[str, tuple[int, int, int]] = {
     route: (
         int(color[0] * settings.led.dim_ratio),
         int(color[1] * settings.led.dim_ratio),
@@ -61,7 +62,7 @@ ROUTE_COLORS_DIM = {
     for route, color in ROUTE_COLORS.items()
 }
 # Define default colors for each LED
-DEFAULT_COLORS = [
+DEFAULT_COLORS: list[tuple[int, int, int]] = [
     *([ROUTE_COLORS_DIM["BKK_H6"]] * 3),  # H6
     *([ROUTE_COLORS_DIM["BKK_H7"]] * 3),  # H7
     *([ROUTE_COLORS_DIM["BKK_5400"]] * 6),  # M4
@@ -102,19 +103,19 @@ DEFAULT_COLORS = [
 ]
 
 # Number of LEDs
-NUM_LEDS = len(DEFAULT_COLORS)
+NUM_LEDS: int = len(DEFAULT_COLORS)
 # Initialize LED states with (0, 0, 0)
-led_states = [0, 0, 0] * NUM_LEDS
+led_states: list[int] = [0, 0, 0] * NUM_LEDS
 # Lock to synchronize access to LED states (led_states)
-led_lock = threading.Lock()
+led_lock: Lock = threading.Lock()
 # Initialize a dictionary of locks for each LED index
-led_locks = {i: threading.Lock() for i in range(NUM_LEDS)}
+led_locks: dict[int, Lock] = {i: threading.Lock() for i in range(NUM_LEDS)}
 
 # sACN sender interface
 sender: Optional[sACNsender] = None
 
 
-def find_key_by_value(d: dict[str, int], target_value: int):
+def find_key_by_value(d: dict[str, int], target_value: int) -> Optional[str]:
     """
     Finds the supplied value (target_value) in the supplied dictionary(d)
 
@@ -128,7 +129,7 @@ def find_key_by_value(d: dict[str, int], target_value: int):
     return None  # Return None if the value is not found
 
 
-def find_keys_by_value(d: dict[str, int], target_value: int):
+def find_keys_by_value(d: dict[str, int], target_value: int) -> List[str]:
     """
     Finds all keys in the supplied dictionary (d)
     that match the supplied value (target_value).
@@ -190,10 +191,10 @@ def calculate_default_color(led_index: int):
         # If no, we don't have to do anything
         return
 
-    route_status = {}  # Status of each route for the specific stop/LED
+    route_status: dict[str, bool] = {}  # Status of each route for the specific stop/LED
     for route in common_stops[led_index]:
-        route_id = route["route_id"]
-        stop_ids = route["stop_ids"]
+        route_id: str = route["route_id"]
+        stop_ids: str = route["stop_ids"]
 
         # Check if all stops in the stop_ids list
         # have no service status for the current route
@@ -303,15 +304,15 @@ def reset_led_to_default(led_index: int):
     if 0 <= led_index < NUM_LEDS:
         with led_lock:
             # Get the current color
-            current_color = (
+            current_color: tuple[int, int, int] = (
                 led_states[led_index * 3],  # Red component
                 led_states[led_index * 3 + 1],  # Green component
                 led_states[led_index * 3 + 2],  # Blue component
             )
 
         # Calculate fade parameters
-        steps = int(settings.led.fade_time / 0.005)  # Number of steps
-        delay = 0.005  # Time to wait between steps
+        steps: int = int(settings.led.fade_time / 0.005)  # Number of steps
+        delay: float = 0.005  # Time to wait between steps
 
         # Start the fading effect in a separate thread
         threading.Thread(
@@ -340,7 +341,7 @@ def set_led_color(led_index: int, color: tuple[int, int, int]):
     if 0 <= led_index < NUM_LEDS:
         with led_lock:
             # Get the current color
-            current_color = (
+            current_color: tuple[int, int, int] = (
                 led_states[led_index * 3],  # Red component
                 led_states[led_index * 3 + 1],  # Green component
                 led_states[led_index * 3 + 2],  # Blue component
@@ -355,8 +356,8 @@ def set_led_color(led_index: int, color: tuple[int, int, int]):
             )
 
         # Calculate fade parameters
-        steps = int(settings.led.fade_time / 0.05)  # Number of steps
-        delay = 0.05  # Time to wait between steps
+        steps: int = int(settings.led.fade_time / 0.05)  # Number of steps
+        delay: float = 0.05  # Time to wait between steps
 
         # Start the fading effect in a separate thread
         threading.Thread(
@@ -375,7 +376,7 @@ def set_led_color(led_index: int, color: tuple[int, int, int]):
         )
 
 
-def get_led_color(led_index: int):
+def get_led_color(led_index: int) -> tuple[int, int, int]:
     """
     Retrieve the color of a specific LED as an RGB tuple.
 
@@ -438,7 +439,7 @@ def update_sacn():
             from BudapestMetroDisplay.esphome import brightness
 
             # Create a new list with modified values
-            modified_led_states = [
+            modified_led_states: list[int] = [
                 (
                     int(ceil(28 / brightness))
                     if value * brightness < 28 and value != 0
