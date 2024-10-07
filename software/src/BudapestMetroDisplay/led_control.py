@@ -418,7 +418,7 @@ def activate_sacn():
 
     sender.activate_output(settings.sacn.universe)
     sender[settings.sacn.universe].multicast = settings.sacn.multicast
-    if settings.sacn.multicast:
+    if not settings.sacn.multicast:
         sender[settings.sacn.universe].destination = settings.sacn.unicast_ip
     update_sacn()
 

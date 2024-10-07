@@ -216,6 +216,41 @@ def test_get_led_color_returns_none_for_invalid_index():
     assert led_control.get_led_color(led_control.NUM_LEDS) is None
 
 
+def test_activate_sacn():
+    # Mock the sACNsender
+    mock_sender = MagicMock()
+
+    # Patch the sACNsender with the mock
+    with patch('BudapestMetroDisplay.led_control.sacn.sACNsender',
+               return_value=mock_sender):
+        # Call the function to test
+        led_control.activate_sacn()
+
+        # Verify that the sACNsender was started
+        mock_sender.start.assert_called_once()
+        # Verify that the output was activated
+        mock_sender.activate_output.assert_called_once_with(
+            led_control.settings.sacn.universe)
+        # Verify that the multicast setting was applied
+        mock_sender.__getitem__.return_value.multicast = led_control.settings.sacn.multicast
+        if not led_control.settings.sacn.multicast:
+            # Verify that the destination was set if multicast is enabled
+            mock_sender.__getitem__.return_value.destination = led_control.settings.sacn.unicast_ip
+
+
+def test_deactivate_sacn():
+    # Mock the sender
+    mock_sender = MagicMock()
+
+    # Patch the sender with the mock
+    with patch('BudapestMetroDisplay.led_control.sender', mock_sender):
+        # Call the function to test
+        led_control.deactivate_sacn()
+
+        # Verify that the stop method was called
+        mock_sender.stop.assert_called_once()
+
+
 def test_update_sacn():
     # Mock the sACNsender and its universe
     mock_sender = MagicMock()
@@ -223,18 +258,24 @@ def test_update_sacn():
     mock_sender.__getitem__.return_value = mock_universe
 
     # Patch the sender with the mock
+    # Patch the sender with the mock
     with patch('BudapestMetroDisplay.led_control.sender', mock_sender):
-        # Set the led_states to a known value
-        led_control.led_states[:] = [10, 20, 30] * (len(led_control.led_states) // 3)
-        expected_dmx_data = tuple(led_control.led_states)
+        # Mock esphome.used as True and brightness value
+        with patch.dict('BudapestMetroDisplay.led_control.settings.esphome.__dict__',
+                        {'used': False}):
+            # Set the led_states to a known value
+            led_control.led_states[:] = [10, 20, 30] * (
+                    len(led_control.led_states) // 3)
+            expected_dmx_data = tuple(led_control.led_states)
 
-        # Call the function to test
-        led_control.update_sacn()
+            # Call the function to test
+            led_control.update_sacn()
 
-        # Verify that the dmx_data was updated correctly
-        mock_universe.dmx_data = expected_dmx_data
-        mock_sender.__getitem__.assert_called_with(led_control.settings.sacn.universe)
-        assert mock_universe.dmx_data == expected_dmx_data
+            # Verify that the dmx_data was updated correctly
+            mock_universe.dmx_data = expected_dmx_data
+            mock_sender.__getitem__.assert_called_with(
+                led_control.settings.sacn.universe)
+            assert mock_universe.dmx_data == expected_dmx_data
 
 
 def test_update_sacn_esphome(monkeypatch):
@@ -297,6 +338,12 @@ def test_calculate_default_color_led12():
     led_control.calculate_default_color(led_test)
     led_control.reset_leds_to_default()
     assert led_control.DEFAULT_COLORS[led_test] == (0, 0, 0)
+    # Clear the NO_SERVICE status for one direction of Kálvin tér M4
+    stops.stop_no_service["BKK_056227"] = False
+    led_control.calculate_default_color(led_test)
+    led_control.reset_leds_to_default()
+    assert led_control.DEFAULT_COLORS[led_test] == led_control.ROUTE_COLORS_DIM[
+        "BKK_5400"]
 
 
 def test_calculate_default_color_led17():
