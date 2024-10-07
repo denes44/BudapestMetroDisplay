@@ -26,7 +26,7 @@ import os
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
-logger = None
+logger = logging.getLogger(__name__)
 
 # Define the custom log level
 TRACE_LEVEL = 5
