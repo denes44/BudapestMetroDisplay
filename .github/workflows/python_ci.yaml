@@ -40,7 +40,8 @@ jobs:
       uses: pr-annotators/mypy-pr-annotator@v1.0.0
     - name: Run mypy
       run: |
-        mypy --install-types software/src/ 
+        pip install types-requests
+        mypy --config-file=.github/rules/mypi.ini software/src/ 
       continue-on-error: true
     - name: Run pytest
       working-directory: software
