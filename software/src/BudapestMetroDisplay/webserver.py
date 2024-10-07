@@ -195,5 +195,5 @@ def get_schedules(route_id):
 
 
 def start_webserver():
-    thread = threading.Thread(target=lambda: app.run(debug=True, use_reloader=False))
+    thread = threading.Thread(target=lambda: app.run(debug=False, use_reloader=False))
     thread.start()
