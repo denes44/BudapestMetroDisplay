@@ -28,12 +28,12 @@ import signal
 import sys
 import time
 
+from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay import bkk_opendata
 from BudapestMetroDisplay import led_control
 from BudapestMetroDisplay import log
 from BudapestMetroDisplay import webserver
 from BudapestMetroDisplay._version import __version__
-from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay.stops import stops_metro, stops_railway, alert_routes
 
 if settings.esphome.used:
