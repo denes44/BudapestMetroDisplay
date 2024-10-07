@@ -1,5 +1,5 @@
 APScheduler~=3.10.1
-requests~=2.31.0
+requests>=2.32.0
 sacn~=1.5
 configparser~=6.0.0
 SQLAlchemy~=2.0.20
