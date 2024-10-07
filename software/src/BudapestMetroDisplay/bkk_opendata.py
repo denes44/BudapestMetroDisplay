@@ -22,7 +22,7 @@
 
 from datetime import datetime, timedelta, time
 import logging
-from typing import List, Dict, Any, Union, Tuple
+from typing import List, Dict, Any, Union
 
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -210,8 +210,8 @@ def fetch_schedule_for_stops(stop_set: tuple[str, tuple[str, ...]],
         # Otherwise schedule the next update according to the configuration
         job_time = (
                 datetime.now()
-                + API_SCHEDULE_PARAMETERS[schedule_type]["nextSchedule"]
-        )  # type: ignore
+                + API_SCHEDULE_PARAMETERS[schedule_type]["nextSchedule"]  # type: ignore
+        )
 
     url: str = f"{API_BASE_URL}arrivals-and-departures-for-stop"
 
@@ -439,7 +439,7 @@ def store_departures(json_response, reference_id: str):
             "routes" in json_response["data"]["references"]
             and len(json_response["data"]["references"]["routes"]) > 0
     ):
-        route_id: str = list(json_response["data"]["references"]["routes"].keys())[
+        route_id = list(json_response["data"]["references"]["routes"].keys())[
             0]
     else:
         logger.warning(
@@ -686,7 +686,7 @@ def calculate_schedule_interval(json_response, reference_id: str):
             "routes" in json_response["data"]["references"]
             and len(json_response["data"]["references"]["routes"]) > 0
     ):
-        route_id: str = list(json_response["data"]["references"]["routes"].keys())[0]
+        route_id = list(json_response["data"]["references"]["routes"].keys())[0]
     else:
         logger.warning(
             f"No route IDs found or the list is empty when updating "
