@@ -221,8 +221,8 @@ def test_activate_sacn():
     mock_sender = MagicMock()
 
     # Patch the sACNsender with the mock
-    with patch('BudapestMetroDisplay.led_control.sacn.sACNsender',
-               return_value=mock_sender):
+    with (patch('BudapestMetroDisplay.led_control.sacn.sACNsender',
+                return_value=mock_sender)):
         # Call the function to test
         led_control.activate_sacn()
 
@@ -232,10 +232,12 @@ def test_activate_sacn():
         mock_sender.activate_output.assert_called_once_with(
             led_control.settings.sacn.universe)
         # Verify that the multicast setting was applied
-        mock_sender.__getitem__.return_value.multicast = led_control.settings.sacn.multicast
+        mock_sender.__getitem__.return_value.multicast = \
+            led_control.settings.sacn.multicast
         if not led_control.settings.sacn.multicast:
             # Verify that the destination was set if multicast is enabled
-            mock_sender.__getitem__.return_value.destination = led_control.settings.sacn.unicast_ip
+            mock_sender.__getitem__.return_value.destination = \
+                led_control.settings.sacn.unicast_ip
 
 
 def test_deactivate_sacn():
