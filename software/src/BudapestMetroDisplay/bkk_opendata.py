@@ -120,8 +120,8 @@ def create_schedule_updates(stop_sets: tuple[tuple[str, tuple[str, ...]], ...],
         return
 
     logging.info(
-        f"Starting updating the {schedule_type} schedules for stop set \
-        ({', '.join(stop_set for stop_set, _ in stop_sets)})"
+        f"Starting updating the {schedule_type} schedules for stop set "
+        f"({', '.join(stop_set for stop_set, _ in stop_sets)})"
     )
 
     for stop_set in stop_sets:
@@ -144,8 +144,8 @@ def create_schedule_updates(stop_sets: tuple[tuple[str, tuple[str, ...]], ...],
         )
 
         logger.debug(
-            f"Scheduling {schedule_type} API updates for stop set \
-            {stop_set[0]} at {str(job_time)}."
+            f"Scheduling {schedule_type} API updates for stop set "
+            f"{stop_set[0]} at {str(job_time)}."
         )
 
 
@@ -236,34 +236,35 @@ def fetch_schedule_for_stops(stop_set: tuple[str, tuple[str, ...]],
             store_departures(response.json(), stop_set[0])
 
             logger.debug(
-                f"Successfully updated {schedule_type} schedules for stop set \
-                {stop_set[0]}. Next update scheduled for {str(job_time)}"
+                f"Successfully updated {schedule_type} schedules for stop set "
+                f"{stop_set[0]}. Next update scheduled for {str(job_time)}"
             )
         else:
             # Reschedule the failed action for 1 minute later
             job_time = datetime.now() + timedelta(minutes=1)
 
             logger.error(
-                f"Failed to update {schedule_type} schedules for stop set \
-                {stop_set[0]}: {response.status_code}. Rescheduled for {str(job_time)}."
+                f"Failed to update {schedule_type} schedules for stop set "
+                f"{stop_set[0]}: {response.status_code}. "
+                f"Rescheduled for {str(job_time)}."
             )
     except requests.exceptions.ReadTimeout as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
-            f"Timeout occurred when updating {schedule_type} schedules for stop set \
-            {stop_set[0]}. Rescheduled for {str(job_time)}.")
+            f"Timeout occurred when updating {schedule_type} schedules for stop set "
+            f"{stop_set[0]}. Rescheduled for {str(job_time)}.")
         logger.warning(e)
     except requests.exceptions.ConnectionError as e:
         job_time = datetime.now() + timedelta(minutes=5)
         logger.warning(
-            f"Connection error when updating {schedule_type} schedules for stop set \
-            {stop_set[0]}. Rescheduled for {str(job_time)}.")
+            f"Connection error when updating {schedule_type} schedules for stop set "
+            f"{stop_set[0]}. Rescheduled for {str(job_time)}.")
         logger.warning(e)
     except requests.exceptions.RequestException as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
-            f"Error when updating {schedule_type} schedules for stop set {stop_set[0]}.\
-             Rescheduled for {str(job_time)}.")
+            f"Error when updating {schedule_type} schedules for stop set {stop_set[0]}."
+            f"Rescheduled for {str(job_time)}.")
         logger.warning(e)
 
     # Get schedule data for the first stop in the stop set
@@ -278,39 +279,39 @@ def fetch_schedule_for_stops(stop_set: tuple[str, tuple[str, ...]],
                 calculate_schedule_interval((response.json()), stop_set[0])
 
                 logger.debug(
-                    f"Successfully updated schedules for stop set {stop_set[0]} \
-                    for schedule interval calculation. \
-                    Next update scheduled for {str(job_time)}"
+                    f"Successfully updated schedules for stop set {stop_set[0]} "
+                    f"for schedule interval calculation. "
+                    f"Next update scheduled for {str(job_time)}"
                 )
             else:
                 # Reschedule the failed action for 1 minute later
                 job_time = datetime.now() + timedelta(minutes=1)
 
                 logger.error(
-                    f"Failed to update schedules for stop set {stop_set[0]} \
-                    for schedule interval calculation: {response.status_code}. \
-                    Rescheduled for {str(job_time)}."
+                    f"Failed to update schedules for stop set {stop_set[0]} "
+                    f"for schedule interval calculation: {response.status_code}. "
+                    f"Rescheduled for {str(job_time)}."
                 )
         except requests.exceptions.ReadTimeout as e:
             job_time = datetime.now() + timedelta(minutes=1)
             logger.warning(
-                f"Timeout occurred when updating schedules for stop set {stop_set[0]} \
-                for schedule interval calculation. \
-                Next update scheduled for {str(job_time)}")
+                f"Timeout occurred when updating schedules for stop set {stop_set[0]} "
+                f"for schedule interval calculation. "
+                f"Next update scheduled for {str(job_time)}")
             logger.warning(e)
         except requests.exceptions.ConnectionError as e:
             job_time = datetime.now() + timedelta(minutes=5)
             logger.error(
-                f"Connection error when updating schedules for stop set {stop_set[0]} \
-                for schedule interval calculation. \
-                Next update scheduled for {str(job_time)}")
+                f"Connection error when updating schedules for stop set {stop_set[0]} "
+                f"for schedule interval calculation. "
+                f"Next update scheduled for {str(job_time)}")
             logger.error(e)
         except requests.exceptions.RequestException as e:
             job_time = datetime.now() + timedelta(minutes=1)
             logger.error(
-                f"Error when updating schedules for stop set {stop_set[0]} \
-                for schedule interval calculation. \
-                Next update scheduled for {str(job_time)}")
+                f"Error when updating schedules for stop set {stop_set[0]} "
+                f"for schedule interval calculation. "
+                f"Next update scheduled for {str(job_time)}")
             logger.error(e)
 
     job_id: str = f"{stop_set[0]}_{schedule_type}"
@@ -358,34 +359,34 @@ def fetch_alerts_for_route(route_id: str):
             process_alerts(response.json(), route_id)
 
             logger.debug(
-                f"Successfully updated alerts for route {route_id}. \
-                Next update scheduled for {str(job_time)}"
+                f"Successfully updated alerts for route {route_id}. "
+                f"Next update scheduled for {str(job_time)}"
             )
         else:
             # Reschedule the failed action for 1 minute later
             job_time = datetime.now() + timedelta(minutes=1)
 
             logger.error(
-                f"Failed to update alerts for route {route_id}: {response.status_code}.\
-                 Rescheduled for {str(job_time)}."
+                f"Failed to update alerts for route {route_id}: {response.status_code}."
+                f"Rescheduled for {str(job_time)}."
             )
     except requests.exceptions.ReadTimeout as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
-            f"Timeout occurred when updating alerts for route {route_id}. \
-            Next update scheduled for {str(job_time)}")
+            f"Timeout occurred when updating alerts for route {route_id}. "
+            f"Next update scheduled for {str(job_time)}")
         logger.warning(e)
     except requests.exceptions.ConnectionError as e:
         job_time = datetime.now() + timedelta(minutes=5)
         logger.error(
-            f"Connection error when updating alerts for route {route_id}. \
-            Next update scheduled for {str(job_time)}")
+            f"Connection error when updating alerts for route {route_id}. "
+            f"Next update scheduled for {str(job_time)}")
         logger.error(e)
     except requests.exceptions.RequestException as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.error(
-            f"Error when updating alerts for route {route_id}. \
-            Next update scheduled for {str(job_time)}")
+            f"Error when updating alerts for route {route_id}. "
+            f"Next update scheduled for {str(job_time)}")
         logger.error(e)
 
     job_id: str = f"{route_id}_ALERTS"
@@ -442,8 +443,8 @@ def store_departures(json_response, reference_id: str):
             0]
     else:
         logger.warning(
-            f"No route IDs found or the list is empty when updating stop(s) \
-            {reference_id}"
+            f"No route IDs found or the list is empty when updating stop(s) "
+            f"{reference_id}"
         )
         return
 
@@ -469,8 +470,8 @@ def store_departures(json_response, reference_id: str):
         # Check if we are interested in the provided stopId
         if stop_id not in stops_led:
             logger.debug(
-                f"Got update for stop {stop_id}, route {route_id}, \
-                but we don't need that, skipping"
+                f"Got update for stop {stop_id}, route {route_id}, "
+                f"but we don't need that, skipping"
             )
             continue
 
@@ -552,8 +553,8 @@ def store_departures(json_response, reference_id: str):
         # CASE #7: No valid time data is available
         else:
             logger.warning(
-                f"No valid arrival/departure time found \
-                when updating stop {stop_id}, route {route_id}"
+                f"No valid arrival/departure time found "
+                f"when updating stop {stop_id}, route {route_id}"
             )
             continue
 
@@ -584,16 +585,16 @@ def store_departures(json_response, reference_id: str):
             )
 
             logger.trace(
-                f"Scheduled action for departure: stop_id={stop_id}, \
-                route_id={route_id}, trip_id={trip_id}, \
-                departure_time={str(datetime.fromtimestamp(arrival_time))}"
+                f"Scheduled action for departure: stop_id={stop_id}, "
+                f"route_id={route_id}, trip_id={trip_id}, "
+                f"departure_time={str(datetime.fromtimestamp(arrival_time))}"
             )
         else:
             logger.trace(
-                f"Action for departure: stop_id={stop_id}, route_id={route_id}, \
-                trip_id={trip_id}, \
-                departure_time={str(datetime.fromtimestamp(arrival_time))} \
-                was in the past, skipping"
+                f"Action for departure: stop_id={stop_id}, route_id={route_id}, "
+                f"trip_id={trip_id}, "
+                f"departure_time={str(datetime.fromtimestamp(arrival_time))} "
+                f"was in the past, skipping"
             )
 
     # Check if there is any active alerts in the response and process them
@@ -622,8 +623,8 @@ def action_to_execute(
         return
 
     logger.trace(
-        f"Action triggered for stop: {stop_id}, route: {route_id}, trip: {trip_id}, \
-        LED off delay: {delay} sec"
+        f"Action triggered for stop: {stop_id}, route: {route_id}, trip: {trip_id}, "
+        f"LED off delay: {delay} sec"
     )
 
     led_id: int = stops_led[stop_id]
@@ -663,16 +664,16 @@ def calculate_schedule_interval(json_response, reference_id: str):
             or "entry" not in json_response["data"]
     ):
         logger.error(
-            f"No valid schedule data in API response \
-            for schedule intervals for {reference_id}"
+            f"No valid schedule data in API response "
+            f"for schedule intervals for {reference_id}"
         )
         return
 
     # Check if we exceeded the query limit
     if json_response["data"].get("limitExceeded", "false") == "true":
         logger.warning(
-            f"Query limit is exceeded when updating \
-            schedule intervals for {reference_id}"
+            f"Query limit is exceeded when updating "
+            f"schedule intervals for {reference_id}"
         )
 
     # Get routeId
@@ -688,8 +689,8 @@ def calculate_schedule_interval(json_response, reference_id: str):
         route_id: str = list(json_response["data"]["references"]["routes"].keys())[0]
     else:
         logger.warning(
-            f"No route IDs found or the list is empty when updating \
-            schedule intervals for {reference_id}"
+            f"No route IDs found or the list is empty when updating "
+            f"schedule intervals for {reference_id}"
         )
         return
 
@@ -697,8 +698,8 @@ def calculate_schedule_interval(json_response, reference_id: str):
     stop_times = json_response["data"]["entry"].get("stopTimes", [])
     if len(stop_times) < 2:
         logger.debug(
-            f"Not enough schedule data found when updating \
-            schedule intervals for {reference_id}"
+            f"Not enough schedule data found when updating "
+            f"schedule intervals for {reference_id}"
         )
         return
 
@@ -732,8 +733,8 @@ def calculate_schedule_interval(json_response, reference_id: str):
         # CASE #4: No valid time data is available
         else:
             logger.warning(
-                f"No valid arrival/departure time found when updating \
-                route {route_id} during schedule interval calculation"
+                f"No valid arrival/departure time found when updating "
+                f"route {route_id} during schedule interval calculation"
             )
             continue
         i += 1
@@ -746,8 +747,8 @@ def calculate_schedule_interval(json_response, reference_id: str):
     if "time" not in data[0] or "time" not in data[1]:
         # No valid schedule data found, set the difference to -1
         logger.warning(
-            f"No valid schedule data found when updating \
-            schedule intervals for {reference_id}"
+            f"No valid schedule data found when updating "
+            f"schedule intervals for {reference_id}"
         )
         difference = -1
     else:
@@ -778,8 +779,8 @@ def calculate_schedule_interval(json_response, reference_id: str):
             ACTION_DELAY[route_id] = 45
 
     logger.debug(
-        f"Recalculated LED turn off delay for route {route_id}, \
-        schedule delay: {difference:.1f} min, new delay: {ACTION_DELAY[route_id]} sec"
+        f"Recalculated LED turn off delay for route {route_id}, "
+        f"schedule delay: {difference:.1f} min, new delay: {ACTION_DELAY[route_id]} sec"
     )
 
 
@@ -835,17 +836,17 @@ def process_alerts(json_response, reference_id):
                         # We found at least one schedule for this stop,
                         # so we'll ignore the NO_SERVICE alert
                         logger.debug(
-                            f"Found NO_SERVICE alert {alert_details['id']} \
-                            for stop {stop_id}, route {route_id}, \
-                            but there are active schedules for that stop, \
-                            so we'll ignore that"
+                            f"Found NO_SERVICE alert {alert_details['id']} "
+                            f"for stop {stop_id}, route {route_id}, "
+                            f"but there are active schedules for that stop, "
+                            f"so we'll ignore that"
                         )
                     else:
                         # No schedule found for this stop,
                         # so we'll process the NO_SERVICE alert
                         logger.debug(
-                            f"Found NO_SERVICE alert {alert_details['id']} \
-                            for stop {stop_id}, route {route_id}"
+                            f"Found NO_SERVICE alert {alert_details['id']} "
+                            f"for stop {stop_id}, route {route_id}"
                         )
                         # Set the no_service flag for this stop
                         stop_no_service[stop_id] = True

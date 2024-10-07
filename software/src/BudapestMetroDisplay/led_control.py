@@ -321,13 +321,13 @@ def reset_led_to_default(led_index: int):
         ).start()
 
         logger.trace(
-            f"LED {led_index} fading from color {str(current_color)} \
-            to default color {str(DEFAULT_COLORS[led_index])}"
+            f"LED {led_index} fading from color {str(current_color)} "
+            f"to default color {str(DEFAULT_COLORS[led_index])}"
         )
     else:
         logger.error(
-            f"Invalid LED index {led_index} when trying to reset the value, \
-            caller: {inspect.stack()[1].function}"
+            f"Invalid LED index {led_index} when trying to reset the value, "
+            f"caller: {inspect.stack()[1].function}"
         )
 
 
@@ -366,13 +366,13 @@ def set_led_color(led_index: int, color: tuple[int, int, int]):
         ).start()
 
         logger.trace(
-            f"LED {led_index} fading from color {str(current_color)} \
-            to color {str(color)}"
+            f"LED {led_index} fading from color {str(current_color)} "
+            f"to color {str(color)}"
         )
     else:
         logger.error(
-            f"Invalid LED index {led_index} when trying to change the value, \
-            caller: {inspect.stack()[1].function}"
+            f"Invalid LED index {led_index} when trying to change the value, "
+            f"caller: {inspect.stack()[1].function}"
         )
 
 
@@ -392,8 +392,8 @@ def get_led_color(led_index: int) -> tuple[int, int, int]:
             )
     else:
         logger.error(
-            f"Invalid LED index {led_index} when trying to get the value, \
-            caller: {inspect.stack()[1].function}"
+            f"Invalid LED index {led_index} when trying to get the value, "
+            f"caller: {inspect.stack()[1].function}"
         )
         return None
 
