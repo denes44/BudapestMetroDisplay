@@ -44,7 +44,7 @@ logging.getLogger("requests").setLevel(logging.INFO)
 API_BASE_URL: str = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/"
 
 # Define the API request parameters for the different schedule updates
-API_SCHEDULE_PARAMETERS: dict[str, dict[str, int | timedelta]] = {
+API_SCHEDULE_PARAMETERS: dict[str, dict[str, Any]] = {
     "REGULAR": {
         "minutesBefore": 0,
         "minutesAfter": round((settings.bkk.api_update_regular + 300) / 60),
@@ -210,7 +210,7 @@ def fetch_schedule_for_stops(stop_set: tuple[str, tuple[str, ...]],
         # Otherwise schedule the next update according to the configuration
         job_time = (
                 datetime.now()
-                + API_SCHEDULE_PARAMETERS[schedule_type]["nextSchedule"]  # type: ignore
+                + API_SCHEDULE_PARAMETERS[schedule_type]["nextSchedule"]
         )
 
     url: str = f"{API_BASE_URL}arrivals-and-departures-for-stop"
@@ -218,7 +218,7 @@ def fetch_schedule_for_stops(stop_set: tuple[str, tuple[str, ...]],
     headers: dict[str, str] = {"Accept": "application/json"}
 
     # Get schedule data for all stops in the stop set
-    params: dict[str, Union[str, int, List[str]]] = {
+    params: dict[str, str | int | List[str]] = {
         "stopId": list(stop_set[1]),
         "minutesBefore": API_SCHEDULE_PARAMETERS[schedule_type]["minutesBefore"],
         "minutesAfter": API_SCHEDULE_PARAMETERS[schedule_type]["minutesAfter"],
@@ -478,6 +478,8 @@ def store_departures(json_response, reference_id: str):
         # Get the predicted or scheduled departure and arrival times
         # CASE #1: Both arrival and departure time available as predicted
         # [middle stop with realtime data]
+        arrival_time: int
+        delay: int
         if (
                 "predictedArrivalTime" in stop_time
                 and "predictedDepartureTime" in stop_time
@@ -488,68 +490,68 @@ def store_departures(json_response, reference_id: str):
             if stop_time.get("predictedArrivalTime") != stop_time.get(
                     "predictedDepartureTime"
             ):
-                arrival_time: int = stop_time.get("predictedArrivalTime")
-                delay: int = stop_time.get(
+                arrival_time = stop_time.get("predictedArrivalTime")
+                delay = stop_time.get(
                     "predictedDepartureTime") - stop_time.get(
                     "predictedArrivalTime"
                 )
             # Arrival time is the same as the departure,
             # use predefined delay for LED turn off
             else:
-                arrival_time: int = (
+                arrival_time = (
                         stop_time.get("predictedDepartureTime")
                         - ACTION_DELAY[route_id]
                 )
-                delay: int = ACTION_DELAY[route_id]
+                delay = ACTION_DELAY[route_id]
         # CASE #2: Only predicted arrival time is available
         # [end stop with realtime data]
         # Use the predefined delay for LED turn off
         elif "predictedArrivalTime" in stop_time and not stop_time.get(
                 "uncertain", False
         ):
-            arrival_time: int = (
+            arrival_time = (
                     stop_time.get("predictedArrivalTime")
                     - ACTION_DELAY[route_id]
             )
-            delay: int = ACTION_DELAY[route_id]
+            delay = ACTION_DELAY[route_id]
         # CASE #3: Only predicted departure time is available
         # [start stop with realtime data]
         # Use the predefined delay for LED turn off
         elif "predictedDepartureTime" in stop_time and not stop_time.get(
                 "uncertain", False
         ):
-            arrival_time: int = (
+            arrival_time = (
                     stop_time.get("predictedDepartureTime")
                     - ACTION_DELAY[route_id]
             )
-            delay: int = ACTION_DELAY[route_id]
+            delay = ACTION_DELAY[route_id]
         # CASE #4: Both arrival and departure time available as scheduled time
         # [middle stop, no realtime data]
         elif "arrivalTime" in stop_time and "departureTime" in stop_time:
             # Arrival time is different from the departure,
             # lets use the difference between them for the LED turn off delay
             if stop_time.get("arrivalTime") != stop_time.get("departureTime"):
-                arrival_time: int = stop_time.get("arrivalTime")
-                delay: int = (stop_time.get("departureTime")
-                              - stop_time.get("arrivalTime"))
+                arrival_time = stop_time.get("arrivalTime")
+                delay = (stop_time.get("departureTime")
+                         - stop_time.get("arrivalTime"))
             # Arrival time is the same as the departure,
             # use predefined delay for LED turn off
             else:
-                arrival_time: int = stop_time.get("departureTime") - ACTION_DELAY[
+                arrival_time = stop_time.get("departureTime") - ACTION_DELAY[
                     route_id]
-                delay: int = ACTION_DELAY[route_id]
+                delay = ACTION_DELAY[route_id]
         # CASE #5: Only scheduled arrival time is available
         # [end stop with no realtime data]
         # Use the predefined delay for LED turn off
         elif "arrivalTime" in stop_time:
-            arrival_time: int = stop_time.get("arrivalTime") - ACTION_DELAY[route_id]
-            delay: int = ACTION_DELAY[route_id]
+            arrival_time = stop_time.get("arrivalTime") - ACTION_DELAY[route_id]
+            delay = ACTION_DELAY[route_id]
         # CASE #6: Only scheduled departure time is available
         # [start stop with no realtime data]
         # Use the predefined delay for LED turn off
         elif "departureTime" in stop_time:
-            arrival_time: int = stop_time.get("departureTime") - ACTION_DELAY[route_id]
-            delay: int = ACTION_DELAY[route_id]
+            arrival_time = stop_time.get("departureTime") - ACTION_DELAY[route_id]
+            delay = ACTION_DELAY[route_id]
         # CASE #7: No valid time data is available
         else:
             logger.warning(
@@ -677,11 +679,12 @@ def calculate_schedule_interval(json_response, reference_id: str):
         )
 
     # Get routeId
+    route_id: str
     if (
             "routeIds" in json_response["data"]["entry"]
             and len(json_response["data"]["entry"]["routeIds"]) > 0
     ):
-        route_id: str = json_response["data"]["entry"].get("routeIds", [])[0]
+        route_id = json_response["data"]["entry"].get("routeIds", [])[0]
     elif (
             "routes" in json_response["data"]["references"]
             and len(json_response["data"]["references"]["routes"]) > 0
@@ -784,7 +787,7 @@ def calculate_schedule_interval(json_response, reference_id: str):
     )
 
 
-def process_alerts(json_response, reference_id):
+def process_alerts(json_response, reference_id: str):
     # Check if JSON looks valid
     if (
             not json_response

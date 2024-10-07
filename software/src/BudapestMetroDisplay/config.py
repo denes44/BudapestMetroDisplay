@@ -133,7 +133,7 @@ class ESPHomeConfig(BaseSettings):
 class AppConfig(BaseSettings):
     led: LEDConfig = LEDConfig()
     sacn: SACNConfig = SACNConfig()
-    bkk: BKKConfig = BKKConfig()
+    bkk: BKKConfig = BKKConfig()  # type: ignore[call-arg]
     esphome: ESPHomeConfig = ESPHomeConfig()
 
     model_config = SettingsConfigDict(

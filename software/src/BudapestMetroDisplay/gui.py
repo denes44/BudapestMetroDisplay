@@ -3,6 +3,7 @@ import math
 import os
 import tkinter as tk
 from tkinter import ttk
+from typing import Optional
 
 from BudapestMetroDisplay import bkk_opendata
 
@@ -239,7 +240,7 @@ stop_names = {
     "BKK_19795280": "Örs vezér tere",
 }
 
-led_rectangles = [None] * len(led_positions)
+led_rectangles: list[Optional[int]] = [None] * len(led_positions)
 
 # Width and height of the rectangles (LEDs)
 RECT_WIDTH = 10
@@ -362,7 +363,8 @@ def create_route_buttons(my_canvas):
             my_canvas,
             text=route_id,
             bg=color_hex,
-            command=lambda rid=route_id: create_filtered_job_table(
+            command=lambda rid=route_id:  # type: ignore[misc]
+            create_filtered_job_table(
                 bkk_opendata.departure_scheduler, rid
             ),
         )

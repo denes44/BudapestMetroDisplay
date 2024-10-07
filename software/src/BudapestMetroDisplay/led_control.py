@@ -376,12 +376,13 @@ def set_led_color(led_index: int, color: tuple[int, int, int]):
         )
 
 
-def get_led_color(led_index: int) -> tuple[int, int, int]:
+def get_led_color(led_index: int) -> Optional[tuple[int, int, int]]:
     """
     Retrieve the color of a specific LED as an RGB tuple.
 
     :param led_index: The index of the LED
     :return: A tuple (red, green, blue) representing the RGB values (0-255)
+        or None if the led_index is invalid
     """
     if 0 <= led_index < NUM_LEDS:
         with led_lock:
@@ -426,7 +427,8 @@ def deactivate_sacn():
     """
     Stops the sACN sender
     """
-    sender.stop()
+    if sender is not None:
+        sender.stop()
 
 
 def update_sacn():

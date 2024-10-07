@@ -79,7 +79,7 @@ async def connect_and_subscribe():
     global client, entities
 
     client = APIClient(
-        settings.esphome.device_ip,
+        settings.esphome.device_ip.__str__(),
         6053,
         None,
         noise_psk=settings.esphome.api_key,

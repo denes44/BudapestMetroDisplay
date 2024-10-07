@@ -19,6 +19,7 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 #  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
+from typing import Any
 
 # Variable for associating the stopIds to the LEDs
 stops_led: dict[str, int] = {
@@ -355,7 +356,7 @@ alert_routes: tuple[str, ...] = (
 # Variable to store if a stop is not serviced at the moment
 stop_no_service: dict[str, bool] = {stop_id: False for stop_id in stops_led}
 
-common_stops: dict[int, tuple[dict[str, str | list[str]], ...]] = {
+common_stops: dict[int, tuple[dict[str, Any], ...]] = {
     12: (
         {
             "name": "M3",
