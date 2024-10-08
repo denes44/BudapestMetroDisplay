@@ -22,7 +22,7 @@ jobs:
       max-parallel: 3
       matrix:
         file:
-          - metro_display
+          - metro-display
         esphome-version:
           - stable
           - beta
