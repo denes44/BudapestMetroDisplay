@@ -1,0 +1,17 @@
+###################################################
+# BudapestMetroDisplay ESPHOME created by denes44 #
+# https://github.com/denes44/BudapestMetroDisplay #
+# User dashboard configuration                    #
+###################################################
+
+substitutions:
+  name: metro_display
+  friendly_name: Metro Display
+  wifi_ssid: ""
+  wifi_password: ""
+  ap_password: ""
+  ota_password: ""
+  encryption_key: ""
+  
+packages:
+  remote_package_shorthand: github://denes44/BudapestMetroDisplay/esphome/metro-display-core.yaml@main

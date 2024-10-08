@@ -1,0 +1,11 @@
+###################################################
+# BudapestMetroDisplay ESPHOME created by denes44 #
+# https://github.com/denes44/BudapestMetroDisplay # 
+# ESPHOME VERSION                                 #
+# For normal use, no changes are necessary.       #
+###################################################
+
+substitutions:
+  ##### DON'T CHANGE THIS ######
+  version: "0.1.1"
+  ##############################
