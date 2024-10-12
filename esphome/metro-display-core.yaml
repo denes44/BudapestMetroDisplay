@@ -11,7 +11,7 @@ esphome:
   friendly_name: ${friendly_name}
   project:
     name: "denes44.BudapestMetroDisplay"
-    version: 0.1.1
+    version: 0.1.2
   platformio_options:
     board_build.flash_mode: dio
   on_boot:
@@ -394,7 +394,7 @@ script:
   - id: get_latest_version
     then:
       - http_request.get:
-          url: https://raw.githubusercontent.com/denes44/test/refs/heads/dev/esphome/firmware/firmware_latest.ota.txt
+          url: https://raw.githubusercontent.com/denes44/test/refs/heads/dev/esphome/firmware/metro-display-esp32s3_latest.txt
           capture_response: true
           on_response:
             - if:
