@@ -45,3 +45,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: ESPHome Firmware ${{ steps.esphome-build.outputs.project-version }} release
+          tagging_message: esphome-${{ steps.esphome-build.outputs.project-version }}
