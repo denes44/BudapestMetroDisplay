@@ -37,6 +37,7 @@ jobs:
           cp ${{ steps.esphome-build.outputs.name }}/manifest.json esphome/firmware/manifest.json
           mv ${{ steps.esphome-build.outputs.name }}/manifest.json esphome/firmware/${{ steps.esphome-build.outputs.project-version }}/manifest.json
           rm -rf ${{ steps.esphome-build.outputs.name }}/
+          echo ${{ steps.esphome-build.outputs.project-version }} > esphome/firmware/${{ steps.esphome-build.outputs.name }}_latest.txt
       - name: Generate checksum
         run: |
           md5sum esphome/firmware/${{ steps.esphome-build.outputs.name }}.ota.bin > esphome/firmware/${{ steps.esphome-build.outputs.name }}.ota.md5
