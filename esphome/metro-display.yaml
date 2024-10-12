@@ -4,14 +4,56 @@
 # User dashboard configuration                    #
 ###################################################
 
+
+# Edit these substitutions to your liking
+
 substitutions:
-  name: metro_display
+  name: metro-display
   friendly_name: Metro Display
-  wifi_ssid: ""
-  wifi_password: ""
-  ap_password: ""
-  ota_password: ""
-  encryption_key: ""
-  
+
+
+# Include latest core package from Github
+
 packages:
   remote_package_shorthand: github://denes44/BudapestMetroDisplay/esphome/metro-display-core.yaml@main
+
+
+# Home Assistant API
+
+# Uncomment the following two line, to add an encryption key
+# to encrypt the communication with Home Assistant.
+# see: https://esphome.io/components/api.html#configuration-variables
+api:
+  # encryption:
+    # key: ""
+
+
+
+# ONLY FOR ADVANCED USERS # 
+
+wifi:
+  # Uncomment the following two lines,
+  # if you want to change the stored WiFi credentials.
+  # If you already provided these during the setup of the device,
+  # it's not necessary to provide them again.
+  
+  # ssid: 
+  # password: 
+    
+  # Uncomment the following line, to add password to the fallback hotspot
+  # (captive portal)in case wifi connection fails.
+  ap:
+    # password: 
+
+ota:
+  - id: !extend esphome_ota_component
+    # password: 
+
+
+# Remove factory sensors
+
+# You can easily remove factory sensor from your configuration without breaking
+# any future updates with !remove [config_id]
+# Example:
+# sensor:
+  # -id: !remove wifi_signal_strength

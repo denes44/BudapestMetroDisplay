@@ -4,6 +4,10 @@
 # Factory configuration                           #
 ###################################################
 
+substitutions:
+  name: metro_display
+  friendly_name: Metro Display
+  
 packages:
   # Include all of the core configuration
   core: !include metro-display-core.yaml
@@ -16,7 +20,6 @@ dashboard_import:
 
 # API is a requirement of the dashboard import.
 api:
-  id: !extend api_component
   reboot_timeout: 0s
   
 

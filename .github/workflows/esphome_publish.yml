@@ -1,0 +1,38 @@
+name: ESPHome Publish
+
+on:
+  push:
+    paths:
+      - esphome/**
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-firmware:
+    name: Build Firmware
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build Firmware
+        uses: esphome/build-action@v4.0.3
+        id: esphome-build
+        with:
+          yaml-file: esphome/metro-display.factory.yaml
+          complete-manifest: true
+      - name: Move files for versioning
+        run: |
+          cp ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.factory.bin esphome/firmware/metro-display_latest.factory.bin
+          mv ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.factory.bin esphome/firmware/metro-display_${{ steps.esphome-build.outputs.version }}.factory.bin
+          cp ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.ota.bin esphome/firmware/metro-display_latest.ota.bin
+          mv ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.ota.bin esphome/firmware/metro-display_${{ steps.esphome-build.outputs.version }}.ota.bin
+          mv ${{ steps.esphome-build.outputs.name }}/manifest.json esphome/firmware/manifest.json
+      - name: Generate checksum
+        uses: jmgilman/actions-generate-checksum@v1
+        with:
+          method: md5
+          patterns: |
+            release/*.zip
+            release/*.tar.gz
+          output: metro-display_lastest.ota.md5
