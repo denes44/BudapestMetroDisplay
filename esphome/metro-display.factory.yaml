@@ -5,7 +5,7 @@
 ###################################################
 
 substitutions:
-  name: metro_display
+  name: metro-display
   friendly_name: Metro Display
   
 packages:
