@@ -3,7 +3,9 @@ name: ESPHome Publish
 on:
   push:
     paths:
-      - esphome/**
+      - esphome/metro-display.yaml
+      - esphome/metro-display.factory.yaml
+      - esphome/metro-display-core.yaml
     branches:
       - main
   workflow_dispatch:
@@ -23,10 +25,12 @@ jobs:
           complete-manifest: true
       - name: Move files for versioning
         run: |
+          mkdir -p esphome/firmware
+          mkdir -p esphome/firmware/${{ steps.esphome-build.outputs.version }}
           cp ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.factory.bin esphome/firmware/metro-display_latest.factory.bin
-          mv ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.factory.bin esphome/firmware/metro-display_${{ steps.esphome-build.outputs.version }}.factory.bin
+          mv ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.factory.bin esphome/firmware/${{ steps.esphome-build.outputs.version }}/metro-display_${{ steps.esphome-build.outputs.version }}.factory.bin
           cp ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.ota.bin esphome/firmware/metro-display_latest.ota.bin
-          mv ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.ota.bin esphome/firmware/metro-display_${{ steps.esphome-build.outputs.version }}.ota.bin
+          mv ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.ota.bin esphome/firmware/${{ steps.esphome-build.outputs.version }}/metro-display_${{ steps.esphome-build.outputs.version }}.ota.bin
           mv ${{ steps.esphome-build.outputs.name }}/manifest.json esphome/firmware/manifest.json
       - name: Generate checksum
         uses: jmgilman/actions-generate-checksum@v1
