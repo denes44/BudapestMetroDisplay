@@ -25,16 +25,54 @@ msg_info "Updating Python3"
 $STD apt-get install -y \
   python3 \
   python3-dev \
-  python3-pip
+  python3-pip \
+  python3-venv
 rm -rf /usr/lib/python3.*/EXTERNALLY-MANAGED
 msg_ok "Updated Python3"
 
 msg_info "Installing BudapestMetroDisplay"
-
+mkdir -p /opt/BudapestMetroDisplay
+cd /opt/BudapestMetroDisplay
+python3 -m venv .venv > /dev/null 2>&1
+source .venv/bin/activate
+python3 -m pip install -q BudapestMetroDisplay > /dev/null 2>&1
+deactivate
+wget -qL https://raw.githubusercontent.com/denes44/BudapestMetroDisplay/refs/heads/main/software/src/BudapestMetroDisplay/.env.sample -O .env
+touch .env
 msg_ok "Installed BudapestMetroDisplay"
 
 msg_info "Creating Service"
+cat <<EOF >/etc/systemd/system/BudapestMetroDisplay.service
+[Unit]
+# service description
+Description=BudapestMetroDisplay
+After=network.target
 
+[Service]
+Type=simple
+
+# user and group -- to run service
+User=root
+Group=root
+
+# project working directory
+WorkingDirectory=/opt/BudapestMetroDisplay
+
+# File containing the environmental values
+EnvironmentFile=/opt/BudapestMetroDisplay/.env
+
+# Command to execute when the service is started
+ExecStart=/opt/BudapestMetroDisplay/.venv/bin/BudapestMetroDisplay
+
+# Automatically restart the service if it crashes
+Restart=always
+
+[Install]
+# Tell systemd to automatically start this service when the system boots
+# (assuming the service is enabled)
+WantedBy=multi-user.target
+EOF
+systemctl enable -q --now BudapestMetroDisplay
 msg_ok "Created Service"
 
 motd_ssh

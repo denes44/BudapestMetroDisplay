@@ -503,7 +503,7 @@ install_script() {
 
 start() {
   if command -v pveversion >/dev/null 2>&1; then
-    if ! (whiptail --backtitle "BudapestMetroDisplay Proxmox VE Helper Script" --title "${APP} LXC" --yesno "To ensure the safety of your system, please only use https://github.com/denes44/BudapestMetroDisplay/Proxmox/\n\nThis will create a New ${APP} LXC. Proceed?" 10 58); then
+    if ! (whiptail --backtitle "BudapestMetroDisplay Proxmox VE Helper Script" --title "${APP} LXC" --yesno "This will create a New ${APP} LXC. Proceed?" 10 58); then
       clear
       echo -e "⚠  User exited script \n"
       exit
@@ -640,9 +640,8 @@ EOF'
 description() {
   IP=$(pct exec "$CTID" ip a s dev eth0 | awk '/inet / {print $2}' | cut -d/ -f1)
   pct set "$CTID" -description "<div align='center'>
-  # ${APP} LXC
-
-  <a href='https://https://github.com/denes44/BudapestMetroDisplay' target='_blank' rel='noopener noreferrer'>GitHub Project Page</a>
+  ${APP} LXC
+  <a href='https://github.com/denes44/BudapestMetroDisplay' target='_blank' rel='noopener noreferrer'>GitHub Project Page</a>
   </div>"
   if [[ -f /etc/systemd/system/ping-instances.service ]]; then
     systemctl start ping-instances.service

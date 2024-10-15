@@ -4,6 +4,22 @@
 
 ### Linux
 
+You can install the application from the Python Package Index:
+[https://pypi.org/project/BudapestMetroDisplay/](https://pypi.org/project/BudapestMetroDisplay/)
+
+Just run this command after installing python and pip
+(and virtual environment if you'd like, etc.):
+
+```bash
+pip install BudapestMetroDisplay
+```
+
+The different configuration options can be set using environmental values
+according to your system.
+
+You can find the possible options and required values
+in the [Configuration options](#configuration-options) chapter.
+
 ### Proxmox
 
 You can easily run the software for this project in a Proxmox LXC.
@@ -11,20 +27,43 @@ You can easily run the software for this project in a Proxmox LXC.
 This is a basic Debian LXC with python,
 and this software automatically installated and configured.
 
+#### Install
+
 To create a new Proxmox VE BudapestMetroDisplay LXC,
 run the command below in the **Proxmox VE Shell**.
 
 ```bash
-bash -c "$(wget -qLO - https://github.com/denes44/BudapestMetroDisplay/raw/main/software/proxmox/ct/debian.sh)"
+bash -c "$(wget -qLO - https://github.com/denes44/BudapestMetroDisplay/raw/main/software/proxmox/ct/BudapestMetroDisplay.sh)"
 ```
-
-In the future you can use the `update` command inside the LXC to
-**update the application**.
 
 This script is customized from the Debian LXC install script, from
 [tteck's Proxmox helper scripts](https://github.com/tteck/Proxmox/tree/main)
 
-## Configuration
+The application is installed to the `/opt/BudapestMetroDisplay` folder.
+
+The `.venv` folder consists the Python virtual environment which will run
+the application.
+
+The `log` folder consists the log generated while running the application
+
+#### Update
+
+In the future you can use the `update` command inside the LXC to
+**update the application**.
+
+#### Configure
+
+During the creation of the LXC the install script will download the
+[sample .env file](https://github.com/denes44/BudapestMetroDisplay/blob/main/software/src/BudapestMetroDisplay/.env.sample)
+which will contains all the possible environment values
+and their default values.
+
+You need to uncomment the ones you would like to customize.
+
+You can find the possible options and required values
+in the [Configuration options](#configuration-options) chapter.
+
+## Configuration options
 
 The different configuration options can be changed by environmental values.
 
