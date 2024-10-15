@@ -21,9 +21,10 @@
 #  OTHER DEALINGS IN THE SOFTWARE.
 
 import logging
+import sys
 from typing import Optional
 
-from pydantic import Field, field_validator, IPvAnyAddress
+from pydantic import Field, field_validator, IPvAnyAddress, ValidationError
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -39,7 +40,7 @@ class LEDConfig(BaseSettings):
             (0 means totally off)",
     )
     fade_time: float = Field(
-        default=1.0,
+        default=0.5,
         ge=0,
         description="Fade time in seconds for the LED turn on and off action",
     )
@@ -131,10 +132,15 @@ class ESPHomeConfig(BaseSettings):
 
 
 class AppConfig(BaseSettings):
-    led: LEDConfig = LEDConfig()
-    sacn: SACNConfig = SACNConfig()
-    bkk: BKKConfig = BKKConfig()  # type: ignore[call-arg]
-    esphome: ESPHomeConfig = ESPHomeConfig()
+    try:
+        led: LEDConfig = LEDConfig()
+        sacn: SACNConfig = SACNConfig()
+        bkk: BKKConfig = BKKConfig()  # type: ignore[call-arg]
+        esphome: ESPHomeConfig = ESPHomeConfig()
+    except ValidationError as e:
+        logger.error("Configuration Error: Please check your environment variables")
+        logger.error(e)
+        sys.exit(1)  # Exit the application with a non-zero status code
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", frozen=True
