@@ -22,6 +22,7 @@
 
 from datetime import datetime, timedelta, time
 import logging
+from random import randint
 from typing import List, Dict, Any, Union
 
 from apscheduler.jobstores.memory import MemoryJobStore
@@ -531,26 +532,37 @@ def store_departures(json_response, reference_id: str):
             # Arrival time is different from the departure,
             # lets use the difference between them for the LED turn off delay
             if stop_time.get("arrivalTime") != stop_time.get("departureTime"):
-                arrival_time = stop_time.get("arrivalTime")
+                arrival_time = (stop_time.get("arrivalTime")
+                                + randint(-3, 3)
+                                )
                 delay = (stop_time.get("departureTime")
-                         - stop_time.get("arrivalTime"))
+                         - stop_time.get("arrivalTime")
+                         )
             # Arrival time is the same as the departure,
             # use predefined delay for LED turn off
             else:
-                arrival_time = stop_time.get("departureTime") - ACTION_DELAY[
-                    route_id]
+                arrival_time = (stop_time.get("departureTime")
+                                - ACTION_DELAY[route_id]
+                                + randint(-3, 3)
+                                )
                 delay = ACTION_DELAY[route_id]
         # CASE #5: Only scheduled arrival time is available
         # [end stop with no realtime data]
         # Use the predefined delay for LED turn off
         elif "arrivalTime" in stop_time:
-            arrival_time = stop_time.get("arrivalTime") - ACTION_DELAY[route_id]
+            arrival_time = (stop_time.get("arrivalTime")
+                            - ACTION_DELAY[route_id]
+                            + randint(-3, 3)
+                            )
             delay = ACTION_DELAY[route_id]
         # CASE #6: Only scheduled departure time is available
         # [start stop with no realtime data]
         # Use the predefined delay for LED turn off
         elif "departureTime" in stop_time:
-            arrival_time = stop_time.get("departureTime") - ACTION_DELAY[route_id]
+            arrival_time = (stop_time.get("departureTime")
+                            - ACTION_DELAY[route_id]
+                            + randint(-3, 3)
+                            )
             delay = ACTION_DELAY[route_id]
         # CASE #7: No valid time data is available
         else:
