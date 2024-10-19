@@ -1,9 +1,14 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
-
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.1] - Unreleased
+
+### Added
+
+- Modifying the schedule times +/- 3 seonds randomly to make it look better on the display
+	- Since the subway data is not realtime, a lot of schedules starts at the same time accross all stops
 
 ## [0.1.0] - 2024-10-07
 
