@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Modifying the schedule times +/- 3 seonds randomly to make it look better on the display
-	- Since the subway data is not realtime, a lot of schedules starts at the same time accross all stops
+    - Since the subway data is not realtime, a lot of schedules starts at the same time accross all stops
 
 ## [0.1.0] - 2024-10-07
 
