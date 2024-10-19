@@ -79,8 +79,9 @@ class SACNConfig(BaseSettings):
 
 
 class BKKConfig(BaseSettings):
-    api_key: str = Field(min_length=1,
-                         description="API key for the BKK OpenData portal")
+    api_key: str = Field(
+        pattern=r'^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+        description="API key for the BKK OpenData portal")
     api_update_interval: int = Field(
         default=2, gt=0, description="Delay between consecutive API calls in seconds"
     )
@@ -110,7 +111,7 @@ class ESPHomeConfig(BaseSettings):
     device_ip: Optional[IPvAnyAddress] = Field(
         default=None, description="The IP address of the ESPHome device"
     )
-    api_key: Optional[str] = Field(min_length=1, default=None,
+    api_key: Optional[str] = Field(default=None, pattern=r"^[A-Za-z0-9+/]{43}=$",
                                    description="The API key of the ESPHome device")
 
     @field_validator("device_ip")

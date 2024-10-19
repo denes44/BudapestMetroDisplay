@@ -15,7 +15,7 @@ os.environ["SACN_UNIVERSE"] = "2"
 os.environ["SACN_FPS"] = "15"
 
 # BKK Configuration
-os.environ["BKK_API_KEY"] = "test_api_key"
+os.environ["BKK_API_KEY"] = "123e4567-e89b-12d3-a456-426614174000"
 os.environ["BKK_API_UPDATE_INTERVAL"] = "6"
 os.environ["BKK_API_UPDATE_REALTIME"] = "82"
 os.environ["BKK_API_UPDATE_REGULAR"] = "3456"
@@ -43,7 +43,7 @@ def test_app_config_initializes_correctly():
     assert config.sacn.fps == 15
 
     # BKK Configuration
-    assert config.bkk.api_key == "test_api_key"
+    assert config.bkk.api_key == "123e4567-e89b-12d3-a456-426614174000"
     assert config.bkk.api_update_interval == 6
     assert config.bkk.api_update_realtime == 82
     assert config.bkk.api_update_regular == 3456
@@ -132,13 +132,19 @@ def test_bkk_config_api_key_required_empty():
         BKKConfig(api_key="")
 
 
+def test_bkk_config_api_key_required_invalid():
+    with pytest.raises(ValidationError):
+        BKKConfig(api_key="test-api-key")
+
+
 def test_bkk_config_api_key_required():
-    config = BKKConfig(api_key="sgd456-efe54g-s5f4ee")
-    assert config.api_key == "sgd456-efe54g-s5f4ee"
+    config = BKKConfig(api_key="123e4567-e89b-12d3-a456-426614174000")
+    assert config.api_key == "123e4567-e89b-12d3-a456-426614174000"
 
 
 def test_bkk_config_api_update_interval_positive():
-    config = BKKConfig(api_key="sgd456-efe54g-s5f4ee", api_update_interval=5)
+    config = BKKConfig(api_key="123e4567-e89b-12d3-a456-426614174000",
+                       api_update_interval=5)
     assert config.api_update_interval == 5
 
 
@@ -148,7 +154,8 @@ def test_bkk_config_api_update_interval_out_of_bounds():
 
 
 def test_bkk_config_api_update_realtime_positive():
-    config = BKKConfig(api_key="sgd456-efe54g-s5f4ee", api_update_realtime=5)
+    config = BKKConfig(api_key="123e4567-e89b-12d3-a456-426614174000",
+                       api_update_realtime=5)
     assert config.api_update_realtime == 5
 
 
@@ -158,7 +165,8 @@ def test_bkk_config_api_update_realtime_out_of_bounds():
 
 
 def test_bkk_config_api_update_regular_positive():
-    config = BKKConfig(api_key="sgd456-efe54g-s5f4ee", api_update_regular=5)
+    config = BKKConfig(api_key="123e4567-e89b-12d3-a456-426614174000",
+                       api_update_regular=5)
     assert config.api_update_regular == 5
 
 
@@ -168,7 +176,8 @@ def test_bkk_config_api_update_regular_out_of_bounds():
 
 
 def test_bkk_config_api_update_alerts_positive():
-    config = BKKConfig(api_key="sgd456-efe54g-s5f4ee", api_update_alerts=5)
+    config = BKKConfig(api_key="123e4567-e89b-12d3-a456-426614174000",
+                       api_update_alerts=5)
     assert config.api_update_alerts == 5
 
 
@@ -197,13 +206,18 @@ def test_esphome_config_used_empty_api_key():
         ESPHomeConfig(used=True, device_ip="192.168.1.1", api_key="")
 
 
+def test_esphome_config_used_invalid_api_key():
+    with pytest.raises(ValidationError):
+        ESPHomeConfig(used=True, device_ip="192.168.1.1", api_key="test_api_key")
+
+
 def test_esphome_config_used_ipv6():
     config = ESPHomeConfig(used=True,
                            device_ip="2001:0000:130F:0000:0000:09C0:876A:130B",
-                           api_key="test")
+                           api_key="0LTLKmoTVR0BO3xppXQkIBVb0VzDLZFqAplYnADTbOY=")
     assert config.used is True
     assert config.device_ip.__str__() == "2001:0:130f::9c0:876a:130b"
-    assert config.api_key == "test"
+    assert config.api_key == "0LTLKmoTVR0BO3xppXQkIBVb0VzDLZFqAplYnADTbOY="
 
 
 def test_esphome_config_not_used_allows_missing_ip_and_key():
