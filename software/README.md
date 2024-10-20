@@ -20,6 +20,17 @@ according to your system.
 You can find the possible options and required values
 in the [Configuration options](#configuration-options) chapter.
 
+### Home Assistant Add-on
+
+To install the software as a Home Assistant add-on, first you need to
+add this repository to the add-on store
+(not available in every installation type):
+
+[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fdenes44%2FBudapestMetroDisplay)
+
+You will be able access the configuration options at the `Options` tab
+of the addon.
+
 ### Proxmox
 
 You can easily run the software for this project in a Proxmox LXC.
@@ -78,7 +89,7 @@ This is the only required value, you need to obtain your own API key from the
 BKK_API_KEY = "your_api_key"
 ```
 
-### API update details
+#### API update details
 
 These are the configurable parameters for updating the public transport data:
 
