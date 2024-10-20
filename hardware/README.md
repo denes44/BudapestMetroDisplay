@@ -2,7 +2,7 @@
 
 ## PCB Size
 
-<img align="right" src="hardware/pcb.png" alt="Design of the PCB">
+<img align="right" src="pcb.png" alt="Design of the PCB">
 
 The size of the PCB is 210 mm x 300 mm.
 
