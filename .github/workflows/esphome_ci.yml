@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - esphome/**
+      - esphome/**/*.yaml
   push:
     paths:
-      - esphome/**
+      - esphome/**/*.yaml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
