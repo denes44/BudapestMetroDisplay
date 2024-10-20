@@ -21,6 +21,8 @@ etc.), can be found in the [software](software/README.md) folder.
 
 ## Hardware
 
+<img align="right" src="hardware/pcb.png" alt="Design of the PCB">
+
 The hardware of this project is a 210 mm x 300 mm sized bare PCB,
 designed to fit into a picture frame, especially the IKEA LOMVIKEN.
 

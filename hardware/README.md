@@ -2,6 +2,8 @@
 
 ## PCB Size
 
+<img align="right" src="hardware/pcb.png" alt="Design of the PCB">
+
 The size of the PCB is 210 mm x 300 mm.
 
 It fits perfectly in an IKEA LOMVIKEN 21x30 cm picture frame
@@ -15,6 +17,9 @@ so the components can fit: [hardware/pcb_cutout.pdf](hardware/pcb_cutout.pdf)
 
 The PCB is designed to accomodate an ESP32-S3 SuperMini controller
 as an internal controller.
+Although the PCB is made for an ESP32-S3 SuperMini controller,
+an ESP32-C3 SuperMini would fit too.
+
 The task of the internal controller is to receive sACN (E1.31) data
 from the software and display it on the LEDs.
 
