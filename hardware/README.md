@@ -10,11 +10,13 @@ It fits perfectly in an IKEA LOMVIKEN 21x30 cm picture frame
 (IKEA article number is 903.143.03).
 The edge of the PCB is designed to not interfere with the edge
 of the picture frame.
+
 There is a template available to cut out areas of the back of the picture frame,
 so the components can fit: [hardware/pcb_cutout.pdf](hardware/pcb_cutout.pdf)
 
 ## Controller
 
+<img align="left" src="esp32-s3.png" alt="Photo of the ESP32 controller">
 The PCB is designed to accomodate an ESP32-S3 SuperMini controller
 as an internal controller.
 Although the PCB is made for an ESP32-S3 SuperMini controller,
@@ -23,7 +25,7 @@ an ESP32-C3 SuperMini would fit too.
 The task of the internal controller is to receive sACN (E1.31) data
 from the software and display it on the LEDs.
 
-<img src="https://esphome.io/_static/made-for-esphome-black-on-white.png" alt="Made for ESPHome logo" width="150">
+<img src="https://esphome.io/_static/made-for-esphome-black-on-white.png" align="left" alt="Made for ESPHome logo" width="120">
 
 The default firmware is ESPHome, you can find the configuration to it in the
 [esphome](esphome/README.md) folder.
