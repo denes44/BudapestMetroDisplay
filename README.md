@@ -22,7 +22,7 @@ can be found in the **[hardware](hardware/README.md)** folder.
 ### ESPHome
 <img src="https://esphome.io/_static/made-for-esphome-black-on-white.png" align="left" alt="Made for ESPHome logo" width="200">
 
-The display uses ESPHome as it's firmware.
+The display uses an ESP32-S3 controller and ESPHome as it's firmware.
 
 More information about the ESPHome firmware can be found in the
 **[epshome](epshome/README.md)** folder.
