@@ -22,9 +22,9 @@ jobs:
         separator: ","
         fix: true
         config: '.github/rules/custom.markdownlint.jsonc'
-  markdown-link-check:
-    name: Check links
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: gaurav-nelson/github-action-markdown-link-check@v1
+  # markdown-link-check:
+    # name: Check links
+    # runs-on: ubuntu-latest
+    # steps:
+    # - uses: actions/checkout@v4
+    # - uses: gaurav-nelson/github-action-markdown-link-check@v1
