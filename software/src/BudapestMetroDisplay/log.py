@@ -20,11 +20,13 @@
 #  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
 
+from datetime import datetime
 # Define logger globally
 import logging
-import os
-from datetime import datetime
 from logging.handlers import RotatingFileHandler
+import os
+
+from BudapestMetroDisplay.main import settings
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +104,7 @@ def setup_logging(parser):
         logger.setLevel(logging.INFO)
 
     # Ensure the log directory exists
-    log_directory = "log"
+    log_directory = settings.log.path
     if not os.path.exists(log_directory):
         os.makedirs(log_directory)
 

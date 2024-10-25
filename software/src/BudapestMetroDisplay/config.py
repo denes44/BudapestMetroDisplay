@@ -21,10 +21,12 @@
 #  OTHER DEALINGS IN THE SOFTWARE.
 
 import logging
+from pathlib import Path
 import sys
 from typing import Optional
 
-from pydantic import Field, field_validator, IPvAnyAddress, ValidationError
+from pydantic import Field, field_validator, IPvAnyAddress, ValidationError, \
+    DirectoryPath
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -132,12 +134,22 @@ class ESPHomeConfig(BaseSettings):
     )
 
 
+class LogConfig(BaseSettings):
+    path: DirectoryPath = Field(default=Path("./log"),
+                                description="The directory to store log files")
+
+    model_config = SettingsConfigDict(
+        env_prefix="LOG_", frozen=True
+    )
+
+
 class AppConfig(BaseSettings):
     try:
         led: LEDConfig = LEDConfig()
         sacn: SACNConfig = SACNConfig()
         bkk: BKKConfig = BKKConfig()  # type: ignore[call-arg]
         esphome: ESPHomeConfig = ESPHomeConfig()
+        log: LogConfig = LogConfig()
     except ValidationError as e:
         logger.error("Configuration Error: Please check your environment variables")
         logger.error(e)
