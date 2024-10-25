@@ -83,6 +83,7 @@ class SACNConfig(BaseSettings):
 class BKKConfig(BaseSettings):
     api_key: str = Field(
         pattern=r'^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
+        # noqa: E501
         description="API key for the BKK OpenData portal")
     api_update_interval: int = Field(
         default=2, gt=0, description="Delay between consecutive API calls in seconds"
