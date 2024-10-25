@@ -1,5 +1,10 @@
 # BudapestMetroDisplay
 
+![Based on ESP32-S3 board](https://img.shields.io/badge/hardware-ESP32--S3-blue?logo=espressif)
+![With ESPHome as a firmare](https://img.shields.io/badge/firmware-esphome-blue?logo=esphome)
+![Software written in python](https://img.shields.io/badge/software-python-blue?logo=python)
+![Home Assistant Compatible](https://img.shields.io/badge/homassistant-compatible-blue?logo=homeassistant)
+
 LED Display for the Budapest Metro and Suburban railway network.
 
 If you are looking for the easiest way to **start using your display

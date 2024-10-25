@@ -1,5 +1,6 @@
 # BudapestMetroDisplay - Software
 
+![Latest version](https://img.shields.io/pypi/v/BudapestMetroDisplay?label=latest%20version%20(pypi)&color=orange&logo=pypi)
 ## Installation
 
 ### Linux
