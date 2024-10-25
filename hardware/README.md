@@ -1,5 +1,7 @@
 # BudapestMetroDisplay - Hardware
 
+![Latest version](https://img.shields.io/badge/latest%20version-AAB-orange)
+
 ## PCB Size
 
 <img align="right" src="pcb.png" alt="Design of the PCB">
