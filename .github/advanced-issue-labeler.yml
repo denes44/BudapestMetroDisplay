@@ -1,6 +1,5 @@
 policy:
-  - template: ['bug_report.yml', 'feature_request.yml']
-    section:
+  - section:
       - id: [issue_scope]
         label:
           - name: 'software'
