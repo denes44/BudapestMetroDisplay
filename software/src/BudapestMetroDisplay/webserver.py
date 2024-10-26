@@ -23,7 +23,7 @@
 import logging
 import threading
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template
 
 logger = logging.getLogger(__name__)
 
