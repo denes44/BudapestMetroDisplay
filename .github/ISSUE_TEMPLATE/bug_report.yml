@@ -1,6 +1,6 @@
 name: Report an issue with BudapestMetroDisplay
 description: Report an issue with BudapestMetroDisplay.
-label: triage, bug
+labels: triage, bug
 body:
   - type: markdown
     attributes:
