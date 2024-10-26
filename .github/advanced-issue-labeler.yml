@@ -1,19 +1,19 @@
 policy:
-  - template: ['bug_report.yml']
-      section:
-        - id: [issue_scope]
-          label:
-            - name: 'software'
-              keys: ['Software']
-            - name: 'esphome'
-              keys: ['ESPHome firmware / installation']
-            - name: 'hardware'
-              keys: ['Hardware']
-            - name: 'ha-addon'
-              keys: ['Home Assistant Add-on']
-            - name: 'proxmox-script'
-              keys: ['Proxmox installation script']
-            - name: 'documentation'
-              keys: ['Documentation']
-            - name: 'invalid'
-              keys: ['None']
+  - template: ['bug_report.yml', 'feature_request.yml']
+    section:
+      - id: [issue_scope]
+        label:
+          - name: 'software'
+            keys: ['Software']
+          - name: 'esphome'
+            keys: ['ESPHome firmware / installation']
+          - name: 'hardware'
+            keys: ['Hardware']
+          - name: 'ha-addon'
+            keys: ['Home Assistant Add-on']
+          - name: 'proxmox-script'
+            keys: ['Proxmox installation script']
+          - name: 'documentation'
+            keys: ['Documentation']
+          - name: 'invalid'
+            keys: ['None']
