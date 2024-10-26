@@ -1,5 +1,6 @@
 name: Report an issue with BudapestMetroDisplay
 description: Report an issue with BudapestMetroDisplay.
+label: triage, bug
 body:
   - type: markdown
     attributes:
@@ -17,6 +18,7 @@ body:
         - Hardware
         - Home Assistant Add-on
         - Proxmox installation script
+        - Documentation
   
   - type: markdown
     attributes:
