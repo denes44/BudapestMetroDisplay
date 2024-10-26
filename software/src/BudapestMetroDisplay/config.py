@@ -23,10 +23,10 @@
 import logging
 from pathlib import Path
 import sys
-from typing import Optional
+from typing import Optional, Any
 
 from pydantic import Field, field_validator, IPvAnyAddress, ValidationError, \
-    DirectoryPath
+    DirectoryPath, model_validator
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -82,8 +82,11 @@ class SACNConfig(BaseSettings):
 
 class BKKConfig(BaseSettings):
     api_key: str = Field(
-        pattern=r'^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
-        # noqa: E501
+        pattern=(
+            r'^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-'
+            r'[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-'
+            r'[a-fA-F0-9]{12}$'
+        ),
         description="API key for the BKK OpenData portal")
     api_update_interval: int = Field(
         default=2, gt=0, description="Delay between consecutive API calls in seconds"
@@ -142,6 +145,23 @@ class LogConfig(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="LOG_", frozen=True
     )
+
+    # Use `model_validator` to create the log directory if it doesn't exist
+    @model_validator(mode="before")
+    @classmethod
+    def ensure_log_directory_exists(cls, values: Any) -> Any:
+        path = values.get("path", Path("./log"))
+        path = Path(path)  # Ensure `path` is a Path object
+
+        if not path.exists():
+            try:
+                path.mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                raise ValidationError(f"Unable to create log directory at {path}: {e}")
+
+        # Update `path` back in `values`
+        values["path"] = path
+        return values
 
 
 class AppConfig(BaseSettings):
