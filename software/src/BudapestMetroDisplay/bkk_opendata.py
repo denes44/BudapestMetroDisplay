@@ -566,7 +566,7 @@ def store_departures(json_response, reference_id: str):
             delay = ACTION_DELAY[route_id]
         # CASE #7: No valid time data is available
         else:
-            logger.warning(
+            logger.debug(
                 f"No valid arrival/departure time found "
                 f"when updating stop {stop_id}, route {route_id}"
             )
@@ -748,7 +748,7 @@ def calculate_schedule_interval(json_response, reference_id: str):
             data[i]["time"] = stop_time.get("departureTime")
         # CASE #4: No valid time data is available
         else:
-            logger.warning(
+            logger.debug(
                 f"No valid arrival/departure time found when updating "
                 f"route {route_id} during schedule interval calculation"
             )
@@ -762,7 +762,7 @@ def calculate_schedule_interval(json_response, reference_id: str):
     # Check if the departure times are available for both stops
     if "time" not in data[0] or "time" not in data[1]:
         # No valid schedule data found, set the difference to -1
-        logger.warning(
+        logger.debug(
             f"No valid schedule data found when updating "
             f"schedule intervals for {reference_id}"
         )
