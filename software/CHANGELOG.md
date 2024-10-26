@@ -3,12 +3,22 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.1] - Unreleased
+## [0.2.0] - Unreleased
 
 ### Added
 
+- Added a configuration option to set the location where to save the log files
+- User friendly error message, when one of the configuration options fails the validation
+
+### Changed
+
 - Modifying the schedule times +/- 3 seonds randomly to make it look better on the display
-    - Since the subway data is not realtime, a lot of schedules starts at the same time accross all stops
+  - Since the subway data is not realtime, a lot of schedules starts at the same time accross all stops
+- Now the BKK and ESPHome API key format is validated instead of checking if they are longer then 1 character
+
+### Fixed 
+
+- Fixed unicast mode for sACN, previously the IP address was not set correctly
 
 ## [0.1.0] - 2024-10-07
 
