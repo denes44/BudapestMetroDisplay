@@ -6,11 +6,11 @@ body:
       value: |
         ## Issue type
   - type: dropdown
+    id: issue_scope
     validations:
       required: true
     attributes:
       label: What part of the project you are having problems?
-      id: issue_scope
       options:
         - Software
         - ESPHome firmware / installation
