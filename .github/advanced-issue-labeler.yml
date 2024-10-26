@@ -1,7 +1,6 @@
 policy:
   - section:
       - id: [issue_scope]
-        block-list: ['None']
         label:
           - name: 'software'
             keys: ['Software']
@@ -13,3 +12,5 @@ policy:
             keys: ['Home Assistant Add-on']
           - name: 'proxmox-script'
             keys: ['Proxmox installation script']
+          - name: 'invalid'
+            keys: ['None']
