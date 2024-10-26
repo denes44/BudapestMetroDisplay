@@ -1,8 +1,36 @@
 # BudapestMetroDisplay - Software
 
+![Latest version](https://img.shields.io/pypi/v/BudapestMetroDisplay?label=latest%20version%20(pypi)&color=orange&logo=pypi)
 ## Installation
 
 ### Linux
+
+You can install the application from the Python Package Index:
+[https://pypi.org/project/BudapestMetroDisplay/](https://pypi.org/project/BudapestMetroDisplay/)
+
+Just run this command after installing python and pip
+(and virtual environment if you'd like, etc.):
+
+```bash
+pip install BudapestMetroDisplay
+```
+
+The different configuration options can be set using environmental values
+according to your system.
+
+You can find the possible options and required values
+in the [Configuration options](#configuration-options) chapter.
+
+### Home Assistant Add-on
+
+To install the software as a Home Assistant add-on, first you need to
+add this repository to the add-on store
+(not available in every installation type):
+
+[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fdenes44%2FBudapestMetroDisplay)
+
+You will be able access the configuration options at the `Options` tab
+of the addon.
 
 ### Proxmox
 
@@ -11,20 +39,43 @@ You can easily run the software for this project in a Proxmox LXC.
 This is a basic Debian LXC with python,
 and this software automatically installated and configured.
 
+#### Install
+
 To create a new Proxmox VE BudapestMetroDisplay LXC,
 run the command below in the **Proxmox VE Shell**.
 
 ```bash
-bash -c "$(wget -qLO - https://github.com/denes44/BudapestMetroDisplay/raw/main/software/proxmox/ct/debian.sh)"
+bash -c "$(wget -qLO - https://github.com/denes44/BudapestMetroDisplay/raw/main/software/proxmox/ct/BudapestMetroDisplay.sh)"
 ```
-
-In the future you can use the `update` command inside the LXC to
-**update the application**.
 
 This script is customized from the Debian LXC install script, from
 [tteck's Proxmox helper scripts](https://github.com/tteck/Proxmox/tree/main)
 
-## Configuration
+The application is installed to the `/opt/BudapestMetroDisplay` folder.
+
+The `.venv` folder consists the Python virtual environment which will run
+the application.
+
+The `log` folder consists the log generated while running the application
+
+#### Update
+
+In the future you can use the `update` command inside the LXC to
+**update the application**.
+
+#### Configure
+
+During the creation of the LXC the install script will download the
+[sample .env file](https://github.com/denes44/BudapestMetroDisplay/blob/main/software/src/BudapestMetroDisplay/.env.sample)
+which will contains all the possible environment values
+and their default values.
+
+You need to uncomment the ones you would like to customize.
+
+You can find the possible options and required values
+in the [Configuration options](#configuration-options) chapter.
+
+## Configuration options
 
 The different configuration options can be changed by environmental values.
 
@@ -39,7 +90,7 @@ This is the only required value, you need to obtain your own API key from the
 BKK_API_KEY = "your_api_key"
 ```
 
-### API update details
+#### API update details
 
 These are the configurable parameters for updating the public transport data:
 

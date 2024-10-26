@@ -419,8 +419,13 @@ def activate_sacn():
     sender.activate_output(settings.sacn.universe)
     sender[settings.sacn.universe].multicast = settings.sacn.multicast
     if not settings.sacn.multicast:
-        sender[settings.sacn.universe].destination = settings.sacn.unicast_ip
+        sender[settings.sacn.universe].destination = settings.sacn.unicast_ip.__str__()
     update_sacn()
+    logger.info(
+        f"sACN settings: "
+        f"{'multicast' if sender[settings.sacn.universe].multicast else 'unicast'}, "
+        f"destination ip: {sender[settings.sacn.universe].destination}"
+    )
 
 
 def deactivate_sacn():

@@ -60,6 +60,12 @@ if [[ ! -d /var ]]; then msg_error "No ${APP} Installation Found!"; exit; fi
 msg_info "Updating $APP LXC"
 apt-get update &>/dev/null
 apt-get -y upgrade &>/dev/null
+
+cd /opt/BudapestMetroDisplay
+source .venv/bin/activate
+python3 -m pip install -q -U BudapestMetroDisplay  > /dev/null 2>&1
+deactivate
+
 msg_ok "Updated $APP LXC"
 exit
 }

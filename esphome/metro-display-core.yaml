@@ -1,18 +1,26 @@
-substitutions:
-  name: metro_display
-  friendly_name: Metro Display
-  
-packages:
-  wifi_api: !include common/common_wifi_api.yaml
-  common_stuff: !include common/common_stuff.yaml
+###################################################
+# BudapestMetroDisplay ESPHOME created by denes44 #
+# https://github.com/denes44/BudapestMetroDisplay #
+# Core functionately                              #
+###################################################
+
+# ESPHome & Board
 
 esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  project:
+    name: "denes44.BudapestMetroDisplay"
+    version: 0.1.2
   platformio_options:
     board_build.flash_mode: dio
   on_boot:
     priority: -100
     then:
       - script.execute: default_values
+      - text_sensor.template.publish:
+          id: fw_version_installed
+          state: !lambda 'return to_string(ESPHOME_PROJECT_VERSION);'
     
 esp32:
   board: adafruit_feather_esp32s3
@@ -20,10 +28,123 @@ esp32:
     type: esp-idf
     version: recommended
 
+logger:
+
+text_sensor:
+  - platform: template
+    name: Installed firmware version
+    id: fw_version_installed
+    entity_category: diagnostic
+    web_server_sorting_weight: 1
+    update_interval: never
+  
+  - platform: template
+    name: Latest firmware version
+    id: fw_version_latest
+    entity_category: diagnostic
+    web_server_sorting_weight: 2
+    update_interval: never
+
+interval:
+  - interval: 1d
+    then:
+      if:
+        condition:
+          wifi.connected:
+        then:
+          - script.execute: get_latest_version
+
+
+# WiFi, AP, Network, etc.
+
+wifi:
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: ${friendly_name} Fallback AP
+  
+  on_connect:
+    then:
+      - script.execute: get_latest_version
+
+captive_portal:
+
+ota:
+  - platform: esphome
+    id: esphome_ota_component
+  - platform: http_request
+    id: http_ota_component
+
+http_request:
+
+
+# Home Assistant API
+
+api:
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+
+# Built in web server
+
+web_server:
+  port: 80
+  ota: false
+  version: 3
+
+
+# Generic sensors and buttons
+
+button:
+  - platform: restart
+    name: Restart
+    id: _restart
+    entity_category: config
+    web_server_sorting_weight: 3
+    
+  - platform: safe_mode
+    name: Restart (Safe Mode)
+    id: _restart_safe
+    entity_category: config
+    web_server_sorting_weight: 4
+    
+  - platform: shutdown
+    name: Shutdown
+    id: _shutdown
+    entity_category: config
+    web_server_sorting_weight: 5
+    
+  - platform: template
+    name: OTA Update
+    id: ota_switch
+    entity_category: config 
+    web_server_sorting_weight: 2
+    on_press:
+      then:
+        - ota.http_request.flash:
+            url: https://raw.githubusercontent.com/denes44/BudapestMetroDisplay/refs/heads/main/esphome/firmware/firmware_latest.ota.bin
+            md5_url: https://raw.githubusercontent.com/denes44/BudapestMetroDisplay/refs/heads/main/esphome/firmware/firmware_latest.ota.md5
+
+sensor:
+  - platform: wifi_signal
+    name: Wifi
+    id: wifi_signal_strength
+    update_interval: 60s
+    entity_category: diagnostic
+    web_server_sorting_weight: 4
+    filters:
+    - sliding_window_moving_average:
+        window_size: 15
+        send_every: 15
+
+# Light, sensors and other stuff for the hardware    
+
 light:
   - platform: esp32_rmt_led_strip
     name: ${friendly_name}
     id: leds
+    web_server_sorting_weight: 1
     restore_mode: RESTORE_DEFAULT_OFF
     pin: GPIO07
     num_leds: 63
@@ -74,9 +195,11 @@ e131:
 
 switch:
   - platform: template
-    name: "LED Test"
+    name: LED Test
     id: led_test
     optimistic: true
+    web_server_sorting_weight: 1
+    entity_category: config
     turn_on_action:
       - light.turn_off:
           id: leds
@@ -98,6 +221,11 @@ binary_sensor:
     id: button_boot
     on_press:
       - switch.toggle: led_test
+      
+  - platform: status
+    name: Status
+    web_server_sorting_weight: 3
+    entity_category: diagnostic
 
 script:
   - id: default_values
@@ -262,3 +390,17 @@ script:
       - light.turn_on:
           id: leds
           effect: E1.31
+          
+  - id: get_latest_version
+    then:
+      - http_request.get:
+          url: https://raw.githubusercontent.com/denes44/test/refs/heads/dev/esphome/firmware/metro-display-esp32s3_latest.txt
+          capture_response: true
+          on_response:
+            - if:
+                condition:
+                    lambda: |-
+                      return response->status_code == 200;  
+                then:
+                  - lambda: |-
+                      id(fw_version_latest).publish_state(body);
