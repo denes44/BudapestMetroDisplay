@@ -1,0 +1,15 @@
+policy:
+  - section:
+      - id: [issue_scope]
+        block-list: ['None']
+        label:
+          - name: 'software'
+            keys: ['Software']
+          - name: 'esphome'
+            keys: ['ESPHome firmware / installation']
+          - name: 'hardware'
+            keys: ['Hardware']
+          - name: 'ha-addon'
+            keys: ['Home Assistant Add-on']
+          - name: 'proxmox-script'
+            keys: ['Proxmox installation script']
