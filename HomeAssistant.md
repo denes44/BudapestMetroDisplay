@@ -5,7 +5,7 @@
 If you got your display with the controller and firmware preinstalled,
 you can skip to the next step.
 
-## Connect to display to WiFi
+## Connect the display to WiFi
 
 ### Using Improv Wi-Fi
 
