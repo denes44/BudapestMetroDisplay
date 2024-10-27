@@ -1,0 +1,45 @@
+name: 'Close stale issues and PRs'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+permissions:
+  contents: write # only for delete-branch option
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          stale-issue-message: >
+            There hasn't been any activity on this issue recently.
+
+            Please make sure to update to the latest version and check if that
+            solves the issue. Let us know if that works for you by
+            adding a comment 👍
+
+            This issue has now been marked as stale and will be closed if no
+            further activity occurs. Thank you for your contributions.
+
+          stale-pr-message: >
+            There hasn't been any activity on this pull request recently. This
+            pull request has been automatically marked as stale because of that
+            and will be closed if no further activity occurs within 14 days.
+
+            If you are the author of this PR, please leave a comment if you want
+            to keep it open. Also, please rebase your PR onto the latest dev
+            branch to ensure that it's up to date with the latest changes.
+
+            Thank you for your contribution!
+          stale-issue-label: stale
+          stale-pr-label: stale
+          days-before-issue-stale: 30
+          days-before-pr-stale: 30
+          days-before-issue-close: 7
+          days-before-pr-close: 14
+          exempt-issue-labels: 'awaiting-approval,work-in-progress'
+          exempt-pr-labels: 'awaiting-approval,work-in-progress'
+          exempt-all-milestones: true
