@@ -17,6 +17,7 @@ body:
         - ESPHome firmware / installation
         - Hardware
         - Home Assistant Add-on
+        - Docker
         - Proxmox installation script
         - Documentation
   
