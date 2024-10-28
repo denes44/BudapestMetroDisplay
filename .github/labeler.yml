@@ -1,16 +1,24 @@
 # Add 'Documentation' label to any change to .md files within the entire repository 
-Documentation:
+documentation:
 - changed-files:
   - any-glob-to-any-file: '**/*.md'
   
-ESPHome:
+esphome:
 - changed-files:
   - any-glob-to-any-file: esphome/*
 
-Hardware:
+hardware:
 - changed-files:
   - any-glob-to-any-file: hardware/*
 
-Software:
+software:
 - changed-files:
   - any-glob-to-any-file: software/*
+
+ha-addon:
+- changed-files:
+  - any-glob-to-any-file: ha-addon/*
+
+proxmox-script:
+- changed-files:
+  - any-glob-to-any-file: proxmox-script/*

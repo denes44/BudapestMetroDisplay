@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-source <(curl -s https://raw.githubusercontent.com/denes44/BudapestMetroDisplay/main/software/proxmox/misc/build.func)
+source <(curl -s https://raw.githubusercontent.com/denes44/BudapestMetroDisplay/main/proxmox-script/misc/build.func)
 # Copyright (c) 2024 denes44
 # Copyright (c) 2021-2024 tteck
 # Author: denes44, tteck
 # License: MIT
-# https://github.com/denes44/BudapestMetroDisplay/raw/main/software/LICENSE
+# https://github.com/denes44/BudapestMetroDisplay/raw/main/proxmox-script/LICENSE
 # https://github.com/tteck/Proxmox/raw/main/LICENSE
 
 function header_info {
