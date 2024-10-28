@@ -78,17 +78,13 @@ async def connect_and_subscribe():
     """Connect to the ESPHome device and subscribe to state changes."""
     global client, entities
 
-    client_options = {
-        "host": settings.esphome.device_ip.__str__(),
-        "port": 6053,
-        "password": None,
-        "client_info": f"BudapestMetroDisplay {__version__}"
-    }
-
-    if settings.esphome.api_key is not None:
-        client_options["noise_psk"] = settings.esphome.api_key
-
-    client = APIClient(**client_options)
+    client = APIClient(
+        settings.esphome.device_ip.__str__(),
+        6053,
+        None,
+        noise_psk=settings.esphome.api_key,
+        client_info=f"BudapestMetroDisplay {__version__}",
+    )
 
     # Build reconnect logic
     reconnect_logic = ReconnectLogic(
