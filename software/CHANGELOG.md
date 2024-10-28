@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bumped sACN python module minimum required version to 1.10.0
 - ESPHome API key is now an optional parameter (because using the encryption is optional as well)
+- Removed unused dependencies and updated pydantic-settings, pydantic_core to the latest version
 
 ## [0.2.0] - 2024-10-26
 
