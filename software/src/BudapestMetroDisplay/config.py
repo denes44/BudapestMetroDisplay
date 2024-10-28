@@ -66,7 +66,7 @@ class SACNConfig(BaseSettings):
         lt=64000,
         description="DMX universe to send out data with the sACN protocol",
     )
-    fps: int = Field(default=60, ge=1, description="Idle update frequency")
+    fps: int = Field(default=60, ge=1, description="FPS limit")
 
     @field_validator("unicast_ip")
     def check_unicast_ip(cls, value: IPvAnyAddress,
@@ -124,13 +124,6 @@ class ESPHomeConfig(BaseSettings):
     def check_unicast_ip(cls, value, info: ValidationInfo):
         if "used" in info.data and info.data["used"] and value is None:
             raise ValueError("Device IP must be filled out when using ESPHome")
-        return value
-
-    @field_validator("api_key")
-    def check_api_key(cls, value, info: ValidationInfo):
-        if "used" in info.data and info.data["used"] and (
-                value is None or len(value) == 0):
-            raise ValueError("API key must be filled out when using ESPHome")
         return value
 
     model_config = SettingsConfigDict(
