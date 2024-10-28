@@ -210,12 +210,7 @@ def test_bkk_config_api_update_alerts_out_of_bounds():
 
 def test_esphome_config_used_requires_ip():
     with pytest.raises(ValidationError):
-        ESPHomeConfig(used=True, device_ip=None, api_key="test")
-
-
-def test_esphome_config_used_requires_key():
-    with pytest.raises(ValidationError):
-        ESPHomeConfig(used=True, device_ip="192.168.1.1", api_key=None)
+        ESPHomeConfig(used=True, device_ip=None, api_key=None)
 
 
 def test_esphome_config_used_requires_ip_and_key():

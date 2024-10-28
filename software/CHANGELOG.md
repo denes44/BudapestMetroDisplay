@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 - Bumped sACN python module minimum required version to 1.10.0
+- ESPHome API key is now an optional parameter (because using the encryption is optional as well)
 
 ## [0.2.0] - 2024-10-26
 
