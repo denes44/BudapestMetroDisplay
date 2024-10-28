@@ -2,7 +2,6 @@ APScheduler~=3.10.1
 requests>=2.32.0
 sacn~=1.10.0
 numpy~=2.1.1
-
 pydantic~=2.9.2
 pydantic-settings~=2.6.0
 aioesphomeapi~=27.0.0
