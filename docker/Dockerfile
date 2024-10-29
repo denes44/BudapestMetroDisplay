@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir BudapestMetroDisplay
 EXPOSE 5568
 
 # Setup an app user so the container doesn't run as the root user
-RUN useradd app
+RUN adduser -D app
 USER app
 
 CMD ["BudapestMetroDisplay"]
