@@ -9,8 +9,13 @@ FROM python:3.12-alpine3.20
 
 WORKDIR /usr/local/budapestmetrodisplay
 
-# Install build dependencies
-RUN apk add --no-cache gcc g++ musl-dev libc-dev
+# Install build dependencies only for i386 platform
+RUN --platform=$BUILDPLATFORM \
+    if [ "$BUILDPLATFORM" = "linux/arm/v7" ]; then \
+        apk add --no-cache cmake ninja; \
+    elif [ "$BUILDPLATFORM" = "linux/i386" ]; then \
+        apk add --no-cache gcc g++ musl-dev libc-dev cargo; \
+    fi
 
 # Install the application
 RUN pip install --no-cache-dir BudapestMetroDisplay
