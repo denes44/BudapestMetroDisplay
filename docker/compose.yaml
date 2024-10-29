@@ -1,0 +1,5 @@
+services:
+  budapestmetrodisplay:
+    image: denes44/budapestmetrodisplay
+    ports:
+      - 5568:5568
