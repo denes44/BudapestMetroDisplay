@@ -1,4 +1,7 @@
-FROM python:3.12-alpine3.20
+FROM --platform=$BUILDPLATFORM python:3.12-alpine3.20
+
+# Add build arguments for specific architectures
+ARG TARGETPLATFORM
 
 # Set one or more individual labels
 # LABEL com.example.version="0.0.1-beta"
@@ -8,6 +11,14 @@ FROM python:3.12-alpine3.20
 # LABEL com.example.version.is-production=""
 
 WORKDIR /usr/local/budapestmetrodisplay
+
+# Install build dependencies only for i386 platform
+RUN \
+    if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
+        apk add --no-cache cmake ninja; \
+    elif [ "$TARGETPLATFORM" = "linux/i386" ]; then \
+        apk add --no-cache gcc g++ musl-dev libc-dev cargo; \
+    fi
 
 # Install the application
 RUN pip install --no-cache-dir BudapestMetroDisplay
