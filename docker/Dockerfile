@@ -9,6 +9,9 @@ FROM python:3.12-alpine3.20
 
 WORKDIR /usr/local/budapestmetrodisplay
 
+# Install build dependencies
+RUN apk add --no-cache gcc musl-dev libc-dev
+
 # Install the application
 RUN pip install --no-cache-dir BudapestMetroDisplay
 
