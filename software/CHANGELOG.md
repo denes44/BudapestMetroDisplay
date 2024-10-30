@@ -3,6 +3,14 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2024-10-30
+
+## Changed
+
+- Bumped sACN python module minimum required version to 1.10.0
+- ESPHome API key is now an optional parameter (because using the encryption is optional as well)
+- Removed unused dependencies and updated pydantic-settings, pydantic_core to the latest version
+
 ## [0.2.0] - 2024-10-26
 
 ### Added
