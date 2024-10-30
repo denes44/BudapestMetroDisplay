@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - docker/**
+      - docker/Dockerfile
+      - docker/.dockerignore
 
 env:
   REGISTRY_IMAGE: denes44/budapestmetrodisplay
