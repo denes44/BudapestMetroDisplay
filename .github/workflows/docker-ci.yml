@@ -1,7 +1,10 @@
 name: Docker CI
 
 on:
+  workflow_dispatch:
   push:
+    paths:
+      - docker/**
 
 env:
   REGISTRY_IMAGE: denes44/budapestmetrodisplay
