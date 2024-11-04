@@ -60,7 +60,7 @@ jobs:
           tags: |
             type=pep440,pattern={{version}},value=${{ steps.meta.outputs.version }}
             type=pep440,pattern={{major}}.{{minor}},value=${{ steps.meta.outputs.version }}
-            type=pep440,pattern={{major}},value=${{ steps.meta.outputs.version }},enable=${{ !startsWith(${{ steps.meta.outputs.version }}, '0') }}
+            type=pep440,pattern={{major}},value=${{ steps.meta.outputs.version }},enable=${{ !startsWith( steps.meta.outputs.version, '0') }}
             type=raw,value=latest,enable={{is_default_branch}}
       
       - name: Export digest
