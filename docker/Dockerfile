@@ -3,12 +3,13 @@ FROM --platform=$BUILDPLATFORM python:3.12-alpine3.20
 # Add build arguments for specific architectures
 ARG TARGETPLATFORM
 
-# Set one or more individual labels
-# LABEL com.example.version="0.0.1-beta"
-# LABEL vendor1="ACME Incorporated"
-# LABEL vendor2=ZENITH\ Incorporated
-# LABEL com.example.release-date="2015-02-12"
-# LABEL com.example.version.is-production=""
+LABEL org.opencontainers.image.url=https://github.com/denes44/BudapestMetroDisplay
+LABEL org.opencontainers.image.documentation=https://github.com/denes44/BudapestMetroDisplay/blob/main/docker/README.md
+LABEL org.opencontainers.image.source=https://github.com/denes44/BudapestMetroDisplay/tree/main/software/src/BudapestMetroDisplay
+LABEL org.opencontainers.image.authors=denes44
+LABEL org.opencontainers.image.title=BudapestMetroDisplay
+LABEL org.opencontainers.image.description=Backgorund service for a BudapestMetroDisplay hardware LED display
+LABEL org.opencontainers.image.version=$app_version
 
 WORKDIR /usr/local/budapestmetrodisplay
 
