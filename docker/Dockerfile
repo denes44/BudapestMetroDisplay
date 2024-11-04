@@ -1,4 +1,5 @@
 FROM --platform=$BUILDPLATFORM python:3.12-alpine3.20
+ARG $app_version 0.2.1
 
 # Add build arguments for specific architectures
 ARG TARGETPLATFORM
@@ -22,7 +23,7 @@ RUN \
     fi
 
 # Install the application
-RUN pip install --no-cache-dir BudapestMetroDisplay
+RUN pip install --no-cache-dir BudapestMetroDisplay==$app_version
 
 # sACN port
 EXPOSE 5568
