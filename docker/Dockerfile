@@ -1,5 +1,5 @@
 FROM --platform=$BUILDPLATFORM python:3.12-alpine3.20
-ARG $app_version 0.2.0
+ARG $app_version 0.2.1
 
 # Add build arguments for specific architectures
 ARG TARGETPLATFORM
