@@ -36,6 +36,11 @@ jobs:
           images: ${{ env.REGISTRY_IMAGE }}
           labels: |
             org.opencontainers.image.created={{date 'YYYY-MM-DDZHH:mm:ss' }}
+          tags: |
+            type=pep440,pattern={{version}},value=${{ steps.meta.outputs.version }}
+            type=pep440,pattern={{major}}.{{minor}},value=${{ steps.meta.outputs.version }}
+            type=pep440,pattern={{major}},value=${{ steps.meta.outputs.version }},enable=${{ !startsWith( steps.meta.outputs.version, '0') }}
+            type=raw,value=latest,enable={{is_default_branch}}
       
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -56,12 +61,8 @@ jobs:
           context: "{{defaultContext}}:docker"
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
-          tags: |
-            type=pep440,pattern={{version}},value=${{ steps.meta.outputs.version }}
-            type=pep440,pattern={{major}}.{{minor}},value=${{ steps.meta.outputs.version }}
-            type=pep440,pattern={{major}},value=${{ steps.meta.outputs.version }},enable=${{ !startsWith( steps.meta.outputs.version, '0') }}
-            type=raw,value=latest,enable={{is_default_branch}}
       
       - name: Export digest
         run: |
