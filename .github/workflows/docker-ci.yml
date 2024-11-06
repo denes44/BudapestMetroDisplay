@@ -36,6 +36,8 @@ jobs:
           images: ${{ env.REGISTRY_IMAGE }}
           labels: |
             org.opencontainers.image.created={{date 'YYYY-MM-DDZHH:mm:ss' }}
+          flavor: |
+            latest=false
           tags: |
             type=pep440,pattern={{version}},value=${{ steps.meta.outputs.version }}
             type=pep440,pattern={{major}}.{{minor}},value=${{ steps.meta.outputs.version }}
