@@ -20,7 +20,7 @@ body:
         - Docker
         - Proxmox installation script
         - Documentation
-  
+
   - type: markdown
     attributes:
       value: |

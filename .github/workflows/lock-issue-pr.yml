@@ -21,7 +21,7 @@ jobs:
           pr-inactive-days: "7"
           pr-lock-reason: ""
           exclude-any-pr-labels: keep-open
-          
+
           issue-inactive-days: "30"
           issue-lock-reason: ""
           exclude-any-issue-labels: keep-open

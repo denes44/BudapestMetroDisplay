@@ -28,7 +28,7 @@ import numpy as np
 
 
 def count_jobs_by_argument(
-        scheduler: BaseScheduler, search_value: Any, arg_position: int
+    scheduler: BaseScheduler, search_value: Any, arg_position: int
 ) -> int:
     """
     Count the number of jobs in a BaseScheduler which matches the search value
@@ -47,7 +47,7 @@ def count_jobs_by_argument(
 
 
 def get_jobs_by_argument(
-        scheduler: BaseScheduler, search_value: Any, arg_position: int
+    scheduler: BaseScheduler, search_value: Any, arg_position: int
 ) -> list[Job]:
     """
     Returns the jobs from a BaseScheduler which arguments matches the search value
@@ -70,7 +70,7 @@ def get_jobs_by_argument(
 
 
 def find_soonest_job_by_argument(
-        scheduler: BaseScheduler, search_value: Any, arg_position: int
+    scheduler: BaseScheduler, search_value: Any, arg_position: int
 ) -> Optional[Job]:
     """
     Find the soonest job based on the next run time, filtered by a specific argument.
@@ -86,8 +86,7 @@ def find_soonest_job_by_argument(
         # Check if the job has the specified argument and value
         if len(job_args) > arg_position and job_args[arg_position] == search_value:
             if soonest_job is None or (
-                    job.next_run_time and
-                    job.next_run_time < soonest_job.next_run_time
+                job.next_run_time and job.next_run_time < soonest_job.next_run_time
             ):
                 soonest_job = job
 

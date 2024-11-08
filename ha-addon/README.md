@@ -52,9 +52,9 @@ You can read more information about the project at [GitHub](https://github.com/d
 
 - README of the software: [software/README.md](https://github.com/denes44/BudapestMetroDisplay/blob/main/software/README.md)
 - CHANGELOG of the software: [software/CHANGELOG.md](https://github.com/denes44/BudapestMetroDisplay/blob/main/software/CHANGELOG.md)
- 
+
 - README of the ESPHome firmware: [esphome/README.md](https://github.com/denes44/BudapestMetroDisplay/blob/main/esphome/README.md)
 - CHANGELOG of the ESPHome firmware: [esphome/CHANGELOG.md](https://github.com/denes44/BudapestMetroDisplay/blob/main/esphome/CHANGELOG.md)
- 
+
 - README of the hardware: [hardware/README.md](https://github.com/denes44/BudapestMetroDisplay/blob/main/hardware/README.md)
 - CHANGELOG of the hardware: [hardware/CHANGELOG.md](https://github.com/denes44/BudapestMetroDisplay/blob/main/hardware/CHANGELOG.md)

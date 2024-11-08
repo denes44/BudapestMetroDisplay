@@ -27,7 +27,7 @@ To install the software as a Home Assistant add-on, first you need to
 add this repository to the add-on store
 (not available in every installation type):
 
-[![Open your Home Assistant instance and show the add add-on repository dialog 
+[![Open your Home Assistant instance and show the add add-on repository dialog
 with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fdenes44%2FBudapestMetroDisplay)
 
 You will be able access the configuration options at the `Options` tab
@@ -151,7 +151,7 @@ with the default beeing `multicast`.
 Because of this the target device's IP address is not needed.
 
 If your network does not support `multicast`, you need to use `unicast`.
-In this case, setting a destination IP address is mandatory. 
+In this case, setting a destination IP address is mandatory.
 
 ```text
 SACN_MULTICAST = True # Whether to use multicast or unicast for the transmission

@@ -37,8 +37,10 @@ from BudapestMetroDisplay._version import __version__
 from BudapestMetroDisplay.stops import stops_metro, stops_railway, alert_routes
 
 if settings.esphome.used:
-    from BudapestMetroDisplay.esphome import start_background_loop, \
-        connect_and_subscribe
+    from BudapestMetroDisplay.esphome import (
+        start_background_loop,
+        connect_and_subscribe,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -80,14 +82,10 @@ def main():
         description="Run the BKK Opendata and LED Control Program."
     )
     parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug mode for verbose output."
+        "--debug", action="store_true", help="Enable debug mode for verbose output."
     )
     parser.add_argument(
-        "--trace",
-        action="store_true",
-        help="Enable trace mode for verbose output."
+        "--trace", action="store_true", help="Enable trace mode for verbose output."
     )
 
     # Set up logging with or without debug mode

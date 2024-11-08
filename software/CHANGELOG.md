@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Since the subway data is not realtime, a lot of schedules starts at the same time accross all stops
 - Now the BKK and ESPHome API key format is validated instead of checking if they are longer then 1 character
 
-### Fixed 
+### Fixed
 
 - Fixed unicast mode for sACN, previously the IP address was not set correctly
 

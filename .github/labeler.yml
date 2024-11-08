@@ -1,8 +1,8 @@
-# Add 'Documentation' label to any change to .md files within the entire repository 
+# Add 'Documentation' label to any change to .md files within the entire repository
 documentation:
 - changed-files:
   - any-glob-to-any-file: '**/*.md'
-  
+
 esphome:
 - changed-files:
   - any-glob-to-any-file: esphome/*

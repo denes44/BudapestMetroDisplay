@@ -21,7 +21,7 @@ esphome:
       - text_sensor.template.publish:
           id: fw_version_installed
           state: !lambda 'return to_string(ESPHOME_PROJECT_VERSION);'
-    
+
 esp32:
   board: adafruit_feather_esp32s3
   framework:
@@ -37,7 +37,7 @@ text_sensor:
     entity_category: diagnostic
     web_server_sorting_weight: 1
     update_interval: never
-  
+
   - platform: template
     name: Latest firmware version
     id: fw_version_latest
@@ -61,7 +61,7 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: ${friendly_name} Fallback AP
-  
+
   on_connect:
     then:
       - script.execute: get_latest_version
@@ -102,23 +102,23 @@ button:
     id: _restart
     entity_category: config
     web_server_sorting_weight: 3
-    
+
   - platform: safe_mode
     name: Restart (Safe Mode)
     id: _restart_safe
     entity_category: config
     web_server_sorting_weight: 4
-    
+
   - platform: shutdown
     name: Shutdown
     id: _shutdown
     entity_category: config
     web_server_sorting_weight: 5
-    
+
   - platform: template
     name: OTA Update
     id: ota_switch
-    entity_category: config 
+    entity_category: config
     web_server_sorting_weight: 2
     on_press:
       then:
@@ -138,7 +138,7 @@ sensor:
         window_size: 15
         send_every: 15
 
-# Light, sensors and other stuff for the hardware    
+# Light, sensors and other stuff for the hardware
 
 light:
   - platform: esp32_rmt_led_strip
@@ -221,7 +221,7 @@ binary_sensor:
     id: button_boot
     on_press:
       - switch.toggle: led_test
-      
+
   - platform: status
     name: Status
     web_server_sorting_weight: 3
@@ -390,7 +390,7 @@ script:
       - light.turn_on:
           id: leds
           effect: E1.31
-          
+
   - id: get_latest_version
     then:
       - http_request.get:
@@ -400,7 +400,7 @@ script:
             - if:
                 condition:
                     lambda: |-
-                      return response->status_code == 200;  
+                      return response->status_code == 200;
                 then:
                   - lambda: |-
                       id(fw_version_latest).publish_state(body);

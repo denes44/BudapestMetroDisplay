@@ -364,9 +364,7 @@ def create_route_buttons(my_canvas):
             text=route_id,
             bg=color_hex,
             command=lambda rid=route_id:  # type: ignore[misc]
-            create_filtered_job_table(
-                bkk_opendata.departure_scheduler, rid
-            ),
+            create_filtered_job_table(bkk_opendata.departure_scheduler, rid),
         )
         my_canvas.create_window(
             x_offset + col * 110, y_offset + row * 40, window=btn, anchor="nw"

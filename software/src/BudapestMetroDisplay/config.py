@@ -25,8 +25,14 @@ from pathlib import Path
 import sys
 from typing import Optional, Any
 
-from pydantic import Field, field_validator, IPvAnyAddress, ValidationError, \
-    DirectoryPath, model_validator
+from pydantic import (
+    Field,
+    field_validator,
+    IPvAnyAddress,
+    ValidationError,
+    DirectoryPath,
+    model_validator,
+)
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -47,9 +53,7 @@ class LEDConfig(BaseSettings):
         description="Fade time in seconds for the LED turn on and off action",
     )
 
-    model_config = SettingsConfigDict(
-        env_prefix="LED_", frozen=True
-    )
+    model_config = SettingsConfigDict(env_prefix="LED_", frozen=True)
 
 
 class SACNConfig(BaseSettings):
@@ -69,25 +73,25 @@ class SACNConfig(BaseSettings):
     fps: int = Field(default=60, ge=1, description="FPS limit")
 
     @field_validator("unicast_ip")
-    def check_unicast_ip(cls, value: IPvAnyAddress,
-                         info: ValidationInfo) -> IPvAnyAddress:
+    def check_unicast_ip(
+        cls, value: IPvAnyAddress, info: ValidationInfo
+    ) -> IPvAnyAddress:
         if "multicast" in info.data and not info.data["multicast"] and value is None:
             raise ValueError("unicast_ip must be a valid IP address when using unicast")
         return value
 
-    model_config = SettingsConfigDict(
-        env_prefix="SACN_", frozen=True
-    )
+    model_config = SettingsConfigDict(env_prefix="SACN_", frozen=True)
 
 
 class BKKConfig(BaseSettings):
     api_key: str = Field(
         pattern=(
-            r'^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-'
-            r'[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-'
-            r'[a-fA-F0-9]{12}$'
+            r"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-"
+            r"[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-"
+            r"[a-fA-F0-9]{12}$"
         ),
-        description="API key for the BKK OpenData portal")
+        description="API key for the BKK OpenData portal",
+    )
     api_update_interval: int = Field(
         default=2, gt=0, description="Delay between consecutive API calls in seconds"
     )
@@ -103,9 +107,7 @@ class BKKConfig(BaseSettings):
         description="Update frequency for alerts for non-realtime routes in seconds",
     )
 
-    model_config = SettingsConfigDict(
-        env_prefix="BKK_", frozen=True
-    )
+    model_config = SettingsConfigDict(env_prefix="BKK_", frozen=True)
 
 
 class ESPHomeConfig(BaseSettings):
@@ -117,8 +119,11 @@ class ESPHomeConfig(BaseSettings):
     device_ip: Optional[IPvAnyAddress] = Field(
         default=None, description="The IP address of the ESPHome device"
     )
-    api_key: Optional[str] = Field(default=None, pattern=r"^[A-Za-z0-9+/]{43}=$",
-                                   description="The API key of the ESPHome device")
+    api_key: Optional[str] = Field(
+        default=None,
+        pattern=r"^[A-Za-z0-9+/]{43}=$",
+        description="The API key of the ESPHome device",
+    )
 
     @field_validator("device_ip")
     def check_unicast_ip(cls, value, info: ValidationInfo):
@@ -126,18 +131,15 @@ class ESPHomeConfig(BaseSettings):
             raise ValueError("Device IP must be filled out when using ESPHome")
         return value
 
-    model_config = SettingsConfigDict(
-        env_prefix="ESPHOME_", frozen=True
-    )
+    model_config = SettingsConfigDict(env_prefix="ESPHOME_", frozen=True)
 
 
 class LogConfig(BaseSettings):
-    path: DirectoryPath = Field(default=Path("./log"),
-                                description="The directory to store log files")
-
-    model_config = SettingsConfigDict(
-        env_prefix="LOG_", frozen=True
+    path: DirectoryPath = Field(
+        default=Path("./log"), description="The directory to store log files"
     )
+
+    model_config = SettingsConfigDict(env_prefix="LOG_", frozen=True)
 
     # Use `model_validator` to create the log directory if it doesn't exist
     @model_validator(mode="before")

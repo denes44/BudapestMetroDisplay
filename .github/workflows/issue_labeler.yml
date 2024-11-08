@@ -32,7 +32,7 @@ jobs:
         with:
           issue-form: ${{ steps.issue-parser.outputs.jsonString }}
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       # - name: Set labels based on regex
         # uses: github/issue-labeler@v3.4
         # with:

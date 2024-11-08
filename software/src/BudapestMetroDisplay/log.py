@@ -21,6 +21,7 @@
 #  OTHER DEALINGS IN THE SOFTWARE.
 
 from datetime import datetime
+
 # Define logger globally
 import logging
 from logging.handlers import RotatingFileHandler

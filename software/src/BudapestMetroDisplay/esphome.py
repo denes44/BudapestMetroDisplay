@@ -110,6 +110,6 @@ def start_background_loop():
         target=esphome_background_process,
         args=(loop,),
         daemon=True,
-        name="ESPHome thread"
+        name="ESPHome thread",
     ).start()
     return loop

@@ -26,7 +26,7 @@ from BudapestMetroDisplay.aps_helpers import (
     count_jobs_by_argument,
     get_jobs_by_argument,
     find_soonest_job_by_argument,
-    calculate_average_time_between_jobs
+    calculate_average_time_between_jobs,
 )
 
 
@@ -97,9 +97,11 @@ def test_find_soonest_job_by_argument_finds_correct_job():
 def test_find_soonest_job_by_argument_no_match():
     scheduler = MockScheduler()
     scheduler.add_job(
-        MockJob(args=[1, 2, 3], next_run_time=datetime(2024, 1, 1, 12, 0)))
+        MockJob(args=[1, 2, 3], next_run_time=datetime(2024, 1, 1, 12, 0))
+    )
     scheduler.add_job(
-        MockJob(args=[4, 5, 6], next_run_time=datetime(2024, 1, 1, 10, 0)))
+        MockJob(args=[4, 5, 6], next_run_time=datetime(2024, 1, 1, 10, 0))
+    )
     result = find_soonest_job_by_argument(scheduler, 7, 1)
     assert result is None
 
