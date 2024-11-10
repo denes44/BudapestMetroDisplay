@@ -20,13 +20,15 @@
 #  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
 
+# ruff: noqa: D101, D102, D103, D107, S101, ANN204, ANN201, ANN001
+
 from datetime import datetime
 
 from BudapestMetroDisplay.aps_helpers import (
-    count_jobs_by_argument,
-    get_jobs_by_argument,
-    find_soonest_job_by_argument,
     calculate_average_time_between_jobs,
+    count_jobs_by_argument,
+    find_soonest_job_by_argument,
+    get_jobs_by_argument,
 )
 
 
@@ -47,7 +49,7 @@ class MockJob:
         self.next_run_time = next_run_time
 
 
-def test_count_jobs_by_argument_counts_correctly():
+def test_count_jobs_by_argument_counts_correctly() -> None:
     scheduler = MockScheduler()
     scheduler.add_job(MockJob(args=[1, 2, 3]))
     scheduler.add_job(MockJob(args=[1, 2, 3]))
@@ -55,14 +57,14 @@ def test_count_jobs_by_argument_counts_correctly():
     assert count_jobs_by_argument(scheduler, 2, 1) == 2
 
 
-def test_count_jobs_by_argument_no_match():
+def test_count_jobs_by_argument_no_match() -> None:
     scheduler = MockScheduler()
     scheduler.add_job(MockJob(args=[1, 2, 3]))
     scheduler.add_job(MockJob(args=[4, 5, 6]))
     assert count_jobs_by_argument(scheduler, 7, 1) == 0
 
 
-def test_get_jobs_by_argument_returns_correct_jobs():
+def test_get_jobs_by_argument_returns_correct_jobs() -> None:
     scheduler = MockScheduler()
     job1 = MockJob(args=[1, 2, 3])
     job2 = MockJob(args=[1, 2, 3])
@@ -74,7 +76,7 @@ def test_get_jobs_by_argument_returns_correct_jobs():
     assert result == [job1, job2]
 
 
-def test_get_jobs_by_argument_no_match():
+def test_get_jobs_by_argument_no_match() -> None:
     scheduler = MockScheduler()
     scheduler.add_job(MockJob(args=[1, 2, 3]))
     scheduler.add_job(MockJob(args=[4, 5, 6]))
@@ -82,7 +84,7 @@ def test_get_jobs_by_argument_no_match():
     assert result == []
 
 
-def test_find_soonest_job_by_argument_finds_correct_job():
+def test_find_soonest_job_by_argument_finds_correct_job() -> None:
     scheduler = MockScheduler()
     job1 = MockJob(args=[1, 2, 3], next_run_time=datetime(2024, 1, 1, 12, 0))
     job2 = MockJob(args=[1, 2, 3], next_run_time=datetime(2024, 1, 1, 10, 0))
@@ -94,19 +96,19 @@ def test_find_soonest_job_by_argument_finds_correct_job():
     assert result == job2
 
 
-def test_find_soonest_job_by_argument_no_match():
+def test_find_soonest_job_by_argument_no_match() -> None:
     scheduler = MockScheduler()
     scheduler.add_job(
-        MockJob(args=[1, 2, 3], next_run_time=datetime(2024, 1, 1, 12, 0))
+        MockJob(args=[1, 2, 3], next_run_time=datetime(2024, 1, 1, 12, 0)),
     )
     scheduler.add_job(
-        MockJob(args=[4, 5, 6], next_run_time=datetime(2024, 1, 1, 10, 0))
+        MockJob(args=[4, 5, 6], next_run_time=datetime(2024, 1, 1, 10, 0)),
     )
     result = find_soonest_job_by_argument(scheduler, 7, 1)
     assert result is None
 
 
-def calculate_average_time_between_jobs_calculates_correctly():
+def calculate_average_time_between_jobs_calculates_correctly() -> None:
     job1 = MockJob(next_run_time=datetime(2024, 1, 1, 10, 0))
     job2 = MockJob(next_run_time=datetime(2024, 1, 1, 11, 0))
     job3 = MockJob(next_run_time=datetime(2024, 1, 1, 12, 0))
@@ -114,7 +116,7 @@ def calculate_average_time_between_jobs_calculates_correctly():
     assert result == 3600.0
 
 
-def calculate_average_time_between_jobs_not_enough_jobs():
+def calculate_average_time_between_jobs_not_enough_jobs() -> None:
     job1 = MockJob(next_run_time=datetime(2024, 1, 1, 10, 0))
     result = calculate_average_time_between_jobs([job1])
     assert result is None

@@ -1,16 +1,39 @@
+#  MIT License
+#
+#  Copyright (c) 2024 denes44
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation
+#  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#  and/or sell copies of the Software, and to permit persons to whom
+#  the Software is furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included
+#  in all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+#  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#  OTHER DEALINGS IN THE SOFTWARE.
+
 import logging
 import math
-import os
 import tkinter as tk
+from pathlib import Path
 from tkinter import ttk
-from typing import Optional
+
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from BudapestMetroDisplay import bkk_opendata
 
 logger = logging.getLogger(__name__)
 
 
-def on_closing():
+def on_closing() -> None:
     """Handle the GUI window close event."""
     logger.info("GUI window closed, stopping application...")
     root.destroy()
@@ -27,7 +50,7 @@ canvas.pack()
 
 # Background image
 background_image_path = "../../resources/gui_bg.png"
-if os.path.exists(background_image_path):
+if Path(background_image_path).exists():
     background_image = tk.PhotoImage(file=background_image_path)
     # Set the image as the background on the canvas
     canvas.create_image(0, 0, anchor=tk.NW, image=background_image)
@@ -240,7 +263,7 @@ stop_names = {
     "BKK_19795280": "Örs vezér tere",
 }
 
-led_rectangles: list[Optional[int]] = [None] * len(led_positions)
+led_rectangles: list[int | None] = [None] * len(led_positions)
 
 # Width and height of the rectangles (LEDs)
 RECT_WIDTH = 10
@@ -248,13 +271,23 @@ RECT_HEIGHT = 10
 
 
 # Function to convert the LED's RGB state to a color string
-def rgb_to_color_string(color):
-    # Converts RGB values to hex format
+def rgb_to_color_string(color: tuple[int, int, int]) -> str:
+    """Convert RGB tuple values to hex format.
+
+    :param color: An RGB color value as a tuple
+    :return: Color value converted to hex string
+    """
     return f"#{color[0]:02x}{color[1]:02x}{color[2]:02x}"
 
 
-# Function to get rotated points of a rectangle
-def get_rotated_rectangle(x, y, width, height, rotation):
+def get_rotated_rectangle(
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    rotation: float,
+) -> list[tuple[float, float]]:
+    """Get the rotated points of a rectangle."""
     # Calculate half-width and half-height
     hw, hh = width / 2, height / 2
 
@@ -265,7 +298,7 @@ def get_rotated_rectangle(x, y, width, height, rotation):
     angle_rad = math.radians(rotation)
 
     # Apply rotation to each corner using a rotation matrix
-    rotated_corners = [
+    return [
         (
             x + (corner[0] * math.cos(angle_rad) - corner[1] * math.sin(angle_rad)),
             y + (corner[0] * math.sin(angle_rad) + corner[1] * math.cos(angle_rad)),
@@ -273,16 +306,18 @@ def get_rotated_rectangle(x, y, width, height, rotation):
         for corner in corners
     ]
 
-    return rotated_corners
-
 
 # Function to draw the LEDs as circles
-def draw_leds():
+def draw_leds() -> None:
+    """Draw the LEDs on the canvas."""
     from BudapestMetroDisplay.led_control import get_led_color
 
     for i, (x, y, rotation) in enumerate(led_positions):
         # Get the color from led_states (convert from flat list to RGB)
-        color = rgb_to_color_string(get_led_color(i))
+        led_color = get_led_color(i)
+        color = rgb_to_color_string(
+            led_color if not None else (0, 0, 0),  # type: ignore[arg-type]
+        )
 
         # Get the rotated rectangle coordinates
         points = get_rotated_rectangle(x, y, RECT_WIDTH, RECT_HEIGHT, rotation)
@@ -292,17 +327,24 @@ def draw_leds():
     logging.debug("Drawing of the LED on the GUI is finished")
 
 
-def change_gui_led_color(led_index, color):
-    canvas.itemconfig(led_rectangles[led_index], fill=rgb_to_color_string(color))
+def change_gui_led_color(led_index: int, color: tuple[int, int, int]) -> None:
+    """Change the color of a LED on the canvas."""
+    led_rectangle = led_rectangles[led_index]
+    if led_rectangle is not None:
+        canvas.itemconfig(led_rectangle, fill=rgb_to_color_string(color))
 
 
-def filter_jobs_by_route(job_table, scheduler, route_id):
+def filter_jobs_by_route(
+    job_table: ttk.Treeview,
+    scheduler: BackgroundScheduler,
+    route_id: str,
+) -> None:
     """Filter and update job table with jobs for the given route_id."""
     for row in job_table.get_children():
         job_table.delete(row)
 
     for job in scheduler.get_jobs():
-        args = job.args if job.args else (None, None, None, None, None)
+        args = job.args or (None, None, None, None, None)
         if args[1] == route_id:  # Check if the route_id matches
             job_table.insert(
                 "",
@@ -312,8 +354,7 @@ def filter_jobs_by_route(job_table, scheduler, route_id):
                     job.name,
                     job.next_run_time,
                     job.trigger,
-                    # args[0],
-                    stop_names[args[0]],
+                    stop_names[str(args[0])],
                     args[1],
                     args[2],
                     args[3],
@@ -322,7 +363,7 @@ def filter_jobs_by_route(job_table, scheduler, route_id):
             )
 
 
-def create_filtered_job_table(scheduler, route_id):
+def create_filtered_job_table(scheduler: BackgroundScheduler, route_id: str) -> None:
     """Create a job schedule window filtered by route_id."""
     job_window = tk.Toplevel(root)
     job_window.title(f"Job Schedule for {route_id}")
@@ -348,7 +389,7 @@ def create_filtered_job_table(scheduler, route_id):
     filter_jobs_by_route(job_table, scheduler, route_id)
 
 
-def create_route_buttons(my_canvas):
+def create_route_buttons(my_canvas: tk.Canvas) -> None:
     """Create buttons for each route_id in ROUTE_COLORS."""
     from BudapestMetroDisplay.led_control import ROUTE_COLORS
 
@@ -367,7 +408,10 @@ def create_route_buttons(my_canvas):
             create_filtered_job_table(bkk_opendata.departure_scheduler, rid),
         )
         my_canvas.create_window(
-            x_offset + col * 110, y_offset + row * 40, window=btn, anchor="nw"
+            x_offset + col * 110,
+            y_offset + row * 40,
+            window=btn,
+            anchor="nw",
         )  # Positioning buttons
         col += 1
         if col == 1:  # Adjust for buttons per row
@@ -375,7 +419,8 @@ def create_route_buttons(my_canvas):
             row += 1
 
 
-def start_gui():
+def start_gui() -> None:
+    """Open the GUI window and draw the elements."""
     draw_leds()
     create_route_buttons(canvas)
     root.mainloop()

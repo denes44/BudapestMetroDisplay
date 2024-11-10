@@ -22,24 +22,21 @@
 
 import argparse
 import asyncio
-from asyncio import AbstractEventLoop
 import logging
 import signal
 import sys
 import time
+from asyncio import AbstractEventLoop
 
-from BudapestMetroDisplay.config import settings
-from BudapestMetroDisplay import bkk_opendata
-from BudapestMetroDisplay import led_control
-from BudapestMetroDisplay import log
-from BudapestMetroDisplay import webserver
+from BudapestMetroDisplay import bkk_opendata, led_control, log, webserver
 from BudapestMetroDisplay._version import __version__
-from BudapestMetroDisplay.stops import stops_metro, stops_railway, alert_routes
+from BudapestMetroDisplay.config import settings
+from BudapestMetroDisplay.stops import alert_routes, stops_metro, stops_railway
 
 if settings.esphome.used:
     from BudapestMetroDisplay.esphome import (
-        start_background_loop,
         connect_and_subscribe,
+        start_background_loop,
     )
 
 logger = logging.getLogger(__name__)
@@ -48,7 +45,7 @@ parser = None
 loop: AbstractEventLoop
 
 
-def handle_exit_signal(signum, frame):
+def handle_exit_signal(_signum, _frame) -> None:  # noqa: ANN001
     """Handle signals for a clean exit."""
     logger.info("Signal received, stopping threads...")
     bkk_opendata.departure_scheduler.shutdown()
@@ -63,14 +60,14 @@ def handle_exit_signal(signum, frame):
         loop.stop()
         logger.debug("ESPHome update thread shut down")
     logger.info("Cleanup complete. Exiting...")
-    exit(0)
+    sys.exit(0)
 
 
 # Set the global exception hook
 sys.excepthook = log.log_exception
 
 
-def main():
+def main() -> None:  # noqa: D103
     global parser, loop
 
     if settings.esphome.used:
@@ -79,13 +76,17 @@ def main():
 
     # Set up argument parser
     parser = argparse.ArgumentParser(
-        description="Run the BKK Opendata and LED Control Program."
+        description="Run the BKK Opendata and LED Control Program.",
     )
     parser.add_argument(
-        "--debug", action="store_true", help="Enable debug mode for verbose output."
+        "--debug",
+        action="store_true",
+        help="Enable debug mode for verbose output.",
     )
     parser.add_argument(
-        "--trace", action="store_true", help="Enable trace mode for verbose output."
+        "--trace",
+        action="store_true",
+        help="Enable trace mode for verbose output.",
     )
 
     # Set up logging with or without debug mode

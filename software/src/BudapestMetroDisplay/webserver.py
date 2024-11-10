@@ -173,7 +173,12 @@ stop_names = {
 
 @app.route("/schedules", defaults={"route_id": None}, methods=["GET"])
 @app.route("/schedules/<route_id>", methods=["GET"])
-def get_schedules(route_id):
+def get_schedules(route_id: str | None) -> str:
+    """Return HTML page with the filtered schedules.
+
+    :param route_id: Specify a route_id to filter the jobs. Use None the return
+        all jobs.
+    """
     from BudapestMetroDisplay.bkk_opendata import departure_scheduler
     from BudapestMetroDisplay.led_control import ROUTE_COLORS
 
@@ -181,6 +186,8 @@ def get_schedules(route_id):
     job_list = []
     for job in jobs:
         if route_id is None or job.args[1] == route_id:
+            # Add the job to the list if route_id wasn't specified,
+            # or if it matches the route_id of the job
             job_info = {
                 "id": job.id,
                 "stop_name": stop_names.get(job.args[0], "Unknown"),
@@ -193,7 +200,8 @@ def get_schedules(route_id):
     return render_template("schedules.html", jobs=job_list, route_colors=ROUTE_COLORS)
 
 
-def start_webserver():
+def start_webserver() -> None:
+    """Start the webserver in a separate thread."""
     thread = threading.Thread(
         target=lambda: app.run(debug=False, use_reloader=False),
         daemon=True,
