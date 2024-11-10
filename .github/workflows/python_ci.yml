@@ -30,7 +30,7 @@ jobs:
     - name: Lint with Ruff
       working-directory: software
       run: |
-        ruff check --output-format=github software/
+        ruff check --output-format=github .
     - name: Add mypy annotator
       uses: pr-annotators/mypy-pr-annotator@v1.0.0
     - name: Run mypy
