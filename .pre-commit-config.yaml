@@ -1,0 +1,37 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: check-yaml
+    exclude: ^esphome/.*\.yaml$
+  - id: check-toml
+  - id: check-json
+    exclude: ^esphome/firmware/.*\.json$
+  - id: check-ast
+    files: ^software/.*
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+  - id: check-docstring-first
+  - id: mixed-line-ending
+  - id: requirements-txt-fixer
+  - id: pretty-format-json
+    args: [--autofix]
+    exclude: ^esphome/firmware/.*\.json$
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.7.3
+  hooks:
+    # Run the linter.
+    - id: ruff
+      args: [ --fix, --preview]
+      files: ^software/.*
+      pass_filenames: false
+    # Run the formatter.
+    - id: ruff-format
+      files: ^software/.*
+      args: [ --preview ]
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.13.0
+  hooks:
+  - id: mypy
+    additional_dependencies: ['types-requests']
+    files: ^software/.*
