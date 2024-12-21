@@ -14,7 +14,7 @@ The edge of the PCB is designed to not interfere with the edge
 of the picture frame.
 
 There is a template available to cut out areas of the back of the picture frame,
-so the components can fit: [hardware/pcb_cutout.pdf](hardware/pcb_cutout.pdf)
+so the components can fit: [pcb_cutout.pdf](pcb_cutout.pdf)
 
 ## Controller
 
