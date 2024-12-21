@@ -14,7 +14,7 @@ maintainers = [
 ]
 #description = "Backgorund service for a BudapestMetroDisplay hardware LED display"
 description = "Backgorund service"
-readme = "README_test.md"
+readme = "README.md"
 license = { file = "LICENSE" }
 classifiers = [
     "Development Status :: 3 - Alpha",
