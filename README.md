@@ -30,7 +30,7 @@ can be found in the **[hardware](hardware/README.md)** folder.
 The display uses an ESP32-S3 controller and ESPHome as it's firmware.
 
 More information about the ESPHome firmware can be found in the
-**[epshome](epshome/README.md)** folder.
+**[esphome](esphome/README.md)** folder.
 
 ## Software
 

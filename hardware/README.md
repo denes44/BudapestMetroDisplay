@@ -30,7 +30,7 @@ from the software and display it on the LEDs.
 <img src="https://esphome.io/_static/made-for-esphome-black-on-white.png" align="left" alt="Made for ESPHome logo" width="150">
 
 The default firmware is ESPHome, you can find the configuration to it in the
-[esphome](esphome/README.md) folder.
+[esphome](../esphome/README.md) folder.
 
 The control software has an extra feature, it can take account the
 global brightness that is set in ESPHome, so the LEDs won't go dark below 11%
