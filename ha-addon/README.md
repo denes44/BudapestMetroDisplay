@@ -15,8 +15,8 @@
 ![Uses alpinelinux 3.20](https://img.shields.io/badge/alpine-3.20-blue?logo=alpinelinux)
 ![Uses python 3.12](https://img.shields.io/badge/python-3.12-blue?logo=python)
 
-![HA Addon version](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdenes44%2FBudapestMetroDisplay%2Frefs%2Fheads%2Fmain%2Fsoftware%2Fha_addon%2Fconfig.yaml&query=%24.version&logo=homeassistant&label=HA%20Addon%20version&color=orange)
-![BudapestMetroDisplay version](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdenes44%2FBudapestMetroDisplay%2Frefs%2Fheads%2Fmain%2Fsoftware%2Fha_addon%2Fbuild.yaml&query=%24.args.APP_VERSION&label=BudapestMetroDisplay%20version&color=orange)
+![HA Addon version](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdenes44%2FBudapestMetroDisplay%2Frefs%2Fheads%2Fmain%2Fha-addon%2Fconfig.yaml&query=%24.version&logo=homeassistant&label=HA%20Addon%20version&color=orange)
+![BudapestMetroDisplay version](https://img.shields.io/badge/dynamic/yaml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdenes44%2FBudapestMetroDisplay%2Frefs%2Fheads%2Fmain%2Fha-addon%2Fbuild.yaml&query=%24.args.APP_VERSION&label=BudapestMetroDisplay%20version&color=orange)
 
 
 This is a control software to use with the BudapestMetroDisplay
@@ -52,9 +52,9 @@ You can read more information about the project at [GitHub](https://github.com/d
 
 - README of the software: [software/README.md](https://github.com/denes44/BudapestMetroDisplay/blob/main/software/README.md)
 - CHANGELOG of the software: [software/CHANGELOG.md](https://github.com/denes44/BudapestMetroDisplay/blob/main/software/CHANGELOG.md)
- 
+
 - README of the ESPHome firmware: [esphome/README.md](https://github.com/denes44/BudapestMetroDisplay/blob/main/esphome/README.md)
 - CHANGELOG of the ESPHome firmware: [esphome/CHANGELOG.md](https://github.com/denes44/BudapestMetroDisplay/blob/main/esphome/CHANGELOG.md)
- 
+
 - README of the hardware: [hardware/README.md](https://github.com/denes44/BudapestMetroDisplay/blob/main/hardware/README.md)
 - CHANGELOG of the hardware: [hardware/CHANGELOG.md](https://github.com/denes44/BudapestMetroDisplay/blob/main/hardware/CHANGELOG.md)
