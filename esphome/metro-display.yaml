@@ -17,7 +17,7 @@ substitutions:
 packages:
   remote_package_files:
     url: https://github.com/denes44/BudapestMetroDisplay
-    files: [esphome/metro-display-core.yaml, metro-display-update_ha.yaml]
+    files: [esphome/metro-display-core.yaml, esphome/metro-display-update_ha.yaml]
     ref: main
     refresh: 6hours
 
