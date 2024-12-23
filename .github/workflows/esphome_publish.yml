@@ -3,7 +3,9 @@ name: ESPHome Publish
 on:
   push:
     paths:
-      - esphome/**
+      - esphome/metro-display.yaml
+      - esphome/metro-display.factory.yaml
+      - esphome/metro-display-core.yaml
     branches:
       - main
   workflow_dispatch:
@@ -12,6 +14,8 @@ jobs:
   build-firmware:
     name: Build Firmware
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,18 +25,20 @@ jobs:
         with:
           yaml-file: esphome/metro-display.factory.yaml
           complete-manifest: true
+          cache: true
       - name: Move files for versioning
         run: |
-          cp ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.factory.bin esphome/firmware/metro-display_latest.factory.bin
-          mv ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.factory.bin esphome/firmware/metro-display_${{ steps.esphome-build.outputs.version }}.factory.bin
-          cp ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.ota.bin esphome/firmware/metro-display_latest.ota.bin
-          mv ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.ota.bin esphome/firmware/metro-display_${{ steps.esphome-build.outputs.version }}.ota.bin
-          mv ${{ steps.esphome-build.outputs.name }}/manifest.json esphome/firmware/manifest.json
-      - name: Generate checksum
-        uses: jmgilman/actions-generate-checksum@v1
+          mkdir -p esphome/firmware
+          mkdir -p esphome/firmware/${{ steps.esphome-build.outputs.project-version }}
+          cp ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.factory.bin esphome/firmware/${{ steps.esphome-build.outputs.name }}.factory.bin
+          mv ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.factory.bin esphome/firmware/${{ steps.esphome-build.outputs.project-version }}/${{ steps.esphome-build.outputs.name }}.factory.bin
+          cp ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.ota.bin esphome/firmware/${{ steps.esphome-build.outputs.name }}.ota.bin
+          mv ${{ steps.esphome-build.outputs.name }}/${{ steps.esphome-build.outputs.name }}.ota.bin esphome/firmware/${{ steps.esphome-build.outputs.project-version }}/${{ steps.esphome-build.outputs.name }}.ota.bin
+          cp ${{ steps.esphome-build.outputs.name }}/manifest.json esphome/firmware/manifest.json
+          mv ${{ steps.esphome-build.outputs.name }}/manifest.json esphome/firmware/${{ steps.esphome-build.outputs.project-version }}/manifest.json
+          rm -rf ${{ steps.esphome-build.outputs.name }}/
+      - name: Commit firmware to the repository
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          method: md5
-          patterns: |
-            release/*.zip
-            release/*.tar.gz
-          output: metro-display_lastest.ota.md5
+          commit_message: ESPHome Firmware ${{ steps.esphome-build.outputs.project-version }} release
+          tagging_message: esphome-${{ steps.esphome-build.outputs.project-version }}

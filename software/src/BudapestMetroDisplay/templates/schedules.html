@@ -40,21 +40,15 @@
     <table>
         <tr>
             <th>ID</th>
-            <th>Name</th>
-            <th>Next Run Time</th>
-            <th>Trigger</th>
             <th>Stop Name</th>
-            <th>Arg1</th>
-            <th>Arg2</th>
-            <th>Arg3</th>
-            <th>Arg4</th>
+            <th>Route Id</th>
+            <th>Trip ID</th>
+            <th>Scheduled time</th>
+            <th>LED Off delay</th>
         </tr>
         {% for job in jobs %}
         <tr>
             <td>{{ job.id }}</td>
-            <td>{{ job.name }}</td>
-            <td>{{ job.next_run_time }}</td>
-            <td>{{ job.trigger }}</td>
             <td>{{ job.stop_name }}</td>
             <td>{{ job.arg1 }}</td>
             <td>{{ job.arg2 }}</td>

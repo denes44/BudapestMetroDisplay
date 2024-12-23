@@ -1,0 +1,50 @@
+name: Feature request
+description: Suggest an idea for BudapestMetroDisplay.
+labels: triage, enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature request scope
+  - type: dropdown
+    id: issue_scope
+    validations:
+      required: true
+    attributes:
+      label: What part of the project you are having problems?
+      options:
+        - Software
+        - ESPHome firmware / installation
+        - Hardware
+        - Home Assistant Add-on
+        - Docker
+        - Proxmox installation script
+        - Documentation
+  
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature request description
+  - type: markdown
+    attributes:
+      value: |
+        This issue form is for feature requests only!
+
+        If you have an issue, please use the issue report issue type.
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Description
+      description: >-
+        A description of what you want to happen.
+  - type: textarea
+    attributes:
+      label: Use case
+      description: >
+        Please describe your use case for this request and alternatives you've tried.
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: >
+        Add any other context about the feature request here.

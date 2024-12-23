@@ -20,9 +20,12 @@
 #  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
 
+import logging
 import threading
 
 from flask import Flask, render_template
+
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 stop_names = {
@@ -179,10 +182,6 @@ def get_schedules(route_id):
         if route_id is None or job.args[1] == route_id:
             job_info = {
                 'id': job.id,
-                'name': job.name,
-                'next_run_time':
-                    job.next_run_time.isoformat() if job.next_run_time else None,
-                'trigger': str(job.trigger),
                 'stop_name': stop_names.get(job.args[0], 'Unknown'),
                 'arg1': job.args[1],
                 'arg2': job.args[2],
@@ -195,5 +194,9 @@ def get_schedules(route_id):
 
 
 def start_webserver():
-    thread = threading.Thread(target=lambda: app.run(debug=False, use_reloader=False))
+    thread = threading.Thread(
+        target=lambda: app.run(debug=False, use_reloader=False),
+        daemon=True,
+        name="Webserver thread"
+    )
     thread.start()

@@ -1,0 +1,60 @@
+network:
+  5000/tcp: Debug webserver
+  5568/udp: sACN output
+
+configuration:
+  LED_DIM_RATIO:
+    name: LED_DIM_RATIO
+    description: Dim ratio for the background brightness of the LEDs (0 means totally off)
+    
+  LED_FADE_TIME:
+    name: LED_FADE_TIME
+    description: Fade time in seconds for the LED turn on and off action
+
+  SACN_MULTICAST:
+    name: SACN_MULTICAST
+    description: Whether the sACN protocol should use multicast or unicast
+
+  SACN_UNICAST_IP:
+    name: SACN_UNICAST_IP
+    description: The destination IP address for unicast sACN
+
+  SACN_UNIVERSE:
+    name: SACN_UNIVERSE
+    description: DMX universe to send out data with the sACN protocol
+
+  SACN_FPS:
+    name: SACN_FPS
+    description: Idle update frequency
+
+  BKK_API_KEY:
+    name: BKK_API_KEY
+    description: API key for the BKK OpenData portal
+
+  BKK_API_UPDATE_INTERVAL:
+    name: BKK_API_UPDATE_INTERVAL
+    description: Delay between consecutive API calls in seconds
+
+  BKK_API_UPDATE_REALTIME:
+    name: BKK_API_UPDATE_REALTIME
+    description: Update frequency for realtime data in seconds
+
+  BKK_API_UPDATE_REGULAR:
+    name: BKK_API_UPDATE_REGULAR
+    description: Update frequency for regular data in seconds
+
+  BKK_API_UPDATE_ALERTS:
+    name: BKK_API_UPDATE_ALERTS
+    description: Update frequency for alerts for non-realtime routes in seconds
+
+  ESPHOME_USED:
+    name: ESPHOME_USED
+    description: Whether to use brightness data from ESPHome to determine the minimum brightness
+
+  ESPHOME_DEVICE_IP:
+    name: ESPHOME_DEVICE_IP
+    description: The IP address of the ESPHome device
+
+  ESPHOME_API_KEY:
+    name: ESPHOME_API_KEY
+    description: The API key of the ESPHome device

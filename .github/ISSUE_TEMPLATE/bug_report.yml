@@ -1,0 +1,74 @@
+name: Report an issue
+description: Report an issue with BudapestMetroDisplay.
+labels: triage, bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Issue type
+  - type: dropdown
+    id: issue_scope
+    validations:
+      required: true
+    attributes:
+      label: What part of the project you are having problems?
+      options:
+        - Software
+        - ESPHome firmware / installation
+        - Hardware
+        - Home Assistant Add-on
+        - Docker
+        - Proxmox installation script
+        - Documentation
+  
+  - type: markdown
+    attributes:
+      value: |
+        ## Issue description
+  - type: markdown
+    attributes:
+      value: |
+        This issue form is for reporting bugs only!
+
+        If you have a feature or enhancement request, please use the feature request issue type.
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: The problem
+      description: >-
+        Describe the issue you are experiencing here.
+        Tell us what you were trying to do and what happened.
+
+        Provide a clear and concise description of what the problem is.
+  
+  - type: markdown
+    attributes:
+      value: |
+        ## Environment
+  - type: input
+    id: version
+    validations:
+      required: true
+    attributes:
+      label: What version has the issue?
+  - type: input
+    attributes:
+      label: What was the last working version?
+      description: >
+        If known, otherwise leave blank.
+
+  - type: markdown
+    attributes:
+      value: |
+        # Issue details
+  - type: textarea
+    attributes:
+      label: Anything in the logs that might be useful for us?
+      description: For example, error message, or stack traces.
+      render: txt
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: >
+        If you have any additional information for us, use the field below.

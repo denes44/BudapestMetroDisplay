@@ -14,7 +14,7 @@ maintainers = [
 ]
 #description = "Backgorund service for a BudapestMetroDisplay hardware LED display"
 description = "Backgorund service"
-readme = "README_test.md"
+readme = "README.md"
 license = { file = "LICENSE" }
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -29,10 +29,10 @@ classifiers = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/denes44/BudapestMetroDisplay/README.md"
+Documentation = "https://github.com/denes44/BudapestMetroDisplay/blob/main/software/README.md"
 Repository = "https://github.com/denes44/BudapestMetroDisplay.git"
 "Bug Tracker" = "https://github.com/denes44/BudapestMetroDisplay/issues"
-Changelog = "https://github.com/denes44/BudapestMetroDisplay/blob/master/CHANGELOG.md"
+Changelog = "https://github.com/denes44/BudapestMetroDisplay/blob/main/software/CHANGELOG.md"
 
 [project.scripts]
 BudapestMetroDisplay = "BudapestMetroDisplay.main:main"

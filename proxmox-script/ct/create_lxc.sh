@@ -4,7 +4,7 @@
 # Copyright (c) 2021-2024 tteck
 # Author: denes44, tteck
 # License: MIT
-# https://github.com/denes44/BudapestMetroDisplay/raw/main/software/LICENSE
+# https://github.com/denes44/BudapestMetroDisplay/raw/main/proxmox-script/LICENSE
 # https://github.com/tteck/Proxmox/raw/main/LICENSE
 
 # This sets verbose mode if the global variable is set to "yes"

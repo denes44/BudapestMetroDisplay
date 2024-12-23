@@ -107,6 +107,9 @@ def esphome_background_process(loop):
 def start_background_loop():
     loop = asyncio.new_event_loop()
     threading.Thread(
-        target=esphome_background_process, args=(loop,), daemon=True, name="ESPHome"
+        target=esphome_background_process,
+        args=(loop,),
+        daemon=True,
+        name="ESPHome thread"
     ).start()
     return loop

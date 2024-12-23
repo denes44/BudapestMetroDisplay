@@ -1,0 +1,61 @@
+#include <tunables/global>
+
+# github slug: 12f81477
+profile local_budapestmetrodisplay flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  # Capabilities
+  file,
+  signal (send) set=(kill,term,int,hup,cont),
+
+  # S6-Overlay
+  /init ix,
+  /bin/** ix,
+  /usr/bin/** ix,
+  /run/{s6,s6-rc*,service}/** ix,
+  /package/** ix,
+  /command/** ix,
+  /etc/services.d/** rwix,
+  /etc/cont-init.d/** rwix,
+  /etc/cont-finish.d/** rwix,
+  /run/{,**} rwk,
+  /dev/tty rw,
+
+  # Bashio
+  /usr/lib/bashio/** ix,
+  /tmp/** rwk,
+
+  # Access to options.json and other files within your addon
+  /data/** rw,
+
+  # Start new profile for service
+  /opt/BudapestMetroDisplay/.venv/bin/BudapestMetroDisplay cx -> BudapestMetroDisplay,
+
+  profile BudapestMetroDisplay flags=(attach_disconnected,mediate_deleted) {
+	  include <abstractions/apache2-common>
+	  include <abstractions/base>
+	  include <abstractions/openssl>
+	  include <abstractions/python>
+
+	  # Capabilities
+	  file,
+	  signal (send) set=(kill,term,int,hup,cont),
+
+	  # Required access
+	  /opt/BudapestMetroDisplay/.venv/bin/BudapestMetroDisplay r,
+	  /run/systemd/resolve/resolv.conf r,
+	  /usr/bin/python** ix,
+	  owner /etc/host.conf r,
+	  owner /etc/hosts r,
+	  owner /etc/nsswitch.conf r,
+	  owner /opt/BudapestMetroDisplay/.venv/bin/ r,
+	  owner /opt/BudapestMetroDisplay/.venv/lib/** mr,
+	  owner /opt/BudapestMetroDisplay/.venv/pyvenv.cfg r,
+
+	  # Log files
+	  owner /config/log/application.log rwk,
+	  owner /config/log/application_error.log rwk,
+	  owner /config/log/application.log.* rwk,
+	  owner /config/log/application_error.log.* rwk,
+  }
+}

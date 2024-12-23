@@ -20,11 +20,13 @@
 #  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
 
+from datetime import datetime
 # Define logger globally
 import logging
-import os
-from datetime import datetime
 from logging.handlers import RotatingFileHandler
+import os
+
+from BudapestMetroDisplay.main import settings
 
 logger = logging.getLogger(__name__)
 
@@ -101,21 +103,16 @@ def setup_logging(parser):
     else:
         logger.setLevel(logging.INFO)
 
-    # Ensure the log directory exists
-    log_directory = "log"
-    if not os.path.exists(log_directory):
-        os.makedirs(log_directory)
-
     # Create a rotating file handler
     file_handler = RotatingFileHandler(
-        os.path.join(log_directory, "application.log"),
+        os.path.join(settings.log.path, "application.log"),
         maxBytes=5 * 1024 * 1024,  # 5 MB file size limit
         backupCount=10,  # Keep up to 10 backup log files
     )
 
     # Create a rotating file handler
     file_handler_error = RotatingFileHandler(
-        os.path.join(log_directory, "application_error.log"),
+        os.path.join(settings.log.path, "application_error.log"),
         maxBytes=5 * 1024 * 1024,  # 5 MB file size limit
         backupCount=5,  # Keep up to 5 backup log files
     )

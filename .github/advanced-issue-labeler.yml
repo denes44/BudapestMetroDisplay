@@ -1,0 +1,20 @@
+policy:
+  - section:
+      - id: [issue_scope]
+        label:
+          - name: 'software'
+            keys: ['Software']
+          - name: 'esphome'
+            keys: ['ESPHome firmware / installation']
+          - name: 'hardware'
+            keys: ['Hardware']
+          - name: 'ha-addon'
+            keys: ['Home Assistant Add-on']
+          - name: 'docker'
+            keys: ['Docker']
+          - name: 'proxmox-script'
+            keys: ['Proxmox installation script']
+          - name: 'documentation'
+            keys: ['Documentation']
+          - name: 'invalid'
+            keys: ['None']
