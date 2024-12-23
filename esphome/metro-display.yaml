@@ -15,8 +15,11 @@ substitutions:
 # Include latest core package from Github
 
 packages:
-  remote_package_shorthand: github://denes44/BudapestMetroDisplay/esphome/metro-display-core.yaml@main
-  remote_package_shorthand: github://denes44/BudapestMetroDisplay/esphome/metro-display-update_ha.yaml@main
+  remote_package_files:
+    url: https://github.com/denes44/BudapestMetroDisplay
+    files: [esphome/metro-display-core.yaml, metro-display-update_ha.yaml]
+    ref: main
+    refresh: 6hours
 
 
 # Home Assistant API
