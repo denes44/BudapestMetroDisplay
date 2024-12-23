@@ -16,6 +16,7 @@ substitutions:
 
 packages:
   remote_package_shorthand: github://denes44/BudapestMetroDisplay/esphome/metro-display-core.yaml@main
+  remote_package_shorthand: github://denes44/BudapestMetroDisplay/esphome/metro-display-update_ha.yaml@main
 
 
 # Home Assistant API
@@ -29,25 +30,25 @@ api:
 
 
 
-# ONLY FOR ADVANCED USERS # 
+# ONLY FOR ADVANCED USERS #
 
 wifi:
   # Uncomment the following two lines,
   # if you want to change the stored WiFi credentials.
   # If you already provided these during the setup of the device,
   # it's not necessary to provide them again.
-  
-  # ssid: 
-  # password: 
-    
+
+  # ssid:
+  # password:
+
   # Uncomment the following line, to add password to the fallback hotspot
   # (captive portal)in case wifi connection fails.
   ap:
-    # password: 
+    # password:
 
 ota:
   - id: !extend esphome_ota_component
-    # password: 
+    # password:
 
 
 # Remove factory sensors

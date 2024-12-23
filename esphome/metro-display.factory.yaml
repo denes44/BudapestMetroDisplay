@@ -7,10 +7,11 @@
 substitutions:
   name: metro_display
   friendly_name: Metro Display
-  
+
 packages:
   # Include all of the core configuration
   core: !include metro-display-core.yaml
+  core: !include metro-display-update_ota.yaml
 
 # This should point to the public location of the yaml file that will be adopted.
 # In this case it is the core yaml file that does not contain the extra things
@@ -21,7 +22,6 @@ dashboard_import:
 # API is a requirement of the dashboard import.
 api:
   reboot_timeout: 0s
-  
 
 # Sets up Bluetooth LE (Only on ESP32) to allow the user
 # to provision wifi credentials to the device.
