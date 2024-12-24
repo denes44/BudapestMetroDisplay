@@ -184,7 +184,7 @@ class LogConfig(BaseSettings):
         if not path.exists():
             try:
                 path.mkdir(parents=True, exist_ok=True)
-            except Exception:  # noqa: BLE001
+            except BaseException:  # noqa: BLE001
                 # TODO more specific exception handling
                 msg = f"Unable to create log directory at {path}"
                 raise ValueError(msg) from pydantic_core
