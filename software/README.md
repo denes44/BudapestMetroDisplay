@@ -46,7 +46,7 @@ To create a new Proxmox VE BudapestMetroDisplay LXC,
 run the command below in the **Proxmox VE Shell**.
 
 ```bash
-bash -c "$(wget -qLO - https://github.com/denes44/BudapestMetroDisplay/raw/main/software/proxmox/ct/BudapestMetroDisplay.sh)"
+bash -c "$(wget -qLO - https://github.com/denes44/BudapestMetroDisplay/raw/main/proxmox-script/ct/BudapestMetroDisplay.sh)"
 ```
 
 This script is customized from the Debian LXC install script, from

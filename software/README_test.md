@@ -1,1 +1,0 @@
-# BudapestMetroDisplay - Software

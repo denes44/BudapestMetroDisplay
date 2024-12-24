@@ -1,0 +1,35 @@
+###################################################
+# BudapestMetroDisplay ESPHOME created by denes44 #
+# https://github.com/denes44/BudapestMetroDisplay #
+# Home Assistant update functionately             #
+###################################################
+
+ota:
+  - platform: http_request
+    id: http_ota_component
+
+http_request:
+
+update:
+  - platform: http_request
+    id: firmware_update
+    name: Firmware Update
+    entity_category: diagnostic
+    update_interval: 6hours
+    web_server:
+      sorting_weight: 1
+      sorting_group_id: sg_firmware
+    source: https://raw.githubusercontent.com/denes44/BudapestMetroDisplay/refs/heads/main/esphome/firmware/manifest.json
+
+button:
+  - platform: template
+    name: Update Firmware
+    id: ota_switch
+    entity_category: config
+    web_server:
+      sorting_weight: 2
+      sorting_group_id: sg_firmware
+    on_press:
+      then:
+        - update.perform:
+            id: firmware_update

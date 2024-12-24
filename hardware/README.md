@@ -14,7 +14,7 @@ The edge of the PCB is designed to not interfere with the edge
 of the picture frame.
 
 There is a template available to cut out areas of the back of the picture frame,
-so the components can fit: [hardware/pcb_cutout.pdf](hardware/pcb_cutout.pdf)
+so the components can fit: [pcb_cutout.pdf](pcb_cutout.pdf)
 
 ## Controller
 
@@ -27,10 +27,8 @@ an ESP32-C3 SuperMini would fit too.
 The task of the internal controller is to receive sACN (E1.31) data
 from the software and display it on the LEDs.
 
-<img src="https://esphome.io/_static/made-for-esphome-black-on-white.png" align="left" alt="Made for ESPHome logo" width="150">
-
 The default firmware is ESPHome, you can find the configuration to it in the
-[esphome](esphome/README.md) folder.
+[esphome](../esphome/README.md) folder.
 
 The control software has an extra feature, it can take account the
 global brightness that is set in ESPHome, so the LEDs won't go dark below 11%

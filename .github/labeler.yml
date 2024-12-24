@@ -1,24 +1,52 @@
-# Add 'Documentation' label to any change to .md files within the entire repository
-documentation:
-- changed-files:
-  - any-glob-to-any-file: '**/*.md'
+- label: "documentation"
+  files:
+  - '.*\\.md$'
+  
+- label: "esphome"
+  files:
+  - "esphome\\/.*$"
 
-esphome:
-- changed-files:
-  - any-glob-to-any-file: esphome/*
+- label: "hardware"
+  files:
+  - "hardware\\/.*$"
 
-hardware:
-- changed-files:
-  - any-glob-to-any-file: hardware/*
+- label: "software"
+  files:
+  - "software\\/.*$"
 
-software:
-- changed-files:
-  - any-glob-to-any-file: software/*
+- label: "ha-addon"
+  files:
+  - "ha-addon\\/.*$"
 
-ha-addon:
-- changed-files:
-  - any-glob-to-any-file: ha-addon/*
+- label: "proxmox-script"
+  files:
+  - "proxmox-script\\/.*$"
 
-proxmox-script:
-- changed-files:
-  - any-glob-to-any-file: proxmox-script/*
+- label: "S"
+  size:
+      below: 10
+- label: "M"
+  size:
+      above: 9
+      below: 100
+- label: "L"
+  size:
+      above: 100
+
+- label: "dependency"
+  body: "\[x\] Dependency upgrade"
+  
+- label: "bugfix"
+  body: "\[x\] Bugfix"
+  
+- label: "new-feature"
+  body: "\[x\] New feature"
+
+- label: "deprecation"
+  body: "\[x\] Deprecation"
+
+- label: "breaking-change"
+  body: "\[x\] Breaking change"
+
+- label: "code-quality"
+  body: "\[x\] Code quality"
