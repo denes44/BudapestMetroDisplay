@@ -25,7 +25,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-import pydantic_core
 from pydantic import (
     DirectoryPath,
     Field,
@@ -184,10 +183,10 @@ class LogConfig(BaseSettings):
         if not path.exists():
             try:
                 path.mkdir(parents=True, exist_ok=True)
-            except BaseException:  # noqa: BLE001
+            except BaseException as e:
                 # TODO more specific exception handling
                 msg = f"Unable to create log directory at {path}"
-                raise ValueError(msg) from pydantic_core
+                raise ValueError(msg) from e
 
         # Update `path` back in `values`
         values["path"] = path
