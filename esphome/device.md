@@ -1,7 +1,7 @@
 ---
 title: BudapestMetroDisplay
-date-published: 2024-
-type: light
+date-published: 2024-12-20
+type: misc
 standard: global
 board: esp32
 project-url: https://github.com/denes44/BudapestMetroDisplay/tree/main/esphome

@@ -58,7 +58,7 @@ stops_led: dict[str, int] = {
     "BKK_F01336": 22,
     "BKK_F01325": 23,
     "BKK_F01743": 24,
-    # "BKK_F01749": 25, #duplicate
+    # "BKK_F01749": 25, # duplicate  # noqa: ERA001
     # M2-es Örs vezér tere-tól Déli pályaudvar-ig
     "BKK_F01749": 25,
     "BKK_F01742": 24,
@@ -148,9 +148,9 @@ stops_led: dict[str, int] = {
     "BKK_09001188": 17,
     "BKK_09001189": 17,
     # H5-ös (2632) Batthyány tér-től Rómaifürdő-ig
-    # "BKK_09001187": 17,
-    # "BKK_09001188": 17,
-    # "BKK_09001189": 17,
+    # "BKK_09001187": 17,  # noqa: ERA001
+    # "BKK_09001188": 17,  # noqa: ERA001
+    # "BKK_09001189": 17,  # noqa: ERA001
     "BKK_09019190": 27,
     "BKK_09043192": 28,
     "BKK_09050194": 29,
@@ -165,8 +165,8 @@ stops_led: dict[str, int] = {
     "BKK_19720236": 2,
     "BKK_19720237": 2,
     # H6-os (9135) Közvágóhíd-től Pesterzsébet felső-ig
-    # "BKK_19720236": 2,
-    # "BKK_19720237": 2,
+    # "BKK_19720236": 2,  # noqa: ERA001
+    # "BKK_19720237": 2,  # noqa: ERA001
     "BKK_19726238": 1,
     "BKK_19729241": 0,
     # H7-es Szabadkikötő-től Boráros tér-ig
@@ -175,8 +175,8 @@ stops_led: dict[str, int] = {
     "BKK_09220224": 5,
     "BKK_09220225": 5,
     # H7-es (2326) Boráros tér-től Szabadkikötő-ig
-    # "BKK_09220224": 5,
-    # "BKK_09220225": 5,
+    # "BKK_09220224": 5,  # noqa: ERA001
+    # "BKK_09220225": 5,  # noqa: ERA001
     "BKK_09221226": 4,
     "BKK_09223229": 3,
     # H8/H9-es (1071) Rákosfalva-tól Örs vezér tere-ig
@@ -185,9 +185,9 @@ stops_led: dict[str, int] = {
     "BKK_19795279": 25,
     "BKK_19795280": 25,
     # H8/H9-es (1100) Örs vezér tere-től Rákosfalva-ig
-    # "BKK_19795278": 25,
-    # "BKK_19795279": 25,
-    # "BKK_19795280": 25,
+    # "BKK_19795278": 25,  # noqa: ERA001
+    # "BKK_19795279": 25,  # noqa: ERA001
+    # "BKK_19795280": 25,  # noqa: ERA001
     "BKK_19798281": 26,
 }
 
@@ -354,7 +354,7 @@ alert_routes: tuple[str, ...] = (
     "BKK_5400",
 )
 # Variable to store if a stop is not serviced at the moment
-stop_no_service: dict[str, bool] = {stop_id: False for stop_id in stops_led}
+stop_no_service: dict[str, bool] = dict.fromkeys(stops_led, False)
 
 common_stops: dict[int, tuple[dict[str, Any], ...]] = {
     12: (

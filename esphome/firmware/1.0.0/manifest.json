@@ -1,6 +1,6 @@
 {
   "name": "Metro Display",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "home_assistant_domain": "esphome",
   "new_install_prompt_erase": false,
   "builds": [
@@ -8,7 +8,7 @@
       "chipFamily": "ESP32-S3",
       "ota": {
         "path": "metro-display-esp32s3.ota.bin",
-        "md5": "c8550ccd05dca442d9a11acbbaa0d3e2"
+        "md5": "4c0a335799528cc3297366ec2c634703"
       },
       "parts": [
         {

@@ -22,19 +22,18 @@
 
 import inspect
 import logging
-from math import ceil
 import threading
-from threading import Lock
 import time
-from typing import Optional, List
 import uuid
+from math import ceil
+from threading import Lock
 
 import sacn
 from sacn import sACNsender
 
 from BudapestMetroDisplay import stops
 from BudapestMetroDisplay._version import __version__
-from BudapestMetroDisplay.main import settings
+from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay.stops import common_stops
 
 logger = logging.getLogger(__name__)
@@ -112,12 +111,11 @@ led_lock: Lock = threading.Lock()
 led_locks: dict[int, Lock] = {i: threading.Lock() for i in range(NUM_LEDS)}
 
 # sACN sender interface
-sender: Optional[sACNsender] = None
+sender: sACNsender | None = None
 
 
-def find_key_by_value(d: dict[str, int], target_value: int) -> Optional[str]:
-    """
-    Finds the supplied value (target_value) in the supplied dictionary(d)
+def find_key_by_value(d: dict[str, int], target_value: int) -> str | None:
+    """Find the supplied value (target_value) in the supplied dictionary.
 
     :param d: A dictionary to look for a value
     :param target_value: The value to look in the dictionary
@@ -129,29 +127,24 @@ def find_key_by_value(d: dict[str, int], target_value: int) -> Optional[str]:
     return None  # Return None if the value is not found
 
 
-def find_keys_by_value(d: dict[str, int], target_value: int) -> List[str]:
-    """
-    Finds all keys in the supplied dictionary (d)
-    that match the supplied value (target_value).
+def find_keys_by_value(d: dict[str, int], target_value: int) -> list[str]:
+    """Find all keys in the supplied dictionary that match the target_value.
 
     :param d: A dictionary to look for values
     :param target_value: The value to look for in the dictionary
     :return: A list of keys that match the value, or an empty list if none are found
     """
-    matching_keys = [key for key, value in d.items() if value == target_value]
-    return matching_keys  # Return the list of keys, empty if none found
+    return [key for key, value in d.items() if value == target_value]
 
 
 def fade_color(
-        led_index: int,
-        current_color: tuple[int, int, int],
-        target_color: tuple[int, int, int],
-        steps: int = 100,
-        delay: float = 0.05,
-):
-    """
-    Fade from the current color to the target color
-    over a number of steps of a specific LED (led_index).
+    led_index: int,
+    current_color: tuple[int, int, int],
+    target_color: tuple[int, int, int],
+    steps: int = 100,
+    delay: float = 0.05,
+) -> None:
+    """Fade from the current color to the target color of a specific LED.
 
     :param led_index: Index of the LED to update
     :param current_color: Tuple (r, g, b) representing the starting RGB color
@@ -171,7 +164,7 @@ def fade_color(
 
             # Set the LED to the intermediate color
             with led_lock:
-                led_states[led_index * 3: led_index * 3 + 3] = [r, g, b]
+                led_states[led_index * 3 : led_index * 3 + 3] = [r, g, b]
 
             # Update the sACN values
             update_sacn()
@@ -181,11 +174,16 @@ def fade_color(
         # Ensure the final color is set correctly,
         # to avoid rounding errors dealing with floats
         with led_lock:
-            led_states[led_index * 3: led_index * 3 + 3] = [r2, g2, b2]
+            led_states[led_index * 3 : led_index * 3 + 3] = [r2, g2, b2]
         update_sacn()
 
 
-def calculate_default_color(led_index: int):
+def calculate_default_color(led_index: int) -> None:
+    """Recalculate the default LED colors.
+
+    The method considers the active alerts for every stop,
+    and calculates the default color of the stops according to the active routes.
+    """
     # Check whether this LED belongs to multiple routes
     if led_index not in common_stops:
         # If no, we don't have to do anything
@@ -207,7 +205,7 @@ def calculate_default_color(led_index: int):
     # which routes are operational at the specific stop/LED
     if led_index == 12:  # Kálvin tér: M3,M4
         if (
-                route_status["BKK_5300"] and route_status["BKK_5400"]
+            route_status["BKK_5300"] and route_status["BKK_5400"]
         ):  # Both M3 and M4 are operational
             DEFAULT_COLORS[led_index] = (
                 0,
@@ -222,7 +220,7 @@ def calculate_default_color(led_index: int):
             DEFAULT_COLORS[led_index] = (0, 0, 0)
     elif led_index == 17:  # Batthyány tér: M2,H5
         if (
-                route_status["BKK_5200"] and route_status["BKK_H5"]
+            route_status["BKK_5200"] and route_status["BKK_H5"]
         ):  # Both M2 and H5 are operational
             DEFAULT_COLORS[led_index] = (
                 int(255 * settings.led.dim_ratio),
@@ -251,7 +249,7 @@ def calculate_default_color(led_index: int):
         DEFAULT_COLORS[led_index] = (r, g, b)
     elif led_index == 22:  # Keleti pályaudvar: M2,M4
         if (
-                route_status["BKK_5200"] and route_status["BKK_5400"]
+            route_status["BKK_5200"] and route_status["BKK_5400"]
         ):  # Both M2 and M4 are operational
             DEFAULT_COLORS[led_index] = (
                 int(255 * settings.led.dim_ratio),
@@ -266,7 +264,7 @@ def calculate_default_color(led_index: int):
             DEFAULT_COLORS[led_index] = (0, 0, 0)
     elif led_index == 25:  # Örs vezér tere: M2,H8/9
         if (
-                route_status["BKK_5200"] and route_status["BKK_H8"]
+            route_status["BKK_5200"] and route_status["BKK_H8"]
         ):  # Both M2 and H8 are operational
             DEFAULT_COLORS[led_index] = (
                 int(255 * settings.led.dim_ratio),
@@ -281,10 +279,8 @@ def calculate_default_color(led_index: int):
             DEFAULT_COLORS[led_index] = (0, 0, 0)
 
 
-def reset_leds_to_default():
-    """
-    Reset the color of all LEDs to the default value.
-    """
+def reset_leds_to_default() -> None:
+    """Reset the color of all LEDs to the default value."""
     global led_states
     with led_lock:
         led_states = [value for color in DEFAULT_COLORS for value in color]
@@ -294,13 +290,11 @@ def reset_leds_to_default():
     logger.debug("All LEDs were reset to their default colors")
 
 
-def reset_led_to_default(led_index: int):
-    """
-    Reset the color of a specific LED to the default value.
+def reset_led_to_default(led_index: int) -> None:
+    """Reset the color of a specific LED to the default value.
 
     :param led_index: The index of the LED
     """
-
     if 0 <= led_index < NUM_LEDS:
         with led_lock:
             # Get the current color
@@ -321,19 +315,18 @@ def reset_led_to_default(led_index: int):
         ).start()
 
         logger.trace(  # type: ignore[attr-defined]
-            f"LED {led_index} fading from color {str(current_color)} "
-            f"to default color {str(DEFAULT_COLORS[led_index])}"
+            f"LED {led_index} fading from color {current_color!s} "
+            f"to default color {DEFAULT_COLORS[led_index]!s}",
         )
     else:
         logger.error(
             f"Invalid LED index {led_index} when trying to reset the value, "
-            f"caller: {inspect.stack()[1].function}"
+            f"caller: {inspect.stack()[1].function}",
         )
 
 
-def set_led_color(led_index: int, color: tuple[int, int, int]):
-    """
-    Reset the color of a specific LED to the supplied RGB tuple.
+def set_led_color(led_index: int, color: tuple[int, int, int]) -> None:
+    """Reset the color of a specific LED to the supplied RGB tuple.
 
     :param led_index: The index of the LED
     :param color: A tuple (red, green, blue) representing the RGB values (0-255)
@@ -366,19 +359,17 @@ def set_led_color(led_index: int, color: tuple[int, int, int]):
         ).start()
 
         logger.trace(  # type: ignore[attr-defined]
-            f"LED {led_index} fading from color {str(current_color)} "
-            f"to color {str(color)}"
+            f"LED {led_index} fading from color {current_color!s} to color {color!s}",
         )
     else:
         logger.error(
             f"Invalid LED index {led_index} when trying to change the value, "
-            f"caller: {inspect.stack()[1].function}"
+            f"caller: {inspect.stack()[1].function}",
         )
 
 
-def get_led_color(led_index: int) -> Optional[tuple[int, int, int]]:
-    """
-    Retrieve the color of a specific LED as an RGB tuple.
+def get_led_color(led_index: int) -> tuple[int, int, int] | None:
+    """Retrieve the color of a specific LED as an RGB tuple.
 
     :param led_index: The index of the LED
     :return: A tuple (red, green, blue) representing the RGB values (0-255)
@@ -394,15 +385,13 @@ def get_led_color(led_index: int) -> Optional[tuple[int, int, int]]:
     else:
         logger.error(
             f"Invalid LED index {led_index} when trying to get the value, "
-            f"caller: {inspect.stack()[1].function}"
+            f"caller: {inspect.stack()[1].function}",
         )
         return None
 
 
-def activate_sacn():
-    """
-    Starts the sACN sender
-    """
+def activate_sacn() -> None:
+    """Start the sACN sender."""
     global sender
     sender = sacn.sACNsender(
         source_name=f"BudapestMetroDisplay {__version__}",
@@ -410,7 +399,7 @@ def activate_sacn():
             uuid.uuid5(
                 uuid.UUID("12345678-1234-5678-1234-567812345678"),
                 "BudapestMetroDisplay",
-            ).bytes
+            ).bytes,
         ),
         fps=settings.sacn.fps,
     )
@@ -419,27 +408,25 @@ def activate_sacn():
     sender.activate_output(settings.sacn.universe)
     sender[settings.sacn.universe].multicast = settings.sacn.multicast
     if not settings.sacn.multicast:
-        sender[settings.sacn.universe].destination = settings.sacn.unicast_ip.__str__()
+        sender[settings.sacn.universe].destination = str(settings.sacn.unicast_ip)
     update_sacn()
     logger.info(
         f"sACN settings: "
         f"{'multicast' if sender[settings.sacn.universe].multicast else 'unicast'}, "
-        f"destination ip: {sender[settings.sacn.universe].destination}"
+        f"destination ip: {sender[settings.sacn.universe].destination}",
     )
 
 
-def deactivate_sacn():
-    """
-    Stops the sACN sender
-    """
+def deactivate_sacn() -> None:
+    """Stop the sACN sender."""
     if sender is not None:
         sender.stop()
 
 
-def update_sacn():
-    """
-    Updates the internal tuple of the sACN sender to the led_states variable,
-    ensuring each value is at least 28 when multiplied by esphome.brightness.
+def update_sacn() -> None:
+    """Update the internal tuple of the sACN to the latest values.
+
+    Ensure each value is at least 28 when multiplied by esphome.brightness.
     """
     if sender is not None and sender[settings.sacn.universe].dmx_data is not None:
         if settings.esphome.used:

@@ -1,6 +1,6 @@
 #  MIT License
 #
-#  Copyright (c) 2024 [fullname]
+#  Copyright (c) 2024 denes44
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"),
@@ -23,27 +23,27 @@
 import asyncio
 import logging
 import threading
+from asyncio import AbstractEventLoop
 
 from aioesphomeapi import (
     APIClient,
     APIConnectionError,
-    ReconnectLogic,
     EntityState,
     LightState,
+    ReconnectLogic,
 )
 
 from BudapestMetroDisplay._version import __version__
-from BudapestMetroDisplay.main import settings
+from BudapestMetroDisplay.config import settings
 
 logger = logging.getLogger(__name__)
 brightness: float = 1.0
 
 client: APIClient
-entities = None
 
 
-def on_state_change(state: EntityState):
-    """Callback function that handles state changes."""
+def on_state_change(state: EntityState) -> None:
+    """Process entity state changes from ESPHome."""
     global brightness
 
     # Check if this is a light entity
@@ -53,18 +53,19 @@ def on_state_change(state: EntityState):
 
 
 async def on_connect() -> None:
+    """Perform actions after a successful connect."""
     try:
         # Subscribe to the state changes
         client.subscribe_states(on_state_change)
-    except APIConnectionError as err:
-        logger.error(
-            f"Error getting initial data for {settings.esphome.device_ip}: {err}"
+    except APIConnectionError:
+        logger.exception(
+            f"Error getting initial data for {settings.esphome.device_ip}",
         )
         # Re-connection logic will trigger after this
         await client.disconnect()
 
 
-async def on_disconnect(expected_disconnect) -> None:
+async def on_disconnect(expected_disconnect) -> None:  # noqa: ANN001
     """Run disconnect stuff on API disconnect."""
     logger.info(f"Disconnected changed to '{expected_disconnect}'")
 
@@ -74,12 +75,12 @@ async def on_connect_error(err: Exception) -> None:
     logger.error(f"Failed to connect with error '{err}'")
 
 
-async def connect_and_subscribe():
+async def connect_and_subscribe() -> None:
     """Connect to the ESPHome device and subscribe to state changes."""
-    global client, entities
+    global client
 
     client = APIClient(
-        settings.esphome.device_ip.__str__(),
+        str(settings.esphome.device_ip),
         6053,
         None,
         noise_psk=settings.esphome.api_key,
@@ -99,17 +100,19 @@ async def connect_and_subscribe():
     await reconnect_logic.start()
 
 
-def esphome_background_process(loop):
+def esphome_background_process(loop: AbstractEventLoop) -> None:
+    """Run the asyncio loop."""
     asyncio.set_event_loop(loop)
     loop.run_forever()
 
 
-def start_background_loop():
+def start_background_loop() -> AbstractEventLoop:
+    """Start a background thread for asyncio for communicating with the device."""
     loop = asyncio.new_event_loop()
     threading.Thread(
         target=esphome_background_process,
         args=(loop,),
         daemon=True,
-        name="ESPHome thread"
+        name="ESPHome thread",
     ).start()
     return loop

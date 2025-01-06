@@ -9,9 +9,8 @@ substitutions:
   friendly_name: Metro Display
 
 packages:
-  # Include all of the core configuration
   core: !include metro-display-core.yaml
-  core: !include metro-display-update_ota.yaml
+  update: !include metro-display-update_ota.yaml
 
 # This should point to the public location of the yaml file that will be adopted.
 # In this case it is the core yaml file that does not contain the extra things
