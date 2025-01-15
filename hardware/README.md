@@ -16,7 +16,16 @@ of the picture frame.
 There is a template available to cut out areas of the back of the picture frame,
 so the components can fit: [pcb_cutout.pdf](pcb_cutout.pdf)
 
-## Controller
+## Schematics
+
+Very basic stuff, there is an SMD jumper which selects between the signal from
+the internal or external controller, this signal then goes to a 74AHCT series
+line driver for 5V level shifting, and the output of the driver goes through
+a resistor and then to the LEDs.
+
+[schematics.pdf](schematics.pdf)
+
+## Internal controller
 
 <img align="left" src="esp32-s3.png" alt="Photo of the ESP32 controller">
 The PCB is designed to accomodate an ESP32-S3 SuperMini controller
@@ -37,7 +46,17 @@ global brightness that is set in ESPHome, so the LEDs won't go dark below 11%
 (between 0% and 11% the LED stays dark).
 
 In theory, different firmware can be used if it supports sACN (E1.31),
-but the brightness compensation feature won't be available
+but the brightness compensation feature won't be available.
+
+### GPIO Pinout
+
+| Pin    | Function         |
+| ------ | ---------------- |
+| GPIO0  | Boot button      |
+| GPIO7  | LEDs for display |
+| GPIO48 | Status Led       |
+
+## External controller
 
 For more advanced uses
 (for example run the software directly on a more advanced controller),
