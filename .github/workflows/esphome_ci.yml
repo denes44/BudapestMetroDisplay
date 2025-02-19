@@ -33,7 +33,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
       - name: ESPHome ${{ matrix.esphome-version }}
-        uses: esphome/build-action@v4.0.1
+        uses: esphome/build-action@v6.0.0
         with:
           yaml-file: esphome/${{ matrix.file }}.yaml
           version: ${{ matrix.esphome-version }}
