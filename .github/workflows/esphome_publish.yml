@@ -11,7 +11,6 @@ on:
 jobs:
   build-firmware:
     name: Build Firmware
-    if: startsWith(github.ref, 'refs/tags/esphome')
     runs-on: ubuntu-latest
     permissions:
       contents: write
