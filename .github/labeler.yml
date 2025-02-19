@@ -1,54 +1,54 @@
----
+version: 1
 labels:
-- label: "documentation"
-  files:
-  - '.*\\.md$'
+  - label: "documentation"
+    files:
+    - '.*\\.md$'
 
-- label: "esphome"
-  files:
-  - "esphome\\/.*$"
+  - label: "esphome"
+    files:
+    - "esphome\\/.*$"
 
-- label: "hardware"
-  files:
-  - "hardware\\/.*$"
+  - label: "hardware"
+    files:
+    - "hardware\\/.*$"
 
-- label: "software"
-  files:
-  - "software\\/.*$"
+  - label: "software"
+    files:
+    - "software\\/.*$"
 
-- label: "ha-addon"
-  files:
-  - "ha-addon\\/.*$"
+  - label: "ha-addon"
+    files:
+    - "ha-addon\\/.*$"
 
-- label: "proxmox-script"
-  files:
-  - "proxmox-script\\/.*$"
+  - label: "proxmox-script"
+    files:
+    - "proxmox-script\\/.*$"
 
-- label: "S"
-  size:
-      below: 10
-- label: "M"
-  size:
-      above: 9
-      below: 100
-- label: "L"
-  size:
-      above: 100
+  - label: "S"
+    size:
+        below: 10
+  - label: "M"
+    size:
+        above: 9
+        below: 100
+  - label: "L"
+    size:
+        above: 100
 
-- label: "dependency"
-  body: ".*\\[x\\] Dependency upgrade.*"
+  - label: "dependency"
+    body: ".*\\[x\\] Dependency upgrade.*"
 
-- label: "bugfix"
-  body: ".*\\[x\\] Bugfix.*"
+  - label: "bugfix"
+    body: ".*\\[x\\] Bugfix.*"
 
-- label: "new-feature"
-  body: ".*\\[x\\] New feature.*"
+  - label: "new-feature"
+    body: ".*\\[x\\] New feature.*"
 
-- label: "deprecation"
-  body: ".*\\[x\\] Deprecation.*"
+  - label: "deprecation"
+    body: ".*\\[x\\] Deprecation.*"
 
-- label: "breaking-change"
-  body: ".*\\[x\\] Breaking change.*"
+  - label: "breaking-change"
+    body: ".*\\[x\\] Breaking change.*"
 
-- label: "code-quality"
-  body: ".*\\[x\\] Code quality.*"
+  - label: "code-quality"
+    body: ".*\\[x\\] Code quality.*"
