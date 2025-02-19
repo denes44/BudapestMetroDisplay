@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4.1.7
+        with:
+          ref: ${{ github.ref }}
       - name: ESPHome ${{ matrix.esphome-version }}
         uses: esphome/build-action@v4.0.1
         with:
