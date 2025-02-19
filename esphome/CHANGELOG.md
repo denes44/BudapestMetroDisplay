@@ -5,10 +5,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - 2025-02-19
 
-**Minimum required ESPHome version: 2025.2.0**
-
 ### Changed
 
+- **Minimum required ESPHome version: 2025.2.0**
 - Changed the default CPU frequency from 160 MHz to 240 MHz
 - Adapted the new RMT led driver configuration to the 2025.2.0 changes
   - The main LED chain now can use more resources than before,
@@ -17,8 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with 6.9.0 esp32 platform version
   - These versions are also needed to fix the flickering
     mentioned in the previous point
-
-## [1.0.0] - 2024-12-21
 
 ## [1.0.0] - 2024-12-21
 
