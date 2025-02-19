@@ -1,12 +1,11 @@
 name: ESPHome Publish
 
 on:
-  pull_request:
-    paths:
-      - esphome/**/*.yaml
   push:
     paths:
       - esphome/**/*.yaml
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
