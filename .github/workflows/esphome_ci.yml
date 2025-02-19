@@ -22,7 +22,7 @@ jobs:
       max-parallel: 3
       matrix:
         file:
-          - metro-display.factory
+          - metro-display
         esphome-version:
           - stable
           - beta
@@ -30,13 +30,8 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4.1.7
-      - name: ESPHome ${{ matrix.esphome-version }}
-        uses: esphome/build-action@v6.0.0
-        with:
-          yaml-file: esphome/${{ matrix.file }}.yaml
-          version: ${{ matrix.esphome-version }}
       - name: ESPHome ${{ matrix.esphome-version }} Factory
-        uses: esphome/build-action@v4.0.1
+        uses: esphome/build-action@v6.0.0
         with:
           yaml-file: esphome/${{ matrix.file }}.factory.yaml
           version: ${{ matrix.esphome-version }}
