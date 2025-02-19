@@ -1,7 +1,8 @@
+labels:
 - label: "documentation"
   files:
   - '.*\\.md$'
-  
+
 - label: "esphome"
   files:
   - "esphome\\/.*$"
@@ -34,19 +35,19 @@
       above: 100
 
 - label: "dependency"
-  body: "\[x\] Dependency upgrade"
-  
+  body: ".*\\[x\\] Dependency upgrade.*"
+
 - label: "bugfix"
-  body: "\[x\] Bugfix"
-  
+  body: ".*\\[x\\] Bugfix.*"
+
 - label: "new-feature"
-  body: "\[x\] New feature"
+  body: ".*\\[x\\] New feature.*"
 
 - label: "deprecation"
-  body: "\[x\] Deprecation"
+  body: ".*\\[x\\] Deprecation.*"
 
 - label: "breaking-change"
-  body: "\[x\] Breaking change"
+  body: ".*\\[x\\] Breaking change.*"
 
 - label: "code-quality"
-  body: "\[x\] Code quality"
+  body: ".*\\[x\\] Code quality.*"
