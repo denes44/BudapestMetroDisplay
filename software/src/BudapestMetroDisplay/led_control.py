@@ -45,10 +45,10 @@ ROUTE_COLORS: dict[str, tuple[int, int, int]] = {
     "BKK_5300": (0, 0, 255),  # M3
     "BKK_5400": (0, 255, 0),  # M4
     "BKK_H5": (255, 0, 255),  # H5
-    "BKK_H6": (255, 64, 0),  # H6
-    "BKK_H7": (255, 100, 0),  # H7
-    "BKK_H8": (255, 0, 48),  # H8
-    "BKK_H9": (255, 0, 48),  # H9
+    "BKK_H6": (255, 0, 255),  # H6
+    "BKK_H7": (255, 0, 255),  # H7
+    "BKK_H8": (255, 0, 255),  # H8
+    "BKK_H9": (255, 0, 255),  # H9
 }
 
 # The default dimmed LED color for the routes
