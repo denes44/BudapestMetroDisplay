@@ -435,7 +435,7 @@ def update_sacn() -> None:
             # Create a new list with modified values
             modified_led_states: list[int] = [
                 (
-                    int(ceil(28 / brightness))
+                    ceil(28 / brightness)
                     if value * brightness < 28 and value != 0
                     else value
                 )
