@@ -115,10 +115,10 @@ def create_schedule_updates(
     # Check if the supplied schedule_type parameter is valid,
     # and the API call parameters are available in API_SCHEDULE_PARAMETERS
     if schedule_type not in API_SCHEDULE_PARAMETERS:
-        logging.error(f"Invalid schedule type request: {schedule_type}")
+        logger.error(f"Invalid schedule type request: {schedule_type}")
         return
 
-    logging.info(
+    logger.info(
         f"Starting updating the {schedule_type} schedules for stop set "
         f"({', '.join(stop_set for stop_set, _ in stop_sets)})",
     )
@@ -157,7 +157,7 @@ def create_alert_updates(routes: tuple[str, ...]) -> None:
     # Store the current time when we started the update process
     start_time = datetime.now()
 
-    logging.info(f"Starting updating the alerts for routes {routes}")
+    logger.info(f"Starting updating the alerts for routes {routes}")
 
     for i, route_id in enumerate(routes):
         # Schedule the API calls from each other by settings.bkk.api_update_interval

@@ -90,7 +90,7 @@ def add_logging_level(
         *args,  # noqa: ANN002
         **kwargs,  # noqa: ANN003
     ) -> None:
-        logging.log(level_num, message, *args, **kwargs)
+        logging.log(level_num, message, *args, **kwargs)  # noqa: LOG015,RUF100
 
     logging.addLevelName(level_num, level_name)
     setattr(logging, level_name, level_num)
