@@ -154,7 +154,7 @@ def setup_logging(parser: argparse.ArgumentParser) -> None:
 
     # Create a logging format
     formatter = logging.Formatter(
-        "%(asctime)s [%(levelname)s] %(threadName)s: %(message)s",
+        "%(asctime)s [%(levelname)s] %(funcName)s: %(message)s",
     )
     file_handler.setFormatter(formatter)
     file_handler_error.setFormatter(formatter)

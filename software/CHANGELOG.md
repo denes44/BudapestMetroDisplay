@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - All of the suburban railways LED color is the same as H5 now (purple)
+- Log entries includes function name instead of thread name
 
 ## [1.0.0] - 2024-12-24
 
