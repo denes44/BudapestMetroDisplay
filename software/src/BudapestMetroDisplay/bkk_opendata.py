@@ -258,6 +258,8 @@ def fetch_schedule_for_stops(
                     f"Successfully updated {schedule_type} schedules for stop set "
                     f"{stop_set[0]}. Next update scheduled for {job_time!s}",
                 )
+
+            calculate_schedule_interval((response.json()), stop_set[0])
         else:
             # Reschedule the failed action for 1 minute later
             job_time = datetime.now() + timedelta(minutes=1)
@@ -304,69 +306,6 @@ def fetch_schedule_for_stops(
             f"Rescheduled for {job_time!s}.",
         )
         logger.warning(e)
-
-    # Get schedule data for the first stop in the stop set
-    # for the schedule interval calculation
-    if schedule_type == "REGULAR":
-        params["stopId"] = stop_set[1][0]
-        try:
-            response = requests.get(url, headers=headers, params=params, timeout=5)
-
-            if response.status_code == 200:
-                calculate_schedule_interval((response.json()), stop_set[0])
-
-                logger.debug(
-                    f"Successfully updated schedules for stop set {stop_set[0]} "
-                    f"for schedule interval calculation. "
-                    f"Next update scheduled for {job_time!s}",
-                )
-            else:
-                # Reschedule the failed action for 1 minute later
-                job_time = datetime.now() + timedelta(minutes=1)
-
-                logger.error(
-                    f"Failed to update schedules for stop set {stop_set[0]} "
-                    f"for schedule interval calculation: {response.status_code}. "
-                    f"Rescheduled for {job_time!s}.",
-                )
-        except requests.exceptions.JSONDecodeError as e:
-            job_time = datetime.now() + timedelta(minutes=1)
-            logger.warning(
-                "The response contained invalid JSON data when updating schedules "
-                f"for stop set {stop_set[0]} for schedule interval calculation. "
-                f"Next update scheduled for {job_time!s}",
-            )
-            logger.warning(e)
-        except requests.exceptions.InvalidJSONError as e:
-            job_time = datetime.now() + timedelta(minutes=1)
-            logger.warning(
-                "The response contained invalid JSON data when updating schedules "
-                f"for stop set {stop_set[0]} for schedule interval calculation. "
-                f"Next update scheduled for {job_time!s}",
-            )
-            logger.warning(e)
-        except requests.exceptions.ReadTimeout as e:
-            job_time = datetime.now() + timedelta(minutes=1)
-            logger.warning(
-                f"Timeout occurred when updating schedules for stop set {stop_set[0]} "
-                f"for schedule interval calculation. "
-                f"Next update scheduled for {job_time!s}",
-            )
-            logger.warning(e)
-        except requests.exceptions.ConnectionError:
-            job_time = datetime.now() + timedelta(minutes=5)
-            logger.exception(
-                f"Connection error when updating schedules for stop set {stop_set[0]} "
-                f"for schedule interval calculation. "
-                f"Next update scheduled for {job_time!s}",
-            )
-        except requests.exceptions.RequestException:
-            job_time = datetime.now() + timedelta(minutes=1)
-            logger.exception(
-                f"Error when updating schedules for stop set {stop_set[0]} "
-                f"for schedule interval calculation. "
-                f"Next update scheduled for {job_time!s}",
-            )
 
     job_id: str = f"{stop_set[0]}_{schedule_type}"
 

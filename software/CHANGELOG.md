@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All of the suburban railways LED color is the same as H5 now (purple)
 - Dynamically adjust next schedule update date, if the last departure time is sooner
   than the time of the next planned update
+- No separate API call just to calculate schedule interval for the routes
 - Log entries includes function name instead of thread name
 
 ## [1.0.0] - 2024-12-24
