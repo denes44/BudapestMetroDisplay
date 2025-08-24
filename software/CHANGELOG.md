@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - All of the suburban railways LED color is the same as H5 now (purple)
-- Removed limit of results during BKK API request
 
 ## [1.0.0] - 2024-12-24
 

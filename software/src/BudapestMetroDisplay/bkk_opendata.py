@@ -48,11 +48,13 @@ API_SCHEDULE_PARAMETERS: dict[str, dict[str, Any]] = {
     "REGULAR": {
         "minutesBefore": 0,
         "minutesAfter": round((settings.bkk.api_update_regular + 300) / 60),
+        "limit": 200,
         "nextSchedule": timedelta(seconds=settings.bkk.api_update_regular),
     },
     "REALTIME": {
         "minutesBefore": 0,
         "minutesAfter": round(settings.bkk.api_update_realtime * 2 / 60),
+        "limit": 100,
         "nextSchedule": timedelta(seconds=settings.bkk.api_update_realtime),
     },
 }
@@ -218,6 +220,7 @@ def fetch_schedule_for_stops(
         "stopId": list(stop_set[1]),
         "minutesBefore": API_SCHEDULE_PARAMETERS[schedule_type]["minutesBefore"],
         "minutesAfter": API_SCHEDULE_PARAMETERS[schedule_type]["minutesAfter"],
+        "limit": API_SCHEDULE_PARAMETERS[schedule_type]["limit"],
         "onlyDepartures": "false",
         "appVersion": f"BudapestMetroDisplay {__version__}",
         "version": "4",
