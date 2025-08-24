@@ -730,83 +730,55 @@ def calculate_schedule_interval(json_response: Any, reference_id: str) -> None:
         return
 
     # Variable to store the necessary data from the first two relevant stops
-    data: list[dict[str, Any]] = [{} for _ in range(2)]
+    stop_id: str = stop_times[0].get("stopId", "")
+    stop_headsign: str = stop_times[0].get("stopHeadsign", "")
+    last_time: int = stop_times[0].get("departureTime", 0)
+
+    deltas: list[int] = []
 
     # Iterate through the TransitScheduleStopTimes
     # in the TransitArrivalsAndDepartures
-    i = 0
-    for stop_time in stop_times:
-        # Check if the stopHeadsign is the same as the first one
-        if i > 0 and stop_time.get("stopHeadsign") != data[0]["stopHeadsign"]:
+    for stop_time in stop_times[1:]:  # skip the first item
+        # Check if the stopId and stopHeadsign is the same as the first one
+        if (
+            stop_time.get("stopId") != stop_id
+            or stop_time.get("stopHeadsign") != stop_headsign
+        ):
             continue
 
-        # Store the stopHeadsign data
-        data[i]["stopHeadsign"] = stop_time.get("stopHeadsign")
+        current_time: int = stop_time.get("departureTime", 0)
+        delta: int = current_time - last_time
+        deltas.append(delta)
+        last_time = current_time
 
-        # Get the scheduled departure or arrival times
-        # CASE #1: Both arrival and departure time available as scheduled time
-        # [middle stop, no realtime data]
-        if "arrivalTime" in stop_time and "departureTime" in stop_time:
-            data[i]["time"] = stop_time.get("departureTime")
-        # CASE #2: Only scheduled arrival time is available
-        # [end stop with no realtime data]
-        elif "arrivalTime" in stop_time:
-            data[i]["time"] = stop_time.get("arrivalTime")
-        # CASE #3: Only scheduled departure time is available
-        # [start stop with no realtime data]
-        elif "departureTime" in stop_time:
-            data[i]["time"] = stop_time.get("departureTime")
-        # CASE #4: No valid time data is available
-        else:
-            logger.debug(
-                f"No valid arrival/departure time found when updating "
-                f"route {route_id} during schedule interval calculation",
-            )
-            continue
-        i += 1
-
-        if i == 2:
-            break
-
-    # Calculate the difference between the two schedules
-    # Check if the departure times are available for both stops
-    if "time" not in data[0] or "time" not in data[1]:
-        # No valid schedule data found, set the difference to -1
-        logger.debug(
-            f"No valid schedule data found when updating "
-            f"schedule intervals for {reference_id}",
-        )
-        difference = -1
-    else:
-        # Calculate the difference between the two schedules
-        difference = (data[1]["time"] - data[0]["time"]) / 60
+    avg = sum(deltas) / len(deltas) / 60 if deltas else -1
 
     # Update the ACTION_DELAY dictionary according to the calculated difference
-    if difference > 0:
+    if avg > 0:
         if route_id.startswith("BKK_5"):  # Subway
-            if difference <= 2:
+            if avg <= 2:
                 ACTION_DELAY[route_id] = 15
-            elif difference < 5.5:
+            elif avg < 5.5:
                 ACTION_DELAY[route_id] = 20
             else:
                 ACTION_DELAY[route_id] = 30
         elif route_id.startswith("BKK_H"):  # Suburban railway
-            if difference < 5.5:
+            if avg < 5.5:
                 ACTION_DELAY[route_id] = 20
-            elif difference < 10.5:
+            elif avg < 10.5:
                 ACTION_DELAY[route_id] = 30
             else:
                 ACTION_DELAY[route_id] = 45
     # No valid schedule data found, set the default delay
-    elif difference == -1:
+    elif avg == -1:
         if route_id.startswith("BKK_5"):  # Subway
             ACTION_DELAY[route_id] = 30
         elif route_id.startswith("BKK_H"):  # Suburban railway
             ACTION_DELAY[route_id] = 45
 
     logger.debug(
-        f"Recalculated LED turn off delay for route {route_id}, schedule delay:  "
-        f"{difference:.1f} min, new delay: {ACTION_DELAY[route_id]} sec",
+        f"Recalculated LED turn off delay for route {route_id}, schedule interval:  "
+        f"{avg:.1f} min, LED delay: {ACTION_DELAY[route_id]} sec",
     )
 
 
