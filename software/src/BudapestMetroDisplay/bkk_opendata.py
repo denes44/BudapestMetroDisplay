@@ -231,12 +231,33 @@ def fetch_schedule_for_stops(
         response = requests.get(url, headers=headers, params=params, timeout=5)
 
         if response.status_code == 200:
-            store_departures(response.json(), stop_set[0])
+            latest_departure_time: int = store_departures(response.json(), stop_set[0])
 
-            logger.debug(
-                f"Successfully updated {schedule_type} schedules for stop set "
-                f"{stop_set[0]}. Next update scheduled for {job_time!s}",
-            )
+            if schedule_type != "REALTIME" and latest_departure_time == -1:
+                job_time = datetime.now() + timedelta(minutes=1)
+                logger.debug(
+                    f"There were no departures during {schedule_type} schedule update "
+                    f"for stop set {stop_set[0]}. "
+                    f"Next update scheduled for {job_time!s}",
+                )
+            elif (
+                schedule_type != "REALTIME"
+                and datetime.fromtimestamp(latest_departure_time) < job_time
+            ):
+                job_time = datetime.fromtimestamp(latest_departure_time) - timedelta(
+                    minutes=5,
+                )
+                logger.debug(
+                    f"The calculated next {schedule_type} schedule update "
+                    f"for stop set {stop_set[0]} is later than the last departure "
+                    f"we stored, so next update time was adjusted accordingly. "
+                    f"Next update scheduled for {job_time!s}",
+                )
+            else:
+                logger.debug(
+                    f"Successfully updated {schedule_type} schedules for stop set "
+                    f"{stop_set[0]}. Next update scheduled for {job_time!s}",
+                )
         else:
             # Reschedule the failed action for 1 minute later
             job_time = datetime.now() + timedelta(minutes=1)
@@ -451,7 +472,7 @@ def fetch_alerts_for_route(route_id: str) -> None:
     )
 
 
-def store_departures(json_response: Any, reference_id: str) -> None:
+def store_departures(json_response: Any, reference_id: str) -> int:
     """Process the API response and store the departures.
 
     Processes the ArrivalsAndDeparturesForStopOTPMethodResponse API response
@@ -462,7 +483,8 @@ def store_departures(json_response: Any, reference_id: str) -> None:
 
     :param json_response: JSON return data from the BKK OpenData API
     :param reference_id: Internal reference to identify the API request in the logs
-    :return:
+    :return: Timestamp of the latest departure in the data provided,
+        -1 if there is no valid departures
     """
     # Check if JSON looks valid
     if (
@@ -473,7 +495,7 @@ def store_departures(json_response: Any, reference_id: str) -> None:
         logger.error(
             f"No valid schedule data in API response for stop(s) {reference_id}",
         )
-        return
+        return -1
 
     # Check if we exceeded the query limit
     if json_response["data"].get("limitExceeded", "false") == "true":
@@ -495,7 +517,7 @@ def store_departures(json_response: Any, reference_id: str) -> None:
             f"No route IDs found or the list is empty when updating stop(s) "
             f"{reference_id}",
         )
-        return
+        return -1
 
     # Get stopId, when there is only one stop in the response
     stop_id_global: str = json_response["data"]["entry"].get("stopId", None)
@@ -505,6 +527,7 @@ def store_departures(json_response: Any, reference_id: str) -> None:
     if len(stop_times) == 0:
         logger.debug(f"No schedule data found when updating stop(s) {reference_id}")
 
+    latest_departure_time: int = -1
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
     for stop_time in stop_times:
         trip_id: str = stop_time.get("tripId")
@@ -624,6 +647,8 @@ def store_departures(json_response: Any, reference_id: str) -> None:
         job_id: str = f"{stop_id}+{trip_id}"
         job_time: datetime = datetime.fromtimestamp(arrival_time)
 
+        latest_departure_time = max(latest_departure_time, arrival_time)
+
         if job_time > datetime.now():
             departure_scheduler.add_job(
                 action_to_execute,
@@ -652,6 +677,8 @@ def store_departures(json_response: Any, reference_id: str) -> None:
     alerts = json_response["data"]["entry"].get("alertIds", [])
     if len(alerts) > 0:
         process_alerts(json_response, reference_id)
+
+    return latest_departure_time
 
 
 def action_to_execute(
