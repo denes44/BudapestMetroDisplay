@@ -330,7 +330,7 @@ def fetch_alerts_for_route(route_id: str) -> None:
     :param route_id: The id of the stop we want to get the details for
     """
     # Calculate next schedule time
-    job_time = datetime.now() + timedelta(minutes=settings.bkk.api_update_alerts)
+    job_time = datetime.now() + timedelta(seconds=settings.bkk.api_update_alerts)
 
     url: str = f"{API_BASE_URL}route-details"
 
