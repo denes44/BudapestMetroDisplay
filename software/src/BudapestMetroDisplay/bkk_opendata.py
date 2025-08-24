@@ -231,6 +231,10 @@ def fetch_schedule_for_stops(
         response = requests.get(url, headers=headers, params=params, timeout=5)
 
         if response.status_code == 200:
+            # Recalculate schedule intervals for REGULAR updates
+            if schedule_type == "REGULAR":
+                calculate_schedule_interval((response.json()), stop_set[0])
+
             latest_departure_time: int = store_departures(response.json(), stop_set[0])
 
             if schedule_type != "REALTIME" and latest_departure_time == -1:
@@ -258,10 +262,6 @@ def fetch_schedule_for_stops(
                     f"Successfully updated {schedule_type} schedules for stop set "
                     f"{stop_set[0]}. Next update scheduled for {job_time!s}",
                 )
-
-            # Recalculate schedule intervals for REGULAR updates
-            if schedule_type == "REGULAR":
-                calculate_schedule_interval((response.json()), stop_set[0])
         else:
             # Reschedule the failed action for 1 minute later
             job_time = datetime.now() + timedelta(minutes=1)
