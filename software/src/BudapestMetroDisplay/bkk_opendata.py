@@ -259,7 +259,9 @@ def fetch_schedule_for_stops(
                     f"{stop_set[0]}. Next update scheduled for {job_time!s}",
                 )
 
-            calculate_schedule_interval((response.json()), stop_set[0])
+            # Recalculate schedule intervals for REGULAR updates
+            if schedule_type == "REGULAR":
+                calculate_schedule_interval((response.json()), stop_set[0])
         else:
             # Reschedule the failed action for 1 minute later
             job_time = datetime.now() + timedelta(minutes=1)
