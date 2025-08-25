@@ -19,9 +19,10 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 #  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
-
+import json
 import logging
 from datetime import datetime, time, timedelta
+from pathlib import Path
 from random import randint
 from typing import Any
 
@@ -813,6 +814,17 @@ def process_alerts(json_response: Any, reference_id: str) -> None:
 
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
     for alert_details in alerts.values():
+        target_folder = Path(settings.log.path)
+        timestamp_str = datetime.fromtimestamp(alert_details["modifiedTime"]).strftime(
+            "%Y%m%d_%H%M%S",
+        )
+        filename = target_folder / f"alert_{alert_details['id']}_{timestamp_str}.txt"
+
+        # Save only if file does not exist
+        if not filename.exists():
+            with filename.open("w", encoding="utf-8") as f:
+                json.dump(alert_details, f, ensure_ascii=False, indent=2)
+
         # If the start time of the alert is in the future, return False
         if alert_details["start"] > datetime.now().timestamp():
             continue
