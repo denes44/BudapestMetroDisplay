@@ -100,6 +100,7 @@ DEFAULT_COLORS: list[tuple[int, int, int]] = [
     *([ROUTE_COLORS_DIM["BKK_5300"]] * 18),  # M3
     *([ROUTE_COLORS_DIM["BKK_5100"]] * 10),  # M1
 ]
+DEFAULT_COLORS_ORIGINAL = list(DEFAULT_COLORS)
 
 # Number of LEDs
 NUM_LEDS: int = len(DEFAULT_COLORS)
@@ -186,97 +187,108 @@ def calculate_default_color(led_index: int) -> None:
     """
     # Check whether this LED belongs to multiple routes
     if led_index not in common_stops:
-        # If no, we don't have to do anything
-        return
+        # LED belongs to single route
+        stop_ids: list[str] = [
+            sid for sid, idx in stops.stops_led.items() if idx == led_index
+        ]
 
-    route_status: dict[str, bool] = {}  # Status of each route for the specific stop/LED
-    for route in common_stops[led_index]:
-        route_id: str = route["route_id"]
-        stop_ids: str = route["stop_ids"]
-
-        # Check if all stops in the stop_ids list
-        # have no service status for the current route
-        if all(stops.stop_no_service.get(stop_id) for stop_id in stop_ids):
-            route_status[route_id] = False
-        else:
-            route_status[route_id] = True
-
-    # Determine the default color based on
-    # which routes are operational at the specific stop/LED
-    if led_index == 12:  # Kálvin tér: M3,M4
-        if (
-            route_status["BKK_5300"] and route_status["BKK_5400"]
-        ):  # Both M3 and M4 are operational
-            DEFAULT_COLORS[led_index] = (
-                0,
-                int(255 * settings.led.dim_ratio),
-                int(255 * settings.led.dim_ratio),
-            )
-        elif route_status["BKK_5300"]:  # Only M3 is operational
-            DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_5300"]
-        elif route_status["BKK_5400"]:  # Only M4 is operational
-            DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_5400"]
-        else:
+        if all(stops.stop_no_service.get(sid, False) for sid in stop_ids):
             DEFAULT_COLORS[led_index] = (0, 0, 0)
-    elif led_index == 17:  # Batthyány tér: M2,H5
-        if (
-            route_status["BKK_5200"] and route_status["BKK_H5"]
-        ):  # Both M2 and H5 are operational
-            DEFAULT_COLORS[led_index] = (
-                int(255 * settings.led.dim_ratio),
-                0,
-                int(128 * settings.led.dim_ratio),
-            )
-        elif route_status["BKK_5200"]:  # Only M2 is operational
-            DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_5200"]
-        elif route_status["BKK_H5"]:  # Only H5 is operational
-            DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_H5"]
         else:
-            DEFAULT_COLORS[led_index] = (0, 0, 0)
-    elif led_index == 19:  # Deák Ferenc tér: M1,M2,M3
-        r: int = 0
-        g: int = 0
-        b: int = 0
+            DEFAULT_COLORS[led_index] = DEFAULT_COLORS_ORIGINAL[led_index]
+    else:
+        # LED belongs to multiple routes
+        route_status: dict[
+            str,
+            bool,
+        ] = {}  # Status of each route for the specific stop/LED
+        for route in common_stops[led_index]:
+            route_id: str = route["route_id"]
+            stop_ids = route["stop_ids"]
 
-        if route_status["BKK_5100"]:  # M1 is operational
-            r = int(255 * settings.led.dim_ratio)
-            g = int(255 * settings.led.dim_ratio)
-        if route_status["BKK_5200"]:  # M2 is operational
-            r = int(255 * settings.led.dim_ratio)
-        if route_status["BKK_5300"]:  # M3 is operational
-            b = int(255 * settings.led.dim_ratio)
+            # Check if all stops in the stop_ids list
+            # have no service status for the current route
+            if all(stops.stop_no_service.get(stop_id) for stop_id in stop_ids):
+                route_status[route_id] = False
+            else:
+                route_status[route_id] = True
 
-        DEFAULT_COLORS[led_index] = (r, g, b)
-    elif led_index == 22:  # Keleti pályaudvar: M2,M4
-        if (
-            route_status["BKK_5200"] and route_status["BKK_5400"]
-        ):  # Both M2 and M4 are operational
-            DEFAULT_COLORS[led_index] = (
-                int(255 * settings.led.dim_ratio),
-                int(128 * settings.led.dim_ratio),
-                0,
-            )
-        elif route_status["BKK_5200"]:  # Only M2 is operational
-            DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_5200"]
-        elif route_status["BKK_5400"]:  # Only M4 is operational
-            DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_5400"]
-        else:
-            DEFAULT_COLORS[led_index] = (0, 0, 0)
-    elif led_index == 25:  # Örs vezér tere: M2,H8/9
-        if (
-            route_status["BKK_5200"] and route_status["BKK_H8"]
-        ):  # Both M2 and H8 are operational
-            DEFAULT_COLORS[led_index] = (
-                int(255 * settings.led.dim_ratio),
-                0,
-                int(48 * settings.led.dim_ratio),
-            )
-        elif route_status["BKK_5200"]:  # Only M2 is operational
-            DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_5200"]
-        elif route_status["BKK_H8"]:  # Only H8 is operational
-            DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_H8"]
-        else:
-            DEFAULT_COLORS[led_index] = (0, 0, 0)
+        # Determine the default color based on
+        # which routes are operational at the specific stop/LED
+        if led_index == 12:  # Kálvin tér: M3,M4
+            if (
+                route_status["BKK_5300"] and route_status["BKK_5400"]
+            ):  # Both M3 and M4 are operational
+                DEFAULT_COLORS[led_index] = (
+                    0,
+                    int(255 * settings.led.dim_ratio),
+                    int(255 * settings.led.dim_ratio),
+                )
+            elif route_status["BKK_5300"]:  # Only M3 is operational
+                DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_5300"]
+            elif route_status["BKK_5400"]:  # Only M4 is operational
+                DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_5400"]
+            else:
+                DEFAULT_COLORS[led_index] = (0, 0, 0)
+        elif led_index == 17:  # Batthyány tér: M2,H5
+            if (
+                route_status["BKK_5200"] and route_status["BKK_H5"]
+            ):  # Both M2 and H5 are operational
+                DEFAULT_COLORS[led_index] = (
+                    int(255 * settings.led.dim_ratio),
+                    0,
+                    int(128 * settings.led.dim_ratio),
+                )
+            elif route_status["BKK_5200"]:  # Only M2 is operational
+                DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_5200"]
+            elif route_status["BKK_H5"]:  # Only H5 is operational
+                DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_H5"]
+            else:
+                DEFAULT_COLORS[led_index] = (0, 0, 0)
+        elif led_index == 19:  # Deák Ferenc tér: M1,M2,M3
+            r: int = 0
+            g: int = 0
+            b: int = 0
+
+            if route_status["BKK_5100"]:  # M1 is operational
+                r = int(255 * settings.led.dim_ratio)
+                g = int(255 * settings.led.dim_ratio)
+            if route_status["BKK_5200"]:  # M2 is operational
+                r = int(255 * settings.led.dim_ratio)
+            if route_status["BKK_5300"]:  # M3 is operational
+                b = int(255 * settings.led.dim_ratio)
+
+            DEFAULT_COLORS[led_index] = (r, g, b)
+        elif led_index == 22:  # Keleti pályaudvar: M2,M4
+            if (
+                route_status["BKK_5200"] and route_status["BKK_5400"]
+            ):  # Both M2 and M4 are operational
+                DEFAULT_COLORS[led_index] = (
+                    int(255 * settings.led.dim_ratio),
+                    int(128 * settings.led.dim_ratio),
+                    0,
+                )
+            elif route_status["BKK_5200"]:  # Only M2 is operational
+                DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_5200"]
+            elif route_status["BKK_5400"]:  # Only M4 is operational
+                DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_5400"]
+            else:
+                DEFAULT_COLORS[led_index] = (0, 0, 0)
+        elif led_index == 25:  # Örs vezér tere: M2,H8/9
+            if (
+                route_status["BKK_5200"] and route_status["BKK_H8"]
+            ):  # Both M2 and H8 are operational
+                DEFAULT_COLORS[led_index] = (
+                    int(255 * settings.led.dim_ratio),
+                    0,
+                    int(48 * settings.led.dim_ratio),
+                )
+            elif route_status["BKK_5200"]:  # Only M2 is operational
+                DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_5200"]
+            elif route_status["BKK_H8"]:  # Only H8 is operational
+                DEFAULT_COLORS[led_index] = ROUTE_COLORS_DIM["BKK_H8"]
+            else:
+                DEFAULT_COLORS[led_index] = (0, 0, 0)
 
 
 def reset_leds_to_default() -> None:
@@ -290,34 +302,51 @@ def reset_leds_to_default() -> None:
     logger.debug("All LEDs were reset to their default colors")
 
 
-def reset_led_to_default(led_index: int) -> None:
+def reset_led_to_default(led_index: int, *, fade: bool = True) -> None:
     """Reset the color of a specific LED to the default value.
 
     :param led_index: The index of the LED
+    :param fade: Whether to use fade or not
     """
     if 0 <= led_index < NUM_LEDS:
-        with led_lock:
-            # Get the current color
-            current_color: tuple[int, int, int] = (
-                led_states[led_index * 3],  # Red component
-                led_states[led_index * 3 + 1],  # Green component
-                led_states[led_index * 3 + 2],  # Blue component
+        if fade:
+            with led_lock:
+                # Get the current color
+                current_color: tuple[int, int, int] = (
+                    led_states[led_index * 3],  # Red component
+                    led_states[led_index * 3 + 1],  # Green component
+                    led_states[led_index * 3 + 2],  # Blue component
+                )
+
+            # Calculate fade parameters
+            steps: int = int(settings.led.fade_time / 0.005)  # Number of steps
+            delay: float = 0.005  # Time to wait between steps
+
+            # Start the fading effect in a separate thread
+            threading.Thread(
+                target=fade_color,
+                args=(
+                    led_index,
+                    current_color,
+                    DEFAULT_COLORS[led_index],
+                    steps,
+                    delay,
+                ),
+            ).start()
+
+            logger.trace(  # type: ignore[attr-defined]
+                f"LED {led_index} fading from color {current_color!s} "
+                f"to default color {DEFAULT_COLORS[led_index]!s}",
             )
-
-        # Calculate fade parameters
-        steps: int = int(settings.led.fade_time / 0.005)  # Number of steps
-        delay: float = 0.005  # Time to wait between steps
-
-        # Start the fading effect in a separate thread
-        threading.Thread(
-            target=fade_color,
-            args=(led_index, current_color, DEFAULT_COLORS[led_index], steps, delay),
-        ).start()
-
-        logger.trace(  # type: ignore[attr-defined]
-            f"LED {led_index} fading from color {current_color!s} "
-            f"to default color {DEFAULT_COLORS[led_index]!s}",
-        )
+        else:
+            with led_lock:
+                led_states[led_index * 3 : led_index * 3 + 3] = DEFAULT_COLORS[
+                    led_index
+                ]
+            logger.trace(  # type: ignore[attr-defined]
+                f"LED {led_index} set color "
+                f"to default color {DEFAULT_COLORS[led_index]!s}",
+            )
     else:
         logger.error(
             f"Invalid LED index {led_index} when trying to reset the value, "
