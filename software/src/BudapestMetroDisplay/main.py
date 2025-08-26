@@ -28,7 +28,7 @@ import sys
 import time
 from asyncio import AbstractEventLoop
 
-from BudapestMetroDisplay import bkk_opendata, led_control, log, webserver
+from BudapestMetroDisplay import bkk_opendata, gui, led_control, log, webserver
 from BudapestMetroDisplay._version import __version__
 from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay.stops import alert_routes, stops_metro, stops_railway
@@ -111,6 +111,8 @@ def main() -> None:  # noqa: D103
     led_control.activate_sacn()
 
     webserver.start_webserver()
+
+    gui.start_gui()
 
     try:
         while True:

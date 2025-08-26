@@ -28,7 +28,7 @@ from tkinter import ttk
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from BudapestMetroDisplay import bkk_opendata
+from BudapestMetroDisplay import bkk_opendata, led_control
 
 logger = logging.getLogger(__name__)
 
@@ -334,6 +334,18 @@ def change_gui_led_color(led_index: int, color: tuple[int, int, int]) -> None:
         canvas.itemconfig(led_rectangle, fill=rgb_to_color_string(color))
 
 
+def update_all_led_colors() -> None:
+    """Continuously update all LED colors every second."""
+    for led_index, led_rectangle in enumerate(led_rectangles):
+        if led_rectangle is not None:
+            color = led_control.get_led_color(led_index)
+            if color is not None:
+                canvas.itemconfig(led_rectangle, fill=rgb_to_color_string(color))
+
+    # Schedule the function to run again after 1000 ms
+    canvas.after(250, update_all_led_colors)
+
+
 def filter_jobs_by_route(
     job_table: ttk.Treeview,
     scheduler: BackgroundScheduler,
@@ -423,5 +435,6 @@ def start_gui() -> None:
     """Open the GUI window and draw the elements."""
     draw_leds()
     create_route_buttons(canvas)
+    logger.debug("GUI started")
+    update_all_led_colors()
     root.mainloop()
-    logging.debug("GUI started")
