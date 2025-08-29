@@ -29,10 +29,10 @@ import requests
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from BudapestMetroDisplay import aps_helpers, led_control
+from BudapestMetroDisplay import aps_helpers
 from BudapestMetroDisplay._version import __version__
 from BudapestMetroDisplay.config import settings
-from BudapestMetroDisplay.structure import Route
+from BudapestMetroDisplay.structure import Route, Stop
 
 logger = logging.getLogger(__name__)
 # Set the logging level for urllib3 to INFO
@@ -601,7 +601,7 @@ def store_departures(json_response: Any, route: Route) -> int:
                 action_to_execute,
                 "date",
                 run_date=job_time,
-                args=[stop_id, route, trip_id, job_time, delay],
+                args=[route.get_stop_id(stop_id).stop, trip_id, job_time, delay],
                 id=job_id,
                 replace_existing=True,
                 # If the job exists, it will be replaced with the new time
@@ -629,8 +629,7 @@ def store_departures(json_response: Any, route: Route) -> int:
 
 
 def action_to_execute(
-    stop_id: str,
-    route_id: str,
+    stop: Stop,
     trip_id: str,
     job_time: datetime,
     delay: int,
@@ -641,8 +640,7 @@ def action_to_execute(
     Changes the LED of the specified stop(stop_id) to the associated color,
     and schedules the turn-off of the LED in APScheduler after the supplied delay.
 
-    :param stop_id: stopId from the BKK OpenData API
-    :param route_id: routeId from the BKK OpenData API
+    :param stop: The Stop object the departure are related to
     :param trip_id: tripId from the BKK OpenData API
     :param job_time: The time this job was scheduled in APScheduler
     :param delay: The amount of time needs to be elapsed in seconds
@@ -655,27 +653,29 @@ def action_to_execute(
         return
 
     logger.trace(  # type: ignore[attr-defined]
-        f"Action triggered for stop: {stop_id}, route: {route_id}, trip: {trip_id}, "
-        f"LED off delay: {delay} sec",
+        f"Action triggered for stop: {stop.name}, route: {stop.route.name}, "
+        f"trip: {trip_id}, LED off delay: {delay} sec",
     )
 
-    led_id: int = stops_led[stop_id]
+    # FIXME
+    # led_id: int = stop.led.index
 
     # Change LED color according to the color of the route
-    led_control.set_led_color(led_id, led_control.ROUTE_COLORS[route_id])
+    # led_control.set_led_color(led_id, led_control.ROUTE_COLORS[route_id])
 
     # Schedule an action at the departure time to turn the LED back to the default value
-    led_job_time = job_time + timedelta(seconds=delay)
+    # led_job_time = job_time + timedelta(seconds=delay)
 
-    led_scheduler.add_job(
-        led_control.reset_led_to_default,
-        "date",
-        run_date=led_job_time,
-        args=[led_id],
-        id=str(led_id),
-        replace_existing=True,
-        # If the job exists, it will be replaced with the new time
-    )
+    # led_scheduler.add_job(
+    #     led_control.reset_led_to_default,
+    #     "date",
+    #     run_date=led_job_time,
+    #     args=[led_id],
+    #     id=str(led_id),
+    #     replace_existing=True,
+    #     # If the job exists, it will be replaced with the new time
+    # )
+    # FIXME
 
 
 def calculate_schedule_interval(json_response: Any, route: Route) -> None:
