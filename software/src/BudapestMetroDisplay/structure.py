@@ -31,14 +31,15 @@ def _rgb_max(a: RGB, b: RGB) -> RGB:
 # ========= lighting core =========
 
 
-@dataclass
-class LED:
+class LED(BaseModel):
     """Physical RGB LED.
 
     - (r,g,b) is the *current* output color.
     - default_override pins a default color for this LED (if None -> computed).
     - 'stops' back-ref lets the LED compute its default from attached Stops' Routes.
     """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     index: int
     r: int = 0
@@ -83,30 +84,31 @@ class LED:
         self.set_rgb(*self.get_default_color())
 
 
-class LedStrip:
+class LedStrip(BaseModel):
     """An LED Strip that hold LEDs, to make them easier to handle."""
 
-    def __init__(self, leds: list[LED]) -> None:
-        self.leds_by_index: dict[int, LED] = {led.index: led for led in leds}
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    leds: list[LED]
 
     def off(self) -> None:
         """Turn off all LEDs in the LED Strip."""
-        for led in self.leds_by_index.values():
+        for led in self.leds:
             led.off()
 
     def reset_to_default(self) -> None:
-        """Reset all LEDs in the LED Stripto its default color."""
-        for led in self.leds_by_index.values():
+        """Reset all LEDs in the LED Strip to its default color."""
+        for led in self.leds:
             led.reset_to_default()
 
-    def set_led(self, index_1b: int, rgb: RGB) -> None:
+    def set_led(self, index: int, rgb: RGB) -> None:
         """Set the color of a LED with a specific index."""
-        led = self.leds_by_index.get(index_1b)
-        if led:
-            led.set_rgb(*_rgb_clamp(rgb))
+        for led in self.leds:
+            if led.index == index:
+                led.set_rgb(*_rgb_clamp(rgb))
 
     def to_tuple(self) -> tuple[int, ...]:
-        """Return the values of the LEDs in the LED Strip as one big touple."""
+        """Return the values of the LEDs in the LED Strip as one big tuple."""
         out: list[int] = []
         for idx in sorted(self.leds_by_index.keys()):
             led = self.leds_by_index[idx]
