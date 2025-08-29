@@ -214,6 +214,21 @@ class Route(BaseModel):
         if stop.route is not self:
             stop.route = self  # Set the Route for the Stop
 
+    def get_stop_id(self, stop_id: str) -> StopId | None:
+        """Return the StopId object in this Route that matches stop_id.
+
+        Returns None if not found.
+        """
+        return next(
+            (
+                sid
+                for stop in self.stops
+                for sid in stop.stop_ids
+                if sid.stop_id == stop_id
+            ),
+            None,
+        )
+
     def get_stop_ids(self) -> list[StopId]:
         """Return all Stop IDs of the Route."""
         return [sid for stop in self.stops for sid in stop.stop_ids]
