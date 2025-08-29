@@ -32,7 +32,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from BudapestMetroDisplay import aps_helpers, led_control
 from BudapestMetroDisplay._version import __version__
 from BudapestMetroDisplay.config import settings
-from BudapestMetroDisplay.stops import stops_led
 from BudapestMetroDisplay.structure import Route
 
 logger = logging.getLogger(__name__)
@@ -584,11 +583,11 @@ def store_departures(json_response: Any, route: Route) -> int:
 
             # FIXME
             # Reset the LED to the default color
-            led_control.calculate_default_color(stops_led[stop_id])
+            # led_control.calculate_default_color(stops_led[stop_id])
             # Change the LED color to the default color
             # if there is no ongoing LED action for this LED
-            if not led_control.led_locks[stops_led[stop_id]].locked():
-                led_control.reset_led_to_default(stops_led[stop_id])
+            # if not led_control.led_locks[stops_led[stop_id]].locked():
+            #    led_control.reset_led_to_default(stops_led[stop_id])
             # FIXME
 
         # Schedule the action before the departure."""
@@ -894,7 +893,7 @@ def process_alerts(json_response: Any, route: Route) -> None:
                         # FIXME
                         # Calculate the default color for this stop according to
                         # which route is operation for the stop
-                        led_control.calculate_default_color(stops_led[stop_id])
+                        # led_control.calculate_default_color(stops_led[stop_id])
                         # Change the LED color to the default color
-                        led_control.reset_led_to_default(stops_led[stop_id], fade=False)
+                        # led_control.reset_led_to_default(stops_led[stop_id], fade=False)
                         # FIXME
