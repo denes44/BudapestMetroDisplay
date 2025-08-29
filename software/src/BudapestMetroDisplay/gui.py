@@ -324,7 +324,7 @@ def draw_leds() -> None:
 
         # Draw the rectangle with rotation
         led_rectangles[i] = canvas.create_polygon(points, fill=color, outline="white")
-    logging.debug("Drawing of the LED on the GUI is finished")
+    logger.debug("Drawing of the LED on the GUI is finished")
 
 
 def change_gui_led_color(led_index: int, color: tuple[int, int, int]) -> None:
