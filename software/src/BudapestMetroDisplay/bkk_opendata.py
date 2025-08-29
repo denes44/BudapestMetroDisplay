@@ -406,7 +406,7 @@ def fetch_alerts_for_route(route_id: str) -> None:
     )
 
 
-def store_departures(json_response: Any, reference_id: str) -> int:
+def store_departures(json_response: Any, route: Route) -> int:
     """Process the API response and store the departures.
 
     Processes the ArrivalsAndDeparturesForStopOTPMethodResponse API response
@@ -416,7 +416,7 @@ def store_departures(json_response: Any, reference_id: str) -> int:
     which will control the LED states.
 
     :param json_response: JSON return data from the BKK OpenData API
-    :param reference_id: Internal reference to identify the API request in the logs
+    :param route: The Route that the schedule data belongs to
     :return: Timestamp of the latest departure in the data provided,
         -1 if there is no valid departures
     """
@@ -427,13 +427,13 @@ def store_departures(json_response: Any, reference_id: str) -> int:
         or "entry" not in json_response["data"]
     ):
         logger.error(
-            f"No valid schedule data in API response for stop(s) {reference_id}",
+            f"No valid schedule data in API response for route {route.name}",
         )
         return -1
 
     # Check if we exceeded the query limit
     if json_response["data"].get("limitExceeded", "false") == "true":
-        logger.warning(f"Query limit is exceeded when updating stop(s) {reference_id}")
+        logger.warning(f"Query limit is exceeded when updating route {route.name}")
 
     # Get routeId
     if (
@@ -448,8 +448,15 @@ def store_departures(json_response: Any, reference_id: str) -> int:
         route_id = next(json_response["data"]["references"]["routes"].keys())
     else:
         logger.warning(
-            f"No route IDs found or the list is empty when updating stop(s) "
-            f"{reference_id}",
+            f"No route IDs found or the list is empty when updating route {route.name}",
+        )
+        return -1
+
+    # Check if the routeId from the data matches the Route
+    if route_id != route.route_id:
+        logger.warning(
+            f"Route IDs from the data doesn't match with the "
+            f"supplied route {route.name} when storing schedule data",
         )
         return -1
 
@@ -459,7 +466,7 @@ def store_departures(json_response: Any, reference_id: str) -> int:
     # Get stopTimes from TransitArrivalsAndDepartures
     stop_times = json_response["data"]["entry"].get("stopTimes", [])
     if len(stop_times) == 0:
-        logger.debug(f"No schedule data found when updating stop(s) {reference_id}")
+        logger.debug(f"No schedule data found when updating route {route.name}")
 
     latest_departure_time: int = -1
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
@@ -470,9 +477,9 @@ def store_departures(json_response: Any, reference_id: str) -> int:
         stop_id = stop_time.get("stopId") if "stopId" in stop_time else stop_id_global
 
         # Check if we are interested in the provided stopId
-        if stop_id not in stops_led:
+        if stop_id not in route.get_stop_ids():
             logger.debug(
-                f"Got update for stop {stop_id}, route {route_id}, "
+                f"Got update for stop {stop_id}, route {route.name}, "
                 f"but we don't need that, skipping",
             )
             continue
@@ -499,10 +506,10 @@ def store_departures(json_response: Any, reference_id: str) -> int:
             # Arrival time is the same as the departure,
             # use predefined delay for LED turn off
             else:
-                arrival_time = (
-                    stop_time.get("predictedDepartureTime") - ACTION_DELAY[route_id]
-                )
-                delay = ACTION_DELAY[route_id]
+                arrival_time = stop_time.get(
+                    "predictedDepartureTime",
+                ) - calculate_led_off_delay(route)
+                delay = calculate_led_off_delay(route)
         # CASE #2: Only predicted arrival time is available
         # [end stop with realtime data]
         # Use the predefined delay for LED turn off
@@ -510,10 +517,10 @@ def store_departures(json_response: Any, reference_id: str) -> int:
             "uncertain",
             False,
         ):
-            arrival_time = (
-                stop_time.get("predictedArrivalTime") - ACTION_DELAY[route_id]
-            )
-            delay = ACTION_DELAY[route_id]
+            arrival_time = stop_time.get(
+                "predictedArrivalTime",
+            ) - calculate_led_off_delay(route)
+            delay = calculate_led_off_delay(route)
         # CASE #3: Only predicted departure time is available
         # [start stop with realtime data]
         # Use the predefined delay for LED turn off
@@ -521,10 +528,10 @@ def store_departures(json_response: Any, reference_id: str) -> int:
             "uncertain",
             False,
         ):
-            arrival_time = (
-                stop_time.get("predictedDepartureTime") - ACTION_DELAY[route_id]
-            )
-            delay = ACTION_DELAY[route_id]
+            arrival_time = stop_time.get(
+                "predictedDepartureTime",
+            ) - calculate_led_off_delay(route)
+            delay = calculate_led_off_delay(route)
         # CASE #4: Both arrival and departure time available as scheduled time
         # [middle stop, no realtime data]
         elif "arrivalTime" in stop_time and "departureTime" in stop_time:
@@ -538,46 +545,53 @@ def store_departures(json_response: Any, reference_id: str) -> int:
             else:
                 arrival_time = (
                     stop_time.get("departureTime")
-                    - ACTION_DELAY[route_id]
+                    - calculate_led_off_delay(route)
                     + randint(-3, 3)
                 )
-                delay = ACTION_DELAY[route_id]
+                delay = calculate_led_off_delay(route)
         # CASE #5: Only scheduled arrival time is available
         # [end stop with no realtime data]
         # Use the predefined delay for LED turn off
         elif "arrivalTime" in stop_time:
             arrival_time = (
-                stop_time.get("arrivalTime") - ACTION_DELAY[route_id] + randint(-3, 3)
+                stop_time.get("arrivalTime")
+                - calculate_led_off_delay(route)
+                + randint(-3, 3)
             )
-            delay = ACTION_DELAY[route_id]
+            delay = calculate_led_off_delay(route)
         # CASE #6: Only scheduled departure time is available
         # [start stop with no realtime data]
         # Use the predefined delay for LED turn off
         elif "departureTime" in stop_time:
             arrival_time = (
-                stop_time.get("departureTime") - ACTION_DELAY[route_id] + randint(-3, 3)
+                stop_time.get("departureTime")
+                - calculate_led_off_delay(route)
+                + randint(-3, 3)
             )
-            delay = ACTION_DELAY[route_id]
+            delay = calculate_led_off_delay(route)
         # CASE #7: No valid time data is available
         else:
             logger.debug(
                 f"No valid arrival/departure time found "
-                f"when updating stop {stop_id}, route {route_id}",
+                f"when updating stop {stop_id}, route {route.name}",
             )
             continue
 
         # We processed valid schedule data for this stop,
         # that means that the stop is operational
-        if stop_no_service[stop_id]:
-            stop_no_service[stop_id] = False
+        if not route.get_stop_id(stop_id).in_service:
+            route.get_stop_id(stop_id).in_service = True
+
+            # FIXME
             # Reset the LED to the default color
             led_control.calculate_default_color(stops_led[stop_id])
             # Change the LED color to the default color
             # if there is no ongoing LED action for this LED
             if not led_control.led_locks[stops_led[stop_id]].locked():
                 led_control.reset_led_to_default(stops_led[stop_id])
+            # FIXME
 
-        # Schedule the action 10 seconds before the departure."""
+        # Schedule the action before the departure."""
         job_id: str = f"{stop_id}+{trip_id}"
         job_time: datetime = datetime.fromtimestamp(arrival_time)
 
@@ -588,7 +602,7 @@ def store_departures(json_response: Any, reference_id: str) -> int:
                 action_to_execute,
                 "date",
                 run_date=job_time,
-                args=[stop_id, route_id, trip_id, job_time, delay],
+                args=[stop_id, route, trip_id, job_time, delay],
                 id=job_id,
                 replace_existing=True,
                 # If the job exists, it will be replaced with the new time
@@ -596,13 +610,13 @@ def store_departures(json_response: Any, reference_id: str) -> int:
 
             logger.trace(  # type: ignore[attr-defined]
                 f"Scheduled action for departure: stop_id={stop_id}, "
-                f"route_id={route_id}, trip_id={trip_id}, "
+                f"trip_id={trip_id}, route {route.name}, "
                 f"departure_time={datetime.fromtimestamp(arrival_time)!s}",
             )
         else:
             logger.trace(  # type: ignore[attr-defined]
-                f"Action for departure: stop_id={stop_id}, route_id={route_id}, "
-                f"trip_id={trip_id}, "
+                f"Action for departure: stop_id={stop_id}, trip_id={trip_id}, "
+                f"route {route.name}, "
                 f"departure_time={datetime.fromtimestamp(arrival_time)!s} "
                 f"was in the past, skipping",
             )
@@ -610,7 +624,7 @@ def store_departures(json_response: Any, reference_id: str) -> int:
     # Check if there is any active alerts in the response and process them
     alerts = json_response["data"]["entry"].get("alertIds", [])
     if len(alerts) > 0:
-        process_alerts(json_response, reference_id)
+        process_alerts(json_response, route)
 
     return latest_departure_time
 
@@ -715,6 +729,7 @@ def calculate_schedule_interval(json_response: Any, route: Route) -> None:
         )
         return
 
+    # Check if the routeId from the data matches the Route
     if route_id != route.route_id:
         logger.warning(
             f"Route IDs from the data doesn't match with the "
