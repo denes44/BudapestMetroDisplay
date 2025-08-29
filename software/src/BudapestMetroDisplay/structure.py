@@ -1,95 +1,113 @@
 # transit_leds.py
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Callable, Dict, Iterator, List, Optional, Tuple
-from pydantic import BaseModel, Field, ConfigDict
 import time
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
 
-RGB = Tuple[int, int, int]
+from pydantic import BaseModel, ConfigDict, Field
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
+
+RGB = tuple[int, int, int]
 
 
 # ========= helpers =========
 
+
 def _clamp8(x: int) -> int:
-    return 0 if x < 0 else 255 if x > 255 else x
+    return 0 if x < 0 else min(x, 255)
+
 
 def _rgb_clamp(rgb: RGB) -> RGB:
-    return (_clamp8(rgb[0]), _clamp8(rgb[1]), _clamp8(rgb[2]))
+    return _clamp8(rgb[0]), _clamp8(rgb[1]), _clamp8(rgb[2])
+
 
 def _rgb_max(a: RGB, b: RGB) -> RGB:
-    return (a[0] if a[0] >= b[0] else b[0],
-            a[1] if a[1] >= b[1] else b[1],
-            a[2] if a[2] >= b[2] else b[2])
+    return max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2])
 
 
 # ========= lighting core =========
 
+
 @dataclass
 class LED:
-    """
-    Physical RGB LED (1-based index).
+    """Physical RGB LED.
+
     - (r,g,b) is the *current* output color.
     - default_override pins a default color for this LED (if None -> computed).
     - 'stops' back-ref lets the LED compute its default from attached Stops' Routes.
     """
+
     index: int
     r: int = 0
     g: int = 0
     b: int = 0
-    stops: List["Stop"] = field(default_factory=list)      # back-references from Stops
-    default_override: Optional[RGB] = None
+    stops: list[Stop] = field(default_factory=list)  # back-references from Stops
+    color_override: RGB | None = None
 
     def set_rgb(self, r: int, g: int, b: int) -> None:
+        """Set the LED colors to a specific value."""
         self.r, self.g, self.b = _clamp8(r), _clamp8(g), _clamp8(b)
 
     def off(self) -> None:
+        """Set the LED colors to off."""
         self.r = self.g = self.b = 0
 
-    def set_default_override(self, color: Optional[RGB]) -> None:
-        self.default_override = None if color is None else _rgb_clamp(color)
+    def set_color_override(self, color: RGB | None) -> None:
+        """Set an override color to the LED.
+
+        If an override color is set, it will be used instead of the computed
+        color from the Routes that the LED belongs to.
+        """
+        self.color_override = None if color is None else _rgb_clamp(color)
 
     def get_default_color(self) -> RGB:
-        """
+        """Return default color of the LED.
+
         If override set -> return it.
         Else -> per-channel max of default colors from Routes of attached Stops.
         If no stops -> black.
         """
-        if self.default_override is not None:
-            return self.default_override
+        if self.color_override is not None:
+            return self.color_override
         c: RGB = (0, 0, 0)
         for st in self.stops:
             if st.route is not None:
-                c = _rgb_max(c, st.route.default_color)
+                c = _rgb_max(c, st.route.color)
         return c
 
     def reset_to_default(self) -> None:
+        """Reset the LEDs color to its default."""
         self.set_rgb(*self.get_default_color())
 
 
 class LedStrip:
-    """
-    Minimal strip: references LED objects and packs to a sACN/DMX tuple
-    as (led1_r, led1_g, led1_b, led2_r, led2_g, led2_b, ...) in ascending LED.index.
-    """
-    def __init__(self, leds: List[LED]) -> None:
-        self.leds_by_index: Dict[int, LED] = {led.index: led for led in leds}
+    """An LED Strip that hold LEDs, to make them easier to handle."""
 
-    def clear(self) -> None:
+    def __init__(self, leds: list[LED]) -> None:
+        self.leds_by_index: dict[int, LED] = {led.index: led for led in leds}
+
+    def off(self) -> None:
+        """Turn off all LEDs in the LED Strip."""
         for led in self.leds_by_index.values():
             led.off()
 
-    def apply_defaults(self) -> None:
+    def reset_to_default(self) -> None:
+        """Reset all LEDs in the LED Stripto its default color."""
         for led in self.leds_by_index.values():
             led.reset_to_default()
 
     def set_led(self, index_1b: int, rgb: RGB) -> None:
+        """Set the color of a LED with a specific index."""
         led = self.leds_by_index.get(index_1b)
         if led:
             led.set_rgb(*_rgb_clamp(rgb))
 
-    def to_tuple(self) -> Tuple[int, ...]:
-        out: List[int] = []
+    def to_tuple(self) -> tuple[int, ...]:
+        """Return the values of the LEDs in the LED Strip as one big touple."""
+        out: list[int] = []
         for idx in sorted(self.leds_by_index.keys()):
             led = self.leds_by_index[idx]
             out.extend((led.r, led.g, led.b))
@@ -97,157 +115,180 @@ class LedStrip:
 
 
 # ========= transit domain =========
+class Network(BaseModel):
+    """A Network which consist of Routes.
 
-class StopId(BaseModel):
-    stop_id: str
-    in_service: bool = True
-
-
-class Route(BaseModel):
+    routes: The list of Routes that belongs to this Network
     """
-    Route with a default color; owns Stop objects.
-    """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    route_code: str                 # stored on the object; Network won't key on it
-    name: str
-    default_color: RGB = (0, 0, 0)
-    mode: Optional[str] = None
-    stops: List["Stop"] = Field(default_factory=list)
+    routes: list[Route] = Field(default_factory=list)
 
-    def set_default_color(self, rgb: RGB) -> None:
-        self.default_color = _rgb_clamp(rgb)
-
-    def add_stop(self, stop: "Stop") -> None:
-        """
-        Link Stop <-> Route and Stop <-> LED (back-refs).
-        """
-        if stop not in self.stops:
-            self.stops.append(stop)
-        if stop.route is not self:
-            stop.route = self
-        if stop not in stop.led.stops:
-            stop.led.stops.append(stop)
-
-    def remove_stop(self, stop: "Stop") -> None:
-        if stop in self.stops:
-            self.stops.remove(stop)
-        if stop.route is self:
-            stop.route = None
-        if stop in stop.led.stops:
-            stop.led.stops.remove(stop)
-
-
-class Stop(BaseModel):
-    """
-    Physical stop referencing a Route and a LED.
-    - is_terminus: behavior for service evaluation:
-        * terminus -> out of service if ANY StopId is down (require ALL up)
-        * intermediate -> out of service only if ALL StopIds are down (require ANY up)
-    """
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    name: Optional[str] = None
-    led: LED
-    route: Optional[Route] = None
-    is_terminus: bool = False
-    stop_ids: Dict[str, StopId] = Field(default_factory=dict)  # stop_id -> StopId
-
-    @property
-    def default_color(self) -> RGB:
-        return (0, 0, 0) if self.route is None else self.route.default_color
-
-    def add_stop_id(self, stop_id: str, *, in_service: bool = True) -> None:
-        if stop_id not in self.stop_ids:
-            self.stop_ids[stop_id] = StopId(stop_id=stop_id, in_service=in_service)
-
-    def set_stop_id_service(self, stop_id: str, in_service: bool) -> None:
-        if stop_id in self.stop_ids:
-            self.stop_ids[stop_id].in_service = in_service
-
-    def is_in_service(self) -> bool:
-        """
-        Terminus:     False if ANY StopId is down -> require ALL True.
-        Intermediate: False only if ALL StopIds are down -> require ANY True.
-        If no StopIds -> False.
-        """
-        states = [si.in_service for si in self.stop_ids.values()]
-        if not states:
-            return False
-        return all(states) if self.is_terminus else any(states)
-
-
-# ========= network (stores only Route objects) =========
-
-class Network:
-    """
-    Holds ONLY Route objects. All lookups/LEDs/stops are derived by walking routes.
-    """
-    def __init__(self) -> None:
-        self.routes: List[Route] = []  # list only; Route holds its own route_code
-
-    # -- route ops --
     def add_route(self, route: Route) -> None:
+        """Add a Route to the Network."""
         if route not in self.routes:
             self.routes.append(route)
 
-    def get_route(self, route_code: str) -> Optional[Route]:
+    def get_route(self, route_id: str) -> Route | None:
+        """Return the Route with a specific ID."""
         for r in self.routes:
-            if r.route_code == route_code:
+            if r.route_id == route_id:
                 return r
         return None
 
     # -- derived iterators --
     def iter_stops(self) -> Iterator[Stop]:
+        """Collect all Stops from the Routes of the Network."""
         for r in self.routes:
-            for s in r.stops:
-                yield s
+            yield from r.stops
 
     def iter_leds(self) -> Iterator[LED]:
+        """Collect all LEDs from the Stops of the Network."""
         seen: set[int] = set()
-        for s in self.iter_stops():
-            idx = s.led.index
-            if idx not in seen:
-                seen.add(idx)
-                yield s.led
+        for stop in self.iter_stops():
+            led_index = stop.led.index
+            if led_index not in seen:
+                seen.add(led_index)
+                yield stop.led
 
     # -- lookups --
-    def get_stopid(self, stop_id: str) -> Optional[StopId]:
-        """Lookup a StopId by its id string."""
-        for s in self.iter_stops():
-            si = s.stop_ids.get(stop_id)
-            if si is not None:
-                return si
-        return None
+    def get_stopid(self, stop_id: str) -> StopId | None:
+        """Lookup a StopId by its API ID string."""
+        return next(
+            (
+                sid
+                for stop in self.iter_stops()
+                for sid in stop.stop_ids
+                if sid.stop_id == stop_id
+            ),
+            None,
+        )
 
-    def get_stop_by_stopid(self, stop_id: str) -> Optional[Stop]:
-        for s in self.iter_stops():
-            if stop_id in s.stop_ids:
-                return s
-        return None
+    def get_stop_by_stopid(self, stop_id: str) -> Stop | None:
+        """Lookup a Stop by the API ID string of a corresponding StopId."""
+        return next(
+            (
+                stop
+                for stop in self.iter_stops()
+                if any(sid.stop_id == stop_id for sid in stop.stop_ids)
+            ),
+            None,
+        )
 
-    def get_led_by_stopid(self, stop_id: str) -> Optional[LED]:
-        st = self.get_stop_by_stopid(stop_id)
-        return None if st is None else st.led
 
-    # -- sACN helpers --
-    def make_ledstrip(self) -> LedStrip:
-        """Build a LedStrip over all LEDs referenced by the network."""
-        return LedStrip(list(self.iter_leds()))
+class Route(BaseModel):
+    """A Route which consist of Stops, and has its own properties.
 
-    def apply_route_defaults_to_leds(self) -> None:
-        """Set each LED’s current color to its computed default."""
-        for led in self.iter_leds():
-            led.reset_to_default()
+    route_id: The API ID of the Route
+    name: User-friendly name of the Route
+    color: The color of the Route that is shown on the LEDs
+    type: The type of the Route, Subway/Railway
+    stops: List of Stops that are belongs to the Route
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    route_id: str
+    name: str
+    _color: RGB = (0, 0, 0)
+    type: str | None = None
+    stops: list[Stop] = Field(default_factory=list)
+
+    @property
+    def color(self) -> RGB:
+        """Return the color of the Route."""
+        return self._color
+
+    @color.setter
+    def color(self, rgb: RGB) -> None:
+        """Set the color of the Route."""
+        self._color = _rgb_clamp(rgb)
+
+    def add_stop(self, stop: Stop) -> None:
+        """Link Route <-> Stop."""
+        if stop not in self.stops:
+            self.stops.append(stop)  # Add Stop to the Route
+        if stop.route is not self:
+            stop.route = self  # Set the Route for the Stop
+
+
+class Stop(BaseModel):
+    """A physical stop along a Route.
+
+    name: User friendly name of the stop
+    led: The LED object that belongs to this stop
+    route: The Route object that this Stop is part of
+    is_terminus: Whether this Stop is a terminus stop
+    stop_ids: List of StopIds that belongs to this Stop
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    name: str | None = None
+    led: LED
+    route: Route | None = None
+    is_terminus: bool = False
+    stop_ids: list[StopId] = Field(default_factory=list)
+
+    def model_post_init(self, __context: Any, /) -> None:
+        """Link Stop <-> LED."""
+        if self not in self.led.stops:
+            self.led.stops.append(self)
+
+    @property
+    def default_color(self) -> RGB:
+        """The default LED color of the Stop inherited from its Route."""
+        return (0, 0, 0) if self.route is None else self.route.color
+
+    def add_stop_id(self, stop_id: StopId) -> None:
+        """Add a StopId to the Stop."""
+        if stop_id not in self.stop_ids:
+            self.stop_ids.append(stop_id)
+
+        # Link Stop <-> StopId
+        if stop_id.stop is not self:
+            stop_id.stop = self
+
+    def is_in_service(self) -> bool:
+        """Return the in service status of the Stop.
+
+        If it's a terminus Stop, the Stop is no service if ANY of it's
+            StopIds are in no service.
+        If it's an intermediate Stop, the Stop is no service if ALL of it's
+            StopIds are in no service.
+        If there are no StopIds associated to the Stop,
+        it always returns False.
+        """
+        states = [si.in_service for si in self.stop_ids]
+        if not states:
+            return False
+        return all(states) if self.is_terminus else any(states)
+
+
+class StopId(BaseModel):
+    """A single StopId that is part of a Stop.
+
+    stop_id: The API ID of the StopId
+    stop: The Stop object this StopId belongs to
+    in_service: Whether the StopId is in service
+    """
+
+    stop_id: str
+    stop: Stop | None = None
+    in_service: bool = True
 
 
 # ========= fader (animation engine for fades) =========
 
+
 def ease_linear(t: float) -> float:
     return t
 
+
 def ease_in_out_quad(t: float) -> float:
-    return 2*t*t if t < 0.5 else 1 - ((-2*t + 2) ** 2) / 2
+    return 2 * t * t if t < 0.5 else 1 - ((-2 * t + 2) ** 2) / 2
+
 
 @dataclass
 class _Anim:
@@ -271,17 +312,23 @@ class _Anim:
         self.led.set_rgb(r, g, b)
         return u >= 1.0
 
+
 class Fader:
-    """
-    Drives per-LED fades. Call step() at your frame rate, then pack via strip.to_tuple().
+    """Drives per-LED fades. Call step() at your frame rate, then pack via strip.to_tuple().
     One active animation per LED index (new fades overwrite running ones for that LED).
     """
-    def __init__(self, leds: List[LED]) -> None:
-        self._anims: Dict[int, _Anim] = {}
-        self._leds: Dict[int, LED] = {led.index: led for led in leds}
 
-    def fade_led(self, index: int, to: RGB, duration: float = 0.5,
-                 ease: Callable[[float], float] = ease_linear) -> None:
+    def __init__(self, leds: list[LED]) -> None:
+        self._anims: dict[int, _Anim] = {}
+        self._leds: dict[int, LED] = {led.index: led for led in leds}
+
+    def fade_led(
+        self,
+        index: int,
+        to: RGB,
+        duration: float = 0.5,
+        ease: Callable[[float], float] = ease_linear,
+    ) -> None:
         led = self._leds[index]
         self._anims[index] = _Anim(
             led=led,
@@ -289,20 +336,33 @@ class Fader:
             end=_rgb_clamp(to),
             t0=time.perf_counter(),
             dur=max(0.0, float(duration)),
-            ease=ease
+            ease=ease,
         )
 
-    def fade_stop(self, stop: Stop, to: RGB, duration: float = 0.5,
-                  ease: Callable[[float], float] = ease_linear) -> None:
+    def fade_stop(
+        self,
+        stop: Stop,
+        to: RGB,
+        duration: float = 0.5,
+        ease: Callable[[float], float] = ease_linear,
+    ) -> None:
         self.fade_led(stop.led.index, to, duration, ease)
 
-    def fade_route(self, route: Route, to: RGB, duration: float = 0.5,
-                   ease: Callable[[float], float] = ease_linear) -> None:
+    def fade_route(
+        self,
+        route: Route,
+        to: RGB,
+        duration: float = 0.5,
+        ease: Callable[[float], float] = ease_linear,
+    ) -> None:
         for st in route.stops:
             self.fade_led(st.led.index, to, duration, ease)
 
-    def fade_to_defaults(self, duration: float = 0.5,
-                         ease: Callable[[float], float] = ease_linear) -> None:
+    def fade_to_defaults(
+        self,
+        duration: float = 0.5,
+        ease: Callable[[float], float] = ease_linear,
+    ) -> None:
         now = time.perf_counter()
         for led in self._leds.values():
             target = led.get_default_color()
@@ -312,7 +372,7 @@ class Fader:
                 end=_rgb_clamp(target),
                 t0=now,
                 dur=max(0.0, float(duration)),
-                ease=ease
+                ease=ease,
             )
 
     def cancel_led(self, index: int, *, snap_to_end: bool = False) -> None:
@@ -328,10 +388,3 @@ class Fader:
 
     def is_active(self) -> bool:
         return bool(self._anims)
-
-
-# ========= convenience =========
-
-def make_leds(n: int) -> List[LED]:
-    """Create LEDs with indices 1..n."""
-    return [LED(index=i) for i in range(1, n + 1)]
