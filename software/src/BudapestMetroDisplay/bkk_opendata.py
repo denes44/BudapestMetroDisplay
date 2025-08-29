@@ -665,7 +665,7 @@ def action_to_execute(
     )
 
 
-def calculate_schedule_interval(json_response: Any, reference_id: str) -> None:
+def calculate_schedule_interval(json_response: Any, route: Route) -> None:
     """Process API response to determine the interval between schedules for a route.
 
     Process the ArrivalsAndDeparturesForStopOTPMethodResponse API response
@@ -674,7 +674,7 @@ def calculate_schedule_interval(json_response: Any, reference_id: str) -> None:
     and updates the ACTION_DELAY dictionary accordingly.
 
     :param json_response: JSON return data from the BKK OpenData API
-    :param reference_id: Internal reference to identify the API request in the logs
+    :param route: The Route that the schedule data belongs to
     :return:
     """
     # Check if JSON looks valid
@@ -685,7 +685,7 @@ def calculate_schedule_interval(json_response: Any, reference_id: str) -> None:
     ):
         logger.error(
             f"No valid schedule data in API response "
-            f"for schedule intervals for {reference_id}",
+            f"for schedule intervals for route {route.name}",
         )
         return
 
@@ -693,7 +693,7 @@ def calculate_schedule_interval(json_response: Any, reference_id: str) -> None:
     if json_response["data"].get("limitExceeded", "false") == "true":
         logger.warning(
             f"Query limit is exceeded when updating "
-            f"schedule intervals for {reference_id}",
+            f"schedule intervals for route {route.name}",
         )
 
     # Get routeId
@@ -711,7 +711,14 @@ def calculate_schedule_interval(json_response: Any, reference_id: str) -> None:
     else:
         logger.warning(
             f"No route IDs found or the list is empty when updating "
-            f"schedule intervals for {reference_id}",
+            f"schedule intervals for route {route.name}",
+        )
+        return
+
+    if route_id != route.route_id:
+        logger.warning(
+            f"Route IDs from the data doesn't match with the "
+            f"supplied route {route.name}",
         )
         return
 
@@ -720,7 +727,7 @@ def calculate_schedule_interval(json_response: Any, reference_id: str) -> None:
     if len(stop_times) < 2:
         logger.debug(
             f"Not enough schedule data found when updating "
-            f"schedule intervals for {reference_id}",
+            f"schedule intervals for route {route.name}",
         )
         return
 
@@ -748,33 +755,46 @@ def calculate_schedule_interval(json_response: Any, reference_id: str) -> None:
 
     avg = sum(deltas) / len(deltas) / 60 if deltas else -1
 
-    # Update the ACTION_DELAY dictionary according to the calculated difference
-    if avg > 0:
-        if route_id.startswith("BKK_5"):  # Subway
-            if avg <= 2:
-                ACTION_DELAY[route_id] = 15
-            elif avg < 5.5:
-                ACTION_DELAY[route_id] = 20
-            else:
-                ACTION_DELAY[route_id] = 30
-        elif route_id.startswith("BKK_H"):  # Suburban railway
-            if avg < 5.5:
-                ACTION_DELAY[route_id] = 20
-            elif avg < 10.5:
-                ACTION_DELAY[route_id] = 30
-            else:
-                ACTION_DELAY[route_id] = 45
-    # No valid schedule data found, set the default delay
-    elif avg == -1:
-        if route_id.startswith("BKK_5"):  # Subway
-            ACTION_DELAY[route_id] = 30
-        elif route_id.startswith("BKK_H"):  # Suburban railway
-            ACTION_DELAY[route_id] = 45
+    # Store result
+    route.schedule_interval = avg
 
     logger.debug(
-        f"Recalculated LED turn off delay for route {route_id}, schedule interval:  "
-        f"{avg:.1f} min, LED delay: {ACTION_DELAY[route_id]} sec",
+        f"Recalculated LED turn off delay for route {route.name}, schedule interval:  "
+        f"{avg:.1f} min, LED delay: {calculate_led_off_delay(route)} sec",
     )
+
+
+def calculate_led_off_delay(route: Route) -> int:
+    """Calculate LED off time according to the average schedule interval of a Route.
+
+    :param route: The Route object for the calculation
+    :return: The LED turn off delay in seconds
+    """
+    delay: int = 0
+
+    if route.schedule_interval > 0:
+        if route.type == "subway":
+            if route.schedule_interval <= 2:
+                delay = 15
+            elif route.schedule_interval < 5.5:
+                delay = 20
+            else:
+                delay = 30
+        elif route.type == "railway":
+            if route.schedule_interval < 5.5:
+                delay = 20
+            elif route.schedule_interval < 10.5:
+                delay = 30
+            else:
+                delay = 45
+    # No valid schedule data found, set the default delay
+    elif route.schedule_interval == -1:
+        if route.type == "subway":
+            delay = 30
+        elif route.type == "railway":
+            delay = 45
+
+    return delay
 
 
 def process_alerts(json_response: Any, reference_id: str) -> None:
