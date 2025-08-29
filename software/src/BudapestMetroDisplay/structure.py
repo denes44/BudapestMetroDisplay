@@ -185,6 +185,7 @@ class Route(BaseModel):
     color: The color of the Route that is shown on the LEDs
     type: The type of the Route, Subway/Railway
     stops: List of Stops that are belongs to the Route
+    schedule_interval: The average second between each consecutive departures
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -194,6 +195,7 @@ class Route(BaseModel):
     _color: RGB = (0, 0, 0)
     type: str | None = None
     stops: list[Stop] = Field(default_factory=list)
+    schedule_interval: float = -1
 
     @property
     def color(self) -> RGB:
