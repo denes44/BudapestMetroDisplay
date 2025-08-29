@@ -115,29 +115,6 @@ led_locks: dict[int, Lock] = {i: threading.Lock() for i in range(NUM_LEDS)}
 sender: sACNsender | None = None
 
 
-def find_key_by_value(d: dict[str, int], target_value: int) -> str | None:
-    """Find the supplied value (target_value) in the supplied dictionary.
-
-    :param d: A dictionary to look for a value
-    :param target_value: The value to look in the dictionary
-    :return: Returns the key of the value if found, None otherwise
-    """
-    for key, value in d.items():
-        if value == target_value:
-            return key
-    return None  # Return None if the value is not found
-
-
-def find_keys_by_value(d: dict[str, int], target_value: int) -> list[str]:
-    """Find all keys in the supplied dictionary that match the target_value.
-
-    :param d: A dictionary to look for values
-    :param target_value: The value to look for in the dictionary
-    :return: A list of keys that match the value, or an empty list if none are found
-    """
-    return [key for key, value in d.items() if value == target_value]
-
-
 def fade_color(
     led_index: int,
     current_color: tuple[int, int, int],

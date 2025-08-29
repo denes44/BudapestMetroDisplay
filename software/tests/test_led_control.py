@@ -60,26 +60,6 @@ def mock_logger(monkeypatch) -> None:
     monkeypatch.setattr("BudapestMetroDisplay.led_control.logger", mock_logger)
 
 
-def test_find_key_by_value_returns_correct_key() -> None:
-    d = {"a": 1, "b": 2, "c": 3}
-    assert led_control.find_key_by_value(d, 2) == "b"
-
-
-def test_find_key_by_value_returns_none_for_missing_value() -> None:
-    d = {"a": 1, "b": 2, "c": 3}
-    assert led_control.find_key_by_value(d, 4) is None
-
-
-def test_find_keys_by_value_returns_correct_keys() -> None:
-    d = {"a": 1, "b": 2, "c": 1}
-    assert led_control.find_keys_by_value(d, 1) == ["a", "c"]
-
-
-def test_find_keys_by_value_returns_empty_list_for_missing_value() -> None:
-    d = {"a": 1, "b": 2, "c": 3}
-    assert led_control.find_keys_by_value(d, 4) == []
-
-
 def test_fade_color_fades_correctly(monkeypatch) -> None:
     led_index = 4
     current_color = (0, 0, 0)
