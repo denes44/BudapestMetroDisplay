@@ -179,7 +179,7 @@ def create_alert_updates(routes: tuple[str, ...]) -> None:
 
 
 def fetch_schedule_for_route(
-    stop_set: tuple[str, tuple[str, ...]],
+    route: Route,
     schedule_type: str,
 ) -> None:
     """Send API request to fetch the schedule for the selected stops.
@@ -188,8 +188,7 @@ def fetch_schedule_for_route(
     Makes an arrivals-and-departures-for-stop API request to the BKK OpenData server
     for the selected stops.
 
-    :param stop_set: A tuple which consist the stop set name as a string
-        and a tuple with the stop ids we want to get the schedules for
+    :param route: A Route object we want to get the schedules for
     :param schedule_type: REGULAR or REALTIME, affects the API update parameters
     """
     # Calculate next schedule time
@@ -211,7 +210,7 @@ def fetch_schedule_for_route(
 
     # Get schedule data for all stops in the stop set
     params: dict[str, str | int | list[str]] = {
-        "stopId": list(stop_set[1]),
+        "stopId": route.get_stop_ids(),
         "minutesBefore": API_SCHEDULE_PARAMETERS[schedule_type]["minutesBefore"],
         "minutesAfter": API_SCHEDULE_PARAMETERS[schedule_type]["minutesAfter"],
         "limit": API_SCHEDULE_PARAMETERS[schedule_type]["limit"],
@@ -227,15 +226,15 @@ def fetch_schedule_for_route(
         if response.status_code == 200:
             # Recalculate schedule intervals for REGULAR updates
             if schedule_type == "REGULAR":
-                calculate_schedule_interval((response.json()), stop_set[0])
+                calculate_schedule_interval((response.json()), route)
 
-            latest_departure_time: int = store_departures(response.json(), stop_set[0])
+            latest_departure_time: int = store_departures(response.json(), route)
 
             if schedule_type != "REALTIME" and latest_departure_time == -1:
                 job_time = datetime.now() + timedelta(minutes=1)
                 logger.debug(
                     f"There were no departures during {schedule_type} schedule update "
-                    f"for stop set {stop_set[0]}. "
+                    f"for route {route.name}. "
                     f"Next update scheduled for {job_time!s}",
                 )
             elif (
@@ -247,69 +246,69 @@ def fetch_schedule_for_route(
                 )
                 logger.debug(
                     f"The calculated next {schedule_type} schedule update "
-                    f"for stop set {stop_set[0]} is later than the last departure "
+                    f"for route {route.name} is later than the last departure "
                     f"we stored, so next update time was adjusted accordingly. "
                     f"Next update scheduled for {job_time!s}",
                 )
             else:
                 logger.debug(
-                    f"Successfully updated {schedule_type} schedules for stop set "
-                    f"{stop_set[0]}. Next update scheduled for {job_time!s}",
+                    f"Successfully updated {schedule_type} schedules for route "
+                    f"{route.name}. Next update scheduled for {job_time!s}",
                 )
         else:
             # Reschedule the failed action for 1 minute later
             job_time = datetime.now() + timedelta(minutes=1)
 
             logger.error(
-                f"Failed to update {schedule_type} schedules for stop set "
-                f"{stop_set[0]}: {response.status_code}. "
+                f"Failed to update {schedule_type} schedules for route "
+                f"{route.name}: {response.status_code}. "
                 f"Rescheduled for {job_time!s}.",
             )
     except requests.exceptions.JSONDecodeError as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
             "The response did not contain valid JSON data when updating "
-            f"{schedule_type} schedules for stop set "
-            f"{stop_set[0]}. Rescheduled for {job_time!s}.",
+            f"{schedule_type} schedules for route {route.name}. "
+            f"Rescheduled for {job_time!s}.",
         )
         logger.warning(e)
     except requests.exceptions.InvalidJSONError as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
             "The response contained invalid JSON data when updating "
-            f"{schedule_type} schedules for stop set "
-            f"{stop_set[0]}. Rescheduled for {job_time!s}.",
+            f"{schedule_type} schedules for route {route.name}. "
+            f"Rescheduled for {job_time!s}.",
         )
         logger.warning(e)
     except requests.exceptions.ReadTimeout as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
-            f"Timeout occurred when updating {schedule_type} schedules for stop set "
-            f"{stop_set[0]}. Rescheduled for {job_time!s}.",
+            f"Timeout occurred when updating {schedule_type} schedules for route "
+            f"{route.name}. Rescheduled for {job_time!s}.",
         )
         logger.warning(e)
     except requests.exceptions.ConnectionError as e:
         job_time = datetime.now() + timedelta(minutes=5)
         logger.warning(
-            f"Connection error when updating {schedule_type} schedules for stop set "
-            f"{stop_set[0]}. Rescheduled for {job_time!s}.",
+            f"Connection error when updating {schedule_type} schedules for route "
+            f"{route.name}. Rescheduled for {job_time!s}.",
         )
         logger.warning(e)
     except requests.exceptions.RequestException as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
-            f"Error when updating {schedule_type} schedules for stop set {stop_set[0]}."
+            f"Error when updating {schedule_type} schedules for route {route.name}."
             f"Rescheduled for {job_time!s}.",
         )
         logger.warning(e)
 
-    job_id: str = f"{stop_set[0]}_{schedule_type}"
+    job_id: str = f"{route.name}_{schedule_type}"
 
     api_update_scheduler.add_job(
         fetch_schedule_for_route,
         "date",
         run_date=job_time,
-        args=[stop_set, schedule_type],
+        args=[route, schedule_type],
         id=job_id,
         replace_existing=True,
         # If the job exists, it will be replaced with the new time
