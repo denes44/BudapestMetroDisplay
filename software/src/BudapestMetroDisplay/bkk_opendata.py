@@ -832,7 +832,6 @@ def process_alerts(json_response: Any, route: Route) -> None:
 
         # Iterate the TransitAlertRoutes in the TransitAlert
         for alert_route in alert_details["routes"]:
-            route_id: str = alert_route.get("routeId", "")
             effect_type: str = alert_route.get("effectType", "")
 
             # If the effectType is not NO_SERVICE
