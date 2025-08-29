@@ -32,7 +32,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from BudapestMetroDisplay import aps_helpers, led_control
 from BudapestMetroDisplay._version import __version__
 from BudapestMetroDisplay.config import settings
-from BudapestMetroDisplay.stops import stop_no_service, stops_led
+from BudapestMetroDisplay.stops import stops_led
 from BudapestMetroDisplay.structure import Route
 
 logger = logging.getLogger(__name__)
@@ -812,7 +812,7 @@ def calculate_led_off_delay(route: Route) -> int:
     return delay
 
 
-def process_alerts(json_response: Any, reference_id: str) -> None:
+def process_alerts(json_response: Any, route: Route) -> None:
     """Process API response to determine the interval between schedules for a route.
 
     Process the ArrivalsAndDeparturesForStopOTPMethodResponse API response
@@ -821,7 +821,7 @@ def process_alerts(json_response: Any, reference_id: str) -> None:
     and updates the ACTION_DELAY dictionary accordingly.
 
     :param json_response: JSON return data from the BKK OpenData API
-    :param reference_id: Internal reference to identify the API request in the logs
+    :param route: The Route that the schedule data belongs to
     :return:
     """
     # Check if JSON looks valid
@@ -831,13 +831,13 @@ def process_alerts(json_response: Any, reference_id: str) -> None:
         or "references" not in json_response["data"]
         or "alerts" not in json_response["data"]["references"]
     ):
-        logger.error(f"No valid alerts data in API response for stop(s) {reference_id}")
+        logger.error(f"No valid alerts data in API response for route {route.name}")
         return
 
     # Get stopTimes from TransitArrivalsAndDepartures
     alerts = json_response["data"]["references"].get("alerts")
     if len(alerts) == 0:
-        logger.debug(f"No alert data found when updating stop(s) {reference_id}")
+        logger.debug(f"No alert data found when updating route {route.name}")
 
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
     for alert_details in alerts.values():
@@ -846,9 +846,9 @@ def process_alerts(json_response: Any, reference_id: str) -> None:
             continue
 
         # Iterate the TransitAlertRoutes in the TransitAlert
-        for route in alert_details["routes"]:
-            route_id: str = route.get("routeId", "")
-            effect_type: str = route.get("effectType", "")
+        for alert_route in alert_details["routes"]:
+            route_id: str = alert_route.get("routeId", "")
+            effect_type: str = alert_route.get("effectType", "")
 
             # If the effectType is not NO_SERVICE
             # we don't process the TransitAlertRoute anymore
@@ -856,13 +856,14 @@ def process_alerts(json_response: Any, reference_id: str) -> None:
                 continue
 
             # Iterate through stopIds in the TransitAlertRoute
-            for stop_id in route.get("stopIds", []):
+            for stop_id in alert_route.get("stopIds", []):
                 # Check if we are interested in the stopId
-                if stop_id not in stops_led:
+                if stop_id not in route.get_stop_ids():
                     continue
 
+                sid = route.get_stop_id(stop_id)
                 # Check whether the stop is operational now
-                if not stop_no_service[stop_id]:
+                if sid.in_service:
                     # Check if we have a schedule for this stop_id,
                     # because if we have, then the stop is not really out of service
                     soonest_job = aps_helpers.find_soonest_job_by_argument(
@@ -876,7 +877,7 @@ def process_alerts(json_response: Any, reference_id: str) -> None:
                         # so we'll ignore the NO_SERVICE alert
                         logger.debug(
                             f"Found NO_SERVICE alert {alert_details['id']} "
-                            f"for stop {stop_id}, route {route_id}, "
+                            f"for {sid.stop.name}, route {route.name}, "
                             f"but there are active schedules for that stop, "
                             f"so we'll ignore that",
                         )
@@ -885,13 +886,15 @@ def process_alerts(json_response: Any, reference_id: str) -> None:
                         # so we'll process the NO_SERVICE alert
                         logger.debug(
                             f"Found NO_SERVICE alert {alert_details['id']} "
-                            f"for stop {stop_id}, route {route_id}",
+                            f"for {sid.stop.name}, route {route.name}",
                         )
-                        # Set the no_service flag for this stop
-                        stop_no_service[stop_id] = True
+                        # Set the operation state of this StopId
+                        sid.in_service = False
 
+                        # FIXME
                         # Calculate the default color for this stop according to
                         # which route is operation for the stop
                         led_control.calculate_default_color(stops_led[stop_id])
                         # Change the LED color to the default color
                         led_control.reset_led_to_default(stops_led[stop_id], fade=False)
+                        # FIXME
