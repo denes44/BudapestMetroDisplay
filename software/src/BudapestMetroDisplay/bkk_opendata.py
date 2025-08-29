@@ -33,6 +33,7 @@ from BudapestMetroDisplay import aps_helpers, led_control
 from BudapestMetroDisplay._version import __version__
 from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay.stops import stop_no_service, stops_led
+from BudapestMetroDisplay.structure import Route
 
 logger = logging.getLogger(__name__)
 # Set the logging level for urllib3 to INFO
@@ -99,21 +100,19 @@ api_update_scheduler.start()
 
 
 def create_schedule_updates(
-    stop_sets: tuple[tuple[str, tuple[str, ...]], ...],
+    route: Route,
     schedule_type: str,
+    delay: int = 0,
 ) -> None:
     """Create jobs to update the data for the provided stops.
 
     The method puts the jobs in APScheduler which later will make the API calls.
 
-    :param stop_sets: A tuple which consist the stop set name as a string
-    and a tuple with the stop ids
-    :param schedule_type: REGULAR or REALTIME,
+    :param route: A Route object we want to update
+    :param schedule_type: REGULAR or REALTIME
+    :param delay: An extra delay in seconds for the start of the job
     affects the API update parameters
     """
-    # Store the current time when we started the update process
-    start_time = datetime.now()
-
     # Check if the supplied schedule_type parameter is valid,
     # and the API call parameters are available in API_SCHEDULE_PARAMETERS
     if schedule_type not in API_SCHEDULE_PARAMETERS:
@@ -121,32 +120,27 @@ def create_schedule_updates(
         return
 
     logger.info(
-        f"Starting updating the {schedule_type} schedules for stop set "
-        f"({', '.join(stop_set for stop_set, _ in stop_sets)})",
+        f"Starting updating the {schedule_type} schedules for route {route.name}.",
     )
 
-    for i, stop_set in enumerate(stop_sets):
-        # Schedule the API calls from each other by settings.bkk.api_update_interval
-        # starting from the current time
-        delay: int = i * settings.bkk.api_update_interval
-        job_time: datetime = start_time + timedelta(seconds=delay)  # job start time
-        job_id: str = f"{stop_set[0]}_{schedule_type}"  # job reference id
+    job_time: datetime = datetime.now() + timedelta(seconds=delay)  # job start time
+    job_id: str = f"{route.name}_{schedule_type}"  # job reference id
 
-        # Add the job to the scheduler
-        api_update_scheduler.add_job(
-            fetch_schedule_for_stops,
-            "date",
-            run_date=job_time,
-            args=[stop_set, schedule_type],
-            id=job_id,
-            replace_existing=True,
-            # If the job exists, it will be replaced with the new time
-        )
+    # Add the job to the scheduler
+    api_update_scheduler.add_job(
+        fetch_schedule_for_route,
+        "date",
+        run_date=job_time,
+        args=[route, schedule_type],
+        id=job_id,
+        replace_existing=True,
+        # If the job exists, it will be replaced with the new time
+    )
 
-        logger.debug(
-            f"Scheduling {schedule_type} API updates for stop set "
-            f"{stop_set[0]} at {job_time!s}.",
-        )
+    logger.debug(
+        f"Scheduling {schedule_type} API updates for route "
+        f"{route.name} at {job_time!s}.",
+    )
 
 
 def create_alert_updates(routes: tuple[str, ...]) -> None:
@@ -184,7 +178,7 @@ def create_alert_updates(routes: tuple[str, ...]) -> None:
         )
 
 
-def fetch_schedule_for_stops(
+def fetch_schedule_for_route(
     stop_set: tuple[str, tuple[str, ...]],
     schedule_type: str,
 ) -> None:
@@ -312,7 +306,7 @@ def fetch_schedule_for_stops(
     job_id: str = f"{stop_set[0]}_{schedule_type}"
 
     api_update_scheduler.add_job(
-        fetch_schedule_for_stops,
+        fetch_schedule_for_route,
         "date",
         run_date=job_time,
         args=[stop_set, schedule_type],
