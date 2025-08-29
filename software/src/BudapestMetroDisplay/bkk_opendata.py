@@ -59,20 +59,6 @@ API_SCHEDULE_PARAMETERS: dict[str, dict[str, Any]] = {
     },
 }
 
-# Default delay to turn off the LED
-# when there is no separate arrival and departure time is available
-ACTION_DELAY: dict[str, int] = {
-    "BKK_5100": 10,  # M1
-    "BKK_5200": 10,  # M2
-    "BKK_5300": 10,  # M3
-    "BKK_5400": 10,  # M4
-    "BKK_H5": 15,  # H5
-    "BKK_H6": 15,  # H6
-    "BKK_H7": 15,  # H7
-    "BKK_H8": 15,  # H8
-    "BKK_H9": 15,  # H9
-}
-
 # Set minimum log level for APScheduler
 logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
 logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
