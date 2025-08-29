@@ -31,7 +31,7 @@ from asyncio import AbstractEventLoop
 from BudapestMetroDisplay import bkk_opendata, gui, led_control, log, webserver
 from BudapestMetroDisplay._version import __version__
 from BudapestMetroDisplay.config import settings
-from BudapestMetroDisplay.stops import alert_routes, stops_metro, stops_railway
+from BudapestMetroDisplay.network import network
 
 if settings.esphome.used:
     from BudapestMetroDisplay.esphome import (
@@ -97,13 +97,18 @@ def main() -> None:  # noqa: D103
     signal.signal(signal.SIGINT, handle_exit_signal)
     signal.signal(signal.SIGTERM, handle_exit_signal)
 
-    # Create schedules for updating the departures data
-    bkk_opendata.create_schedule_updates(stops_metro, "REGULAR")
-    bkk_opendata.create_schedule_updates(stops_railway, "REGULAR")
-    # Create schedules for updating the realtime data
-    bkk_opendata.create_schedule_updates(stops_railway, "REALTIME")
-    # Create schedules for updating the alarm data for non-realtime stops
-    bkk_opendata.create_alert_updates(alert_routes)
+    for i, route in network.routes:
+        # Schedule the updates from each other by settings.bkk.api_update_interval
+        delay = i * settings.bkk.api_update_interval
+
+        # Create schedules for updating the departures data
+        bkk_opendata.create_schedule_updates(route, "REGULAR", delay)
+        if route.type == "railway":
+            # Create schedules for updating the realtime data
+            bkk_opendata.create_schedule_updates(route, "REALTIME", delay)
+        else:
+            # Create schedules for updating the alarm data for non-realtime stops
+            bkk_opendata.create_alert_updates(route)
 
     # Start the sACN sending routine with continuous updates
     led_control.reset_leds_to_default()
