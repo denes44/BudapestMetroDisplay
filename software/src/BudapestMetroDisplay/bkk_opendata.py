@@ -295,14 +295,14 @@ def fetch_schedule_for_route(
     )
 
 
-def fetch_alerts_for_route(route_id: str) -> None:
+def fetch_alerts_for_route(route: Route) -> None:
     """Send API request to fetch the alerts for a selected route.
 
     Callback function for the APScheduler jobs.
     Makes a route-details API request to the BKK OpenData server
     for the supplied route_id.
 
-    :param route_id: The id of the stop we want to get the details for
+    :param route: A Route object we want to update
     """
     # Calculate next schedule time
     job_time = datetime.now() + timedelta(seconds=settings.bkk.api_update_alerts)
@@ -312,7 +312,7 @@ def fetch_alerts_for_route(route_id: str) -> None:
     headers: dict[str, str] = {"Accept": "application/json"}
 
     params: dict[str, str | int] = {
-        "routeId": route_id,
+        "routeId": route.route_id,
         "appVersion": f"BudapestMetroDisplay {__version__}",
         "version": "4",
         "includeReferences": "alerts",
@@ -323,10 +323,10 @@ def fetch_alerts_for_route(route_id: str) -> None:
         response = requests.get(url, headers=headers, params=params, timeout=5)
 
         if response.status_code == 200:
-            process_alerts(response.json(), route_id)
+            process_alerts(response.json(), route)
 
             logger.debug(
-                f"Successfully updated alerts for route {route_id}. "
+                f"Successfully updated alerts for route {route.name}. "
                 f"Next update scheduled for {job_time!s}",
             )
         else:
@@ -334,14 +334,14 @@ def fetch_alerts_for_route(route_id: str) -> None:
             job_time = datetime.now() + timedelta(minutes=1)
 
             logger.error(
-                f"Failed to update alerts for route {route_id}: {response.status_code}."
+                f"Failed to update alerts for route {route.name}: {response.status_code}."
                 f"Rescheduled for {job_time!s}.",
             )
     except requests.exceptions.JSONDecodeError as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
             "The response did not contain valid JSON data when updating "
-            f"alerts for route {route_id}. "
+            f"alerts for route {route.name}. "
             f"Next update scheduled for {job_time!s}",
         )
         logger.warning(e)
@@ -349,37 +349,37 @@ def fetch_alerts_for_route(route_id: str) -> None:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
             "The response contained invalid JSON data when updating "
-            f"alerts for route {route_id}. "
+            f"alerts for route {route.name}. "
             f"Next update scheduled for {job_time!s}",
         )
         logger.warning(e)
     except requests.exceptions.ReadTimeout as e:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.warning(
-            f"Timeout occurred when updating alerts for route {route_id}. "
+            f"Timeout occurred when updating alerts for route {route.name}. "
             f"Next update scheduled for {job_time!s}",
         )
         logger.warning(e)
     except requests.exceptions.ConnectionError:
         job_time = datetime.now() + timedelta(minutes=5)
         logger.exception(
-            f"Connection error when updating alerts for route {route_id}. "
+            f"Connection error when updating alerts for route {route.name}. "
             f"Next update scheduled for {job_time!s}",
         )
     except requests.exceptions.RequestException:
         job_time = datetime.now() + timedelta(minutes=1)
         logger.exception(
-            f"Error when updating alerts for route {route_id}. "
+            f"Error when updating alerts for route {route.name}. "
             f"Next update scheduled for {job_time!s}",
         )
 
-    job_id: str = f"{route_id}_ALERTS"
+    job_id: str = f"{route.route_id}_ALERTS"
 
     api_update_scheduler.add_job(
         fetch_alerts_for_route,
         "date",
         run_date=job_time,
-        args=[route_id],
+        args=[route],
         id=job_id,
         replace_existing=True,
         # If the job exists, it will be replaced with the new time
