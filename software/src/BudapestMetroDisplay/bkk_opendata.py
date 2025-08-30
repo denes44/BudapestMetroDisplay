@@ -40,9 +40,6 @@ logging.getLogger("urllib3").setLevel(logging.INFO)
 # Set logging level for requests to INFO
 logging.getLogger("requests").setLevel(logging.INFO)
 
-# Define base URL
-API_BASE_URL: str = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/"
-
 # Define the API request parameters for the different schedule updates
 API_SCHEDULE_PARAMETERS: dict[str, dict[str, Any]] = {
     "REGULAR": {
@@ -189,7 +186,7 @@ def fetch_schedule_for_route(
             datetime.now() + API_SCHEDULE_PARAMETERS[schedule_type]["nextSchedule"]
         )
 
-    url: str = f"{API_BASE_URL}arrivals-and-departures-for-stop"
+    url: str = f"{settings.bkk.api_base_url}arrivals-and-departures-for-stop"
 
     headers: dict[str, str] = {"Accept": "application/json"}
 
@@ -312,7 +309,7 @@ def fetch_alerts_for_route(route_id: str) -> None:
     # Calculate next schedule time
     job_time = datetime.now() + timedelta(seconds=settings.bkk.api_update_alerts)
 
-    url: str = f"{API_BASE_URL}route-details"
+    url: str = f"{settings.bkk.api_base_url}route-details"
 
     headers: dict[str, str] = {"Accept": "application/json"}
 
