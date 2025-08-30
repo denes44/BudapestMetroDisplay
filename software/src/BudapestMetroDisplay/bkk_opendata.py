@@ -208,7 +208,7 @@ def fetch_schedule_for_route(
             if schedule_type == "REGULAR":
                 calculate_schedule_interval((response.json()), route)
 
-            latest_departure_time: int = store_departures(response.json(), route)
+            latest_departure_time: int = process_schedule(response.json(), route)
 
             if schedule_type != "REALTIME" and latest_departure_time == -1:
                 job_time = datetime.now() + timedelta(minutes=1)
@@ -386,7 +386,7 @@ def fetch_alerts_for_route(route: Route) -> None:
     )
 
 
-def store_departures(json_response: Any, route: Route) -> int:
+def process_schedule(json_response: Any, route: Route) -> int:
     """Process the API response and store the departures.
 
     Processes the ArrivalsAndDeparturesForStopOTPMethodResponse API response
@@ -579,7 +579,7 @@ def store_departures(json_response: Any, route: Route) -> int:
 
         if job_time > datetime.now():
             departure_scheduler.add_job(
-                action_to_execute,
+                departure_action,
                 "date",
                 run_date=job_time,
                 args=[route.get_stop_id(stop_id).stop, trip_id, job_time, delay],
@@ -609,7 +609,94 @@ def store_departures(json_response: Any, route: Route) -> int:
     return latest_departure_time
 
 
-def action_to_execute(
+def process_alerts(json_response: Any, route: Route) -> None:
+    """Process API response to determine the interval between schedules for a route.
+
+    Process the ArrivalsAndDeparturesForStopOTPMethodResponse API response
+    from the arrivals-and-departures-for-stop method.
+    It checks time between the schedules for each route
+    and updates the ACTION_DELAY dictionary accordingly.
+
+    :param json_response: JSON return data from the BKK OpenData API
+    :param route: The Route that the alert data belongs to
+    :return:
+    """
+    # Check if JSON looks valid
+    if (
+        not json_response
+        or "data" not in json_response
+        or "references" not in json_response["data"]
+        or "alerts" not in json_response["data"]["references"]
+    ):
+        logger.error(f"No valid alerts data in API response for route {route.name}")
+        return
+
+    # Get stopTimes from TransitArrivalsAndDepartures
+    alerts = json_response["data"]["references"].get("alerts")
+    if len(alerts) == 0:
+        logger.debug(f"No alert data found when updating route {route.name}")
+
+    # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
+    for alert_details in alerts.values():
+        # If the start time of the alert is in the future, return False
+        if alert_details["start"] > datetime.now().timestamp():
+            continue
+
+        # Iterate the TransitAlertRoutes in the TransitAlert
+        for alert_route in alert_details["routes"]:
+            effect_type: str = alert_route.get("effectType", "")
+
+            # If the effectType is not NO_SERVICE
+            # we don't process the TransitAlertRoute anymore
+            if effect_type != "NO_SERVICE":
+                continue
+
+            # Iterate through stopIds in the TransitAlertRoute
+            for stop_id in alert_route.get("stopIds", []):
+                # Check if we are interested in the stopId
+                if stop_id not in route.get_stop_ids():
+                    continue
+
+                sid = route.get_stop_id(stop_id)
+                # Check whether the stop is operational now
+                if sid.in_service:
+                    # Check if we have a schedule for this stop_id,
+                    # because if we have, then the stop is not really out of service
+                    soonest_job = aps_helpers.find_soonest_job_by_argument(
+                        departure_scheduler,
+                        stop_id,
+                        0,
+                    )
+
+                    if soonest_job is not None:
+                        # We found at least one schedule for this stop,
+                        # so we'll ignore the NO_SERVICE alert
+                        logger.debug(
+                            f"Found NO_SERVICE alert {alert_details['id']} "
+                            f"for {sid.stop.name}, route {route.name}, "
+                            f"but there are active schedules for that stop, "
+                            f"so we'll ignore that",
+                        )
+                    else:
+                        # No schedule found for this stop,
+                        # so we'll process the NO_SERVICE alert
+                        logger.debug(
+                            f"Found NO_SERVICE alert {alert_details['id']} "
+                            f"for {sid.stop.name}, route {route.name}",
+                        )
+                        # Set the operation state of this StopId
+                        sid.in_service = False
+
+                        # FIXME
+                        # Calculate the default color for this stop according to
+                        # which route is operation for the stop
+                        # led_control.calculate_default_color(stops_led[stop_id])
+                        # Change the LED color to the default color
+                        # led_control.reset_led_to_default(stops_led[stop_id], fade=False)
+                        # FIXME
+
+
+def departure_action(
     stop: Stop,
     trip_id: str,
     job_time: datetime,
@@ -790,90 +877,3 @@ def calculate_led_off_delay(route: Route) -> int:
             delay = 45
 
     return delay
-
-
-def process_alerts(json_response: Any, route: Route) -> None:
-    """Process API response to determine the interval between schedules for a route.
-
-    Process the ArrivalsAndDeparturesForStopOTPMethodResponse API response
-    from the arrivals-and-departures-for-stop method.
-    It checks time between the schedules for each route
-    and updates the ACTION_DELAY dictionary accordingly.
-
-    :param json_response: JSON return data from the BKK OpenData API
-    :param route: The Route that the alert data belongs to
-    :return:
-    """
-    # Check if JSON looks valid
-    if (
-        not json_response
-        or "data" not in json_response
-        or "references" not in json_response["data"]
-        or "alerts" not in json_response["data"]["references"]
-    ):
-        logger.error(f"No valid alerts data in API response for route {route.name}")
-        return
-
-    # Get stopTimes from TransitArrivalsAndDepartures
-    alerts = json_response["data"]["references"].get("alerts")
-    if len(alerts) == 0:
-        logger.debug(f"No alert data found when updating route {route.name}")
-
-    # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
-    for alert_details in alerts.values():
-        # If the start time of the alert is in the future, return False
-        if alert_details["start"] > datetime.now().timestamp():
-            continue
-
-        # Iterate the TransitAlertRoutes in the TransitAlert
-        for alert_route in alert_details["routes"]:
-            effect_type: str = alert_route.get("effectType", "")
-
-            # If the effectType is not NO_SERVICE
-            # we don't process the TransitAlertRoute anymore
-            if effect_type != "NO_SERVICE":
-                continue
-
-            # Iterate through stopIds in the TransitAlertRoute
-            for stop_id in alert_route.get("stopIds", []):
-                # Check if we are interested in the stopId
-                if stop_id not in route.get_stop_ids():
-                    continue
-
-                sid = route.get_stop_id(stop_id)
-                # Check whether the stop is operational now
-                if sid.in_service:
-                    # Check if we have a schedule for this stop_id,
-                    # because if we have, then the stop is not really out of service
-                    soonest_job = aps_helpers.find_soonest_job_by_argument(
-                        departure_scheduler,
-                        stop_id,
-                        0,
-                    )
-
-                    if soonest_job is not None:
-                        # We found at least one schedule for this stop,
-                        # so we'll ignore the NO_SERVICE alert
-                        logger.debug(
-                            f"Found NO_SERVICE alert {alert_details['id']} "
-                            f"for {sid.stop.name}, route {route.name}, "
-                            f"but there are active schedules for that stop, "
-                            f"so we'll ignore that",
-                        )
-                    else:
-                        # No schedule found for this stop,
-                        # so we'll process the NO_SERVICE alert
-                        logger.debug(
-                            f"Found NO_SERVICE alert {alert_details['id']} "
-                            f"for {sid.stop.name}, route {route.name}",
-                        )
-                        # Set the operation state of this StopId
-                        sid.in_service = False
-
-                        # FIXME
-                        # Calculate the default color for this stop according to
-                        # which route is operation for the stop
-                        # led_control.calculate_default_color(stops_led[stop_id])
-                        # Change the LED color to the default color
-                        # led_control.reset_led_to_default(stops_led[stop_id], fade=False)
-                        # FIXME
