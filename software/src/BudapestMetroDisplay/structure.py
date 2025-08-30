@@ -306,10 +306,12 @@ class StopId(BaseModel):
 
 
 def ease_linear(t: float) -> float:
+    """Return a linear easing value for smooth constant transitions."""
     return t
 
 
 def ease_in_out_quad(t: float) -> float:
+    """Return a quadratic easing value for smooth acceleration and deceleration."""
     return 2 * t * t if t < 0.5 else 1 - ((-2 * t + 2) ** 2) / 2
 
 
