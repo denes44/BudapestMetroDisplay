@@ -86,7 +86,7 @@ def create_schedule_updates(
     schedule_type: str,
     delay: int = 0,
 ) -> None:
-    """Create jobs to update the data for the provided stops.
+    """Create jobs to update the data for the provided route.
 
     The method puts the jobs in APScheduler which later will make the API calls.
 
@@ -801,7 +801,7 @@ def process_alerts(json_response: Any, route: Route) -> None:
     and updates the ACTION_DELAY dictionary accordingly.
 
     :param json_response: JSON return data from the BKK OpenData API
-    :param route: The Route that the schedule data belongs to
+    :param route: The Route that the alert data belongs to
     :return:
     """
     # Check if JSON looks valid
