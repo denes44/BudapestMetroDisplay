@@ -125,39 +125,37 @@ def create_schedule_updates(
     )
 
 
-def create_alert_updates(routes: tuple[str, ...]) -> None:
-    """Create jobs in APScheduler to update the alerts for the provided routes.
+def create_alert_updates(route: Route, delay: int = 0) -> None:
+    """Create jobs in APScheduler to update the alerts for the provided route.
 
-    The method puts the jobs in APScheduler which later will make the API calls.
+    The method puts the job in APScheduler which later will make the API calls.
 
-    :param routes: A tuple which consist the route ids
+    :param route: A Route object we want to update
+    :param delay: An extra delay in seconds for the start of the job
+    affects the API update parameters
     """
     # Store the current time when we started the update process
     start_time = datetime.now()
 
-    logger.info(f"Starting updating the alerts for routes {routes}")
+    logger.info(f"Starting updating the alerts for route {route.name}")
 
-    for i, route_id in enumerate(routes):
-        # Schedule the API calls from each other by settings.bkk.api_update_interval
-        # starting from the current time
-        delay: int = i * settings.bkk.api_update_interval
-        job_time: datetime = start_time + timedelta(seconds=delay)  # job start time
-        job_id: str = f"{route_id}_ALERTS"  # job reference id
+    job_time: datetime = start_time + timedelta(seconds=delay)  # job start time
+    job_id: str = f"{route.route_id}_ALERTS"  # job reference id
 
-        # Add the job to the scheduler
-        api_update_scheduler.add_job(
-            fetch_alerts_for_route,
-            "date",
-            run_date=job_time,
-            args=[route_id],
-            id=job_id,
-            replace_existing=True,
-            # If the job exists, it will be replaced with the new time
-        )
+    # Add the job to the scheduler
+    api_update_scheduler.add_job(
+        fetch_alerts_for_route,
+        "date",
+        run_date=job_time,
+        args=[route],
+        id=job_id,
+        replace_existing=True,
+        # If the job exists, it will be replaced with the new time
+    )
 
-        logger.debug(
-            f"Scheduling alerts API updates for routes {routes} at {job_time!s}.",
-        )
+    logger.debug(
+        f"Scheduling alerts API updates for route {route.name} at {job_time!s}.",
+    )
 
 
 def fetch_schedule_for_route(

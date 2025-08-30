@@ -108,7 +108,7 @@ def main() -> None:  # noqa: D103
             bkk_opendata.create_schedule_updates(route, "REALTIME", delay)
         else:
             # Create schedules for updating the alarm data for non-realtime stops
-            bkk_opendata.create_alert_updates(route)
+            bkk_opendata.create_alert_updates(route, delay)
 
     # Start the sACN sending routine with continuous updates
     led_control.reset_leds_to_default()
