@@ -190,7 +190,7 @@ def fetch_schedule_for_route(
 
     # Get schedule data for all stops in the stop set
     params: dict[str, str | int | list[str]] = {
-        "stopId": route.get_stop_ids(),
+        "stopId": route.get_stop_ids(string_only=True),
         "minutesBefore": API_SCHEDULE_PARAMETERS[schedule_type]["minutesBefore"],
         "minutesAfter": API_SCHEDULE_PARAMETERS[schedule_type]["minutesAfter"],
         "limit": API_SCHEDULE_PARAMETERS[schedule_type]["limit"],
@@ -457,9 +457,9 @@ def process_schedule(json_response: Any, route: Route) -> int:
         stop_id = stop_time.get("stopId") if "stopId" in stop_time else stop_id_global
 
         # Check if we are interested in the provided stopId
-        if stop_id not in route.get_stop_ids():
+        if stop_id not in route.get_stop_ids(string_only=True):
             logger.debug(
-                f"Got update for stop {stop_id}, route {route.name}, "
+                f"Got update for stop ID {stop_id}, route {route.name}, "
                 f"but we don't need that, skipping",
             )
             continue
@@ -654,7 +654,7 @@ def process_alerts(json_response: Any, route: Route) -> None:
             # Iterate through stopIds in the TransitAlertRoute
             for stop_id in alert_route.get("stopIds", []):
                 # Check if we are interested in the stopId
-                if stop_id not in route.get_stop_ids():
+                if stop_id not in route.get_stop_ids(string_only=True):
                     continue
 
                 sid = route.get_stop_id(stop_id)

@@ -231,9 +231,17 @@ class Route(BaseModel):
             None,
         )
 
-    def get_stop_ids(self) -> list[StopId]:
-        """Return all Stop IDs of the Route."""
-        return [sid for stop in self.stops for sid in stop.stop_ids]
+    def get_stop_ids(self, *, string_only: bool = False) -> list[StopId] | list[str]:
+        """Return all Stop IDs of the Route.
+
+        If string_only is True, return only the stop_id strings;
+        otherwise return StopId objects.
+        """
+        return (
+            [sid.stop_id for stop in self.stops for sid in stop.stop_ids]
+            if string_only
+            else [sid for stop in self.stops for sid in stop.stop_ids]
+        )
 
 
 class Stop(BaseModel):
