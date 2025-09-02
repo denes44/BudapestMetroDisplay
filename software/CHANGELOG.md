@@ -3,6 +3,25 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - Unreleased
+
+### Added
+
+- The webserver now can list the API update jobs too for debug purposes
+
+### Changed
+
+- Completely new, OO data structure for storing the public transport data
+and relations.
+- General code-quality improvements
+- Webserver lines are now color coded with route colors
+- When the software runs in debug (or trace) mode, the webserver also runs in debug mode
+- Some logging are moved from debug to trace level
+
+### Removed
+
+- GUI is removed from the code
+
 ## [1.1.1] - 2025-09-02
 
 ### Fixed
