@@ -823,12 +823,13 @@ def calculate_schedule_interval(json_response: Any, route: Route) -> None:
     # Variable to store the necessary data from the first two relevant stops
     stop_id: str = stop_times[0].get("stopId", "")
     stop_headsign: str = stop_times[0].get("stopHeadsign", "")
+    field: str
+
     if stop_times[0].get("departureTime") is not None:
-        last_time: int = stop_times[0].get("departureTime", 0)
-        field: str = "departureTime"
+        field = "departureTime"
     else:
-        last_time: int = stop_times[0].get("arrivalTime", 0)
-        field: str = "arrivalTime"
+        field = "arrivalTime"
+    last_time: int = stop_times[0].get(field, 0)
 
     deltas: list[int] = []
 
