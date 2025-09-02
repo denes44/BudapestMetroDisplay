@@ -833,6 +833,7 @@ def calculate_schedule_interval(json_response: Any, route: Route) -> None:
         field = "arrivalTime"
     last_time: int = stop_times[0].get(field, 0)
 
+
     deltas: list[int] = []
 
     # Iterate through the TransitScheduleStopTimes
