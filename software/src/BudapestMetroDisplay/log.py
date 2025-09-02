@@ -122,6 +122,7 @@ def setup_logging(parser: argparse.ArgumentParser) -> None:
         Path(settings.log.path) / "application.log",
         maxBytes=5 * 1024 * 1024,  # 5 MB file size limit
         backupCount=10,  # Keep up to 10 backup log files
+        encoding="utf-8",
     )
 
     # Create a rotating file handler
@@ -129,6 +130,7 @@ def setup_logging(parser: argparse.ArgumentParser) -> None:
         Path(settings.log.path) / "application_error.log",
         maxBytes=5 * 1024 * 1024,  # 5 MB file size limit
         backupCount=5,  # Keep up to 5 backup log files
+        encoding="utf-8",
     )
 
     # Create a temporary logger for adding the start entry
