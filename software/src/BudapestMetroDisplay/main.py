@@ -97,7 +97,7 @@ def main() -> None:  # noqa: D103
     signal.signal(signal.SIGINT, handle_exit_signal)
     signal.signal(signal.SIGTERM, handle_exit_signal)
 
-    for i, route in network.routes:
+    for i, route in enumerate(network.routes):
         # Schedule the updates from each other by settings.bkk.api_update_interval
         delay = i * settings.bkk.api_update_interval
 
