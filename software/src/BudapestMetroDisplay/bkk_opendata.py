@@ -231,10 +231,15 @@ def fetch_schedule_for_route(
                     f"Next update scheduled for {job_time!s}",
                 )
             else:
-                logger.debug(
+                message: str = (
                     f"Successfully updated {schedule_type} schedules for route "
-                    f"{route.name}. Next update scheduled for {job_time!s}",
+                    f"{route.name}. Next update scheduled for {job_time!s}"
                 )
+
+                if schedule_type == "REGULAR":
+                    logger.debug(message)
+                else:
+                    logger.trace(message)  # type: ignore[attr-defined]
         else:
             # Reschedule the failed action for 1 minute later
             job_time = datetime.now() + timedelta(minutes=1)
@@ -446,7 +451,9 @@ def process_schedule(json_response: Any, route: Route) -> int:
     # Get stopTimes from TransitArrivalsAndDepartures
     stop_times = json_response["data"]["entry"].get("stopTimes", [])
     if len(stop_times) == 0:
-        logger.debug(f"No schedule data found when updating route {route.name}")
+        logger.trace(  # type: ignore[attr-defined]
+            f"No schedule data found when updating route {route.name}",
+        )
 
     latest_departure_time: int = -1
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
