@@ -111,7 +111,7 @@ def create_schedule_updates(
     # Add the job to the scheduler
     api_update_scheduler.add_job(
         fetch_schedule_for_route,
-        "date",
+        trigger="date",
         run_date=job_time,
         args=[route, schedule_type],
         id=job_id,
@@ -145,7 +145,7 @@ def create_alert_updates(route: Route, delay: int = 0) -> None:
     # Add the job to the scheduler
     api_update_scheduler.add_job(
         fetch_alerts_for_route,
-        "date",
+        trigger="date",
         run_date=job_time,
         args=[route],
         id=job_id,
@@ -286,7 +286,7 @@ def fetch_schedule_for_route(
 
     api_update_scheduler.add_job(
         fetch_schedule_for_route,
-        "date",
+        trigger="date",
         run_date=job_time,
         args=[route, schedule_type],
         id=job_id,
@@ -377,7 +377,7 @@ def fetch_alerts_for_route(route: Route) -> None:
 
     api_update_scheduler.add_job(
         fetch_alerts_for_route,
-        "date",
+        trigger="date",
         run_date=job_time,
         args=[route],
         id=job_id,
@@ -580,7 +580,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
         if job_time > datetime.now():
             departure_scheduler.add_job(
                 departure_action,
-                "date",
+                trigger="date",
                 run_date=job_time,
                 args=[route.get_stop_id(stop_id).stop, trip_id, job_time, delay],
                 id=job_id,
@@ -736,7 +736,7 @@ def departure_action(
 
     # led_scheduler.add_job(
     #     led_control.reset_led_to_default,
-    #     "date",
+    #     trigger="date",
     #     run_date=led_job_time,
     #     args=[led_id],
     #     id=str(led_id),
