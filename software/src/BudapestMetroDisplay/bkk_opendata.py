@@ -328,7 +328,7 @@ def fetch_alerts_for_route(route: Route) -> None:
         response = requests.get(url, headers=headers, params=params, timeout=5)
 
         if response.status_code == 200:
-            process_alerts(response.json(), route)
+            process_alerts(response.json(), route, True)
 
             logger.debug(
                 f"Successfully updated alerts for route {route.name}. "
@@ -616,7 +616,12 @@ def process_schedule(json_response: Any, route: Route) -> int:
     return latest_departure_time
 
 
-def process_alerts(json_response: Any, route: Route) -> None:
+def process_alerts(
+    json_response: Any,
+    route: Route,
+    *,
+    is_alert_only: bool = False,
+) -> None:
     """Process API response to determine the interval between schedules for a route.
 
     Process the ArrivalsAndDeparturesForStopOTPMethodResponse API response
@@ -626,6 +631,8 @@ def process_alerts(json_response: Any, route: Route) -> None:
 
     :param json_response: JSON return data from the BKK OpenData API
     :param route: The Route that the alert data belongs to
+    :param is_alert_only: If True, the API data comes from an alert-only update,
+        not a regular schedule update
     :return:
     """
     # Check if JSON looks valid
@@ -638,7 +645,6 @@ def process_alerts(json_response: Any, route: Route) -> None:
         logger.error(f"No valid alerts data in API response for route {route.name}")
         return
 
-    # Get stopTimes from TransitArrivalsAndDepartures
     alerts = json_response["data"]["references"].get("alerts")
     if len(alerts) == 0:
         logger.trace(  # type: ignore[attr-defined]
@@ -695,6 +701,10 @@ def process_alerts(json_response: Any, route: Route) -> None:
                         )
                         # Set the operation state of this StopId
                         sid.in_service = False
+
+                        # Update the regular schedule data for the route
+                        # because of the active alert
+                        create_schedule_updates(route, "REGULAR")
 
                         # FIXME
                         # Calculate the default color for this stop according to
@@ -832,7 +842,6 @@ def calculate_schedule_interval(json_response: Any, route: Route) -> None:
     else:
         field = "arrivalTime"
     last_time: int = stop_times[0].get(field, 0)
-
 
     deltas: list[int] = []
 
