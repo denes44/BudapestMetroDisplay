@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-09-02
+
+### Fixed
+- Fixed calculation of schedule interval time, which in some cases could have
+caused the LEDs not to turn on during a departure
+
 ## [1.1.0] - 2025-08-26
 
 ### Changed
