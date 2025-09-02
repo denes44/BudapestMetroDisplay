@@ -23,6 +23,7 @@
 import logging
 import threading
 
+from apscheduler.job import Job
 from flask import Flask, render_template
 
 from BudapestMetroDisplay.network import network
@@ -42,7 +43,7 @@ def get_schedules(route_id: str | None) -> str:
     """
     from BudapestMetroDisplay.bkk_opendata import departure_scheduler
 
-    jobs = departure_scheduler.get_jobs()
+    jobs: list[Job] = departure_scheduler.get_jobs()
     job_list = []
     for job in jobs:
         if route_id is None or job.args[0].route.route_id == route_id:
@@ -58,6 +59,16 @@ def get_schedules(route_id: str | None) -> str:
             }
             job_list.append(job_info)
     return render_template("schedules.html", jobs=job_list, network=network)
+
+
+@app.route("/jobs", methods=["GET"])
+def get_jobs() -> str:
+    """Return an HTML page with the API update schedules."""
+    from BudapestMetroDisplay.bkk_opendata import api_update_scheduler
+
+    jobs: list[Job] = api_update_scheduler.get_jobs()
+
+    return render_template("jobs.html", jobs=jobs)
 
 
 def start_webserver() -> None:

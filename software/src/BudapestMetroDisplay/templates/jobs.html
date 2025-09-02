@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedules</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .M1 {
+            background-color: #FFF9C4;
+        }
+        .M2 {
+            background-color: #FFCCBC;
+        }
+        .M3 {
+            background-color: #BBDEFB;
+        }
+        .M4 {
+            background-color: #DCEDC8;
+        }
+        .H5, .H6, .H7, .H8 {
+            background-color: #E1BEE7;
+        }
+    </style>
+</head>
+<body>
+    <h1>API update Jobs</h1>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Route</th>
+            <th>Schedule tpye</th>
+            <th>Scheduled time</th>
+        </tr>
+        {% for job in jobs %}
+        <tr class="{{ job.args[0].name }}">
+            <td>{{ job.id }}</td>
+            <td>{{ job.args[0].name }}</td>
+            <td>{{ job.args[1] }}</td>
+            <td>{{ job.next_run_time.strftime('%H:%M:%S') }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
