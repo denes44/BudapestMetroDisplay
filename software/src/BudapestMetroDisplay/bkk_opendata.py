@@ -641,7 +641,9 @@ def process_alerts(json_response: Any, route: Route) -> None:
     # Get stopTimes from TransitArrivalsAndDepartures
     alerts = json_response["data"]["references"].get("alerts")
     if len(alerts) == 0:
-        logger.debug(f"No alert data found when updating route {route.name}")
+        logger.trace(  # type: ignore[attr-defined]
+            f"No alert data found when updating route {route.name}",
+        )
 
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
     for alert_details in alerts.values():
