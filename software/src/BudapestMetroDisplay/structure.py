@@ -65,7 +65,7 @@ class LED(BaseModel):
         self.color_override = None if color is None else _rgb_clamp(color)
 
     def get_default_color(self) -> RGB:
-        """Return default color of the LED.
+        """Return the default color of the LED.
 
         If override set -> return it.
         Else -> per-channel max of default colors from Routes of attached Stops.
@@ -85,7 +85,7 @@ class LED(BaseModel):
 
 
 class LedStrip(BaseModel):
-    """An LED Strip that hold LEDs, to make them easier to handle."""
+    """An LED Strip that holds LEDs to make them easier to handle."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -118,9 +118,9 @@ class LedStrip(BaseModel):
 
 # ========= transit domain =========
 class Network(BaseModel):
-    """A Network which consist of Routes.
+    """A Network that consists of Routes.
 
-    routes: The list of Routes that belongs to this Network
+    routes: The list of Routes that belong to this Network
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -156,7 +156,7 @@ class Network(BaseModel):
 
     # -- lookups --
     def get_stopid(self, stop_id: str) -> StopId | None:
-        """Lookup a StopId by its API ID string."""
+        """Look up a StopId by its API ID string."""
         return next(
             (
                 sid
@@ -168,7 +168,7 @@ class Network(BaseModel):
         )
 
     def get_stop_by_stopid(self, stop_id: str) -> Stop | None:
-        """Lookup a Stop by the API ID string of a corresponding StopId."""
+        """Look up a Stop by the API ID string of a corresponding StopId."""
         return next(
             (
                 stop
@@ -180,14 +180,14 @@ class Network(BaseModel):
 
 
 class Route(BaseModel):
-    """A Route which consist of Stops, and has its own properties.
+    """A Route that consists of Stops and has its own properties.
 
     route_id: The API ID of the Route
     name: User-friendly name of the Route
     color: The color of the Route that is shown on the LEDs
     type: The type of the Route, Subway/Railway
-    stops: List of Stops that are belongs to the Route
-    schedule_interval: The average second between each consecutive departures
+    stops: List of Stops that belong to the Route
+    schedule_interval: The average second between each consecutive departure
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -276,12 +276,11 @@ class Stop(BaseModel):
     def is_in_service(self) -> bool:
         """Return the in service status of the Stop.
 
-        If it's a terminus Stop, the Stop is no service if ANY of it's
+        If it's a terminus Stop, the Stop is no service if ANY of its
             StopIds are in no service.
-        If it's an intermediate Stop, the Stop is no service if ALL of it's
+        If it's an intermediate Stop, the Stop is no service if ALL of its
             StopIds are in no service.
-        If there are no StopIds associated to the Stop,
-        it always returns False.
+        If there are no StopIds associated with the Stop, it always returns False.
         """
         states = [si.in_service for si in self.stop_ids]
         if not states:

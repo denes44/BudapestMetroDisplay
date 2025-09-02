@@ -37,7 +37,7 @@ from BudapestMetroDisplay.structure import Route, Stop
 logger = logging.getLogger(__name__)
 # Set the logging level for urllib3 to INFO
 logging.getLogger("urllib3").setLevel(logging.INFO)
-# Set logging level for requests to INFO
+# Set the logging level for requests to INFO
 logging.getLogger("requests").setLevel(logging.INFO)
 
 # Define the API request parameters for the different schedule updates
@@ -56,7 +56,7 @@ API_SCHEDULE_PARAMETERS: dict[str, dict[str, Any]] = {
     },
 }
 
-# Set minimum log level for APScheduler
+# Set the minimum log level for APScheduler
 logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
 logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
 
@@ -88,7 +88,7 @@ def create_schedule_updates(
 ) -> None:
     """Create jobs to update the data for the provided route.
 
-    The method puts the jobs in APScheduler which later will make the API calls.
+    The method puts the jobs in APScheduler, which later will make the API calls.
 
     :param route: A Route object we want to update
     :param schedule_type: REGULAR or REALTIME
@@ -128,7 +128,7 @@ def create_schedule_updates(
 def create_alert_updates(route: Route, delay: int = 0) -> None:
     """Create jobs in APScheduler to update the alerts for the provided route.
 
-    The method puts the job in APScheduler which later will make the API calls.
+    The method puts the job in APScheduler, which later will make the API calls.
 
     :param route: A Route object we want to update
     :param delay: An extra delay in seconds for the start of the job
@@ -171,11 +171,11 @@ def fetch_schedule_for_route(
     :param route: A Route object we want to get the schedules for
     :param schedule_type: REGULAR or REALTIME, affects the API update parameters
     """
-    # Calculate next schedule time
+    # Calculate the next schedule time
     if schedule_type == "REALTIME" and (
         time(0, 30) <= datetime.now().time() <= time(4, 0)
     ):
-        # When the current time is between 00:30 and 04:00
+        # When the current time is between 00:30 and 04:00,
         # schedule the next REALTIME update for 04:00
         job_time = datetime.combine(datetime.today(), time(4, 0))
     else:
@@ -296,7 +296,7 @@ def fetch_schedule_for_route(
 
 
 def fetch_alerts_for_route(route: Route) -> None:
-    """Send API request to fetch the alerts for a selected route.
+    """Send an API request to fetch the alerts for a selected route.
 
     Callback function for the APScheduler jobs.
     Makes a route-details API request to the BKK OpenData server
@@ -304,7 +304,7 @@ def fetch_alerts_for_route(route: Route) -> None:
 
     :param route: A Route object we want to update
     """
-    # Calculate next schedule time
+    # Calculate the next schedule time
     job_time = datetime.now() + timedelta(seconds=settings.bkk.api_update_alerts)
 
     url: str = f"{settings.bkk.api_base_url}route-details"
@@ -392,13 +392,13 @@ def process_schedule(json_response: Any, route: Route) -> int:
     Processes the ArrivalsAndDeparturesForStopOTPMethodResponse API response
     from the arrivals-and-departures-for-stop method.
 
-    As a result stores the retrieved departures in an APScheduler instance
+    As a result, stores the retrieved departures in an APScheduler instance
     which will control the LED states.
 
     :param json_response: JSON return data from the BKK OpenData API
     :param route: The Route that the schedule data belongs to
     :return: Timestamp of the latest departure in the data provided,
-        -1 if there is no valid departures
+        -1 if there are no valid departures
     """
     # Check if JSON looks valid
     if (
@@ -453,7 +453,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
     for stop_time in stop_times:
         trip_id: str = stop_time.get("tripId")
 
-        # Get stopId, when the response contains schedules for multiple stops
+        # Get stopId when the response contains schedules for multiple stops
         stop_id = stop_time.get("stopId") if "stopId" in stop_time else stop_id_global
 
         # Check if we are interested in the provided stopId
@@ -475,7 +475,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
             and not stop_time.get("uncertain", False)
         ):
             # Arrival time is different from the departure,
-            # lets use the difference between them for the LED turn off delay
+            # let's use the difference between them for the LED turn-off delay
             if stop_time.get("predictedArrivalTime") != stop_time.get(
                 "predictedDepartureTime",
             ):
@@ -484,7 +484,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
                     "predictedArrivalTime",
                 )
             # Arrival time is the same as the departure,
-            # use predefined delay for LED turn off
+            # use predefined delay for LED turn-off
             else:
                 arrival_time = stop_time.get(
                     "predictedDepartureTime",
@@ -492,7 +492,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
                 delay = calculate_led_off_delay(route)
         # CASE #2: Only predicted arrival time is available
         # [end stop with realtime data]
-        # Use the predefined delay for LED turn off
+        # Use the predefined delay for LED turn-off
         elif "predictedArrivalTime" in stop_time and not stop_time.get(
             "uncertain",
             False,
@@ -503,7 +503,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
             delay = calculate_led_off_delay(route)
         # CASE #3: Only predicted departure time is available
         # [start stop with realtime data]
-        # Use the predefined delay for LED turn off
+        # Use the predefined delay for LED turn-off
         elif "predictedDepartureTime" in stop_time and not stop_time.get(
             "uncertain",
             False,
@@ -516,12 +516,12 @@ def process_schedule(json_response: Any, route: Route) -> int:
         # [middle stop, no realtime data]
         elif "arrivalTime" in stop_time and "departureTime" in stop_time:
             # Arrival time is different from the departure,
-            # lets use the difference between them for the LED turn off delay
+            # let's use the difference between them for the LED turn-off delay
             if stop_time.get("arrivalTime") != stop_time.get("departureTime"):
                 arrival_time = stop_time.get("arrivalTime") + randint(-3, 3)
                 delay = stop_time.get("departureTime") - stop_time.get("arrivalTime")
             # Arrival time is the same as the departure,
-            # use predefined delay for LED turn off
+            # use predefined delay for LED turn-off
             else:
                 arrival_time = (
                     stop_time.get("departureTime")
@@ -531,7 +531,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
                 delay = calculate_led_off_delay(route)
         # CASE #5: Only scheduled arrival time is available
         # [end stop with no realtime data]
-        # Use the predefined delay for LED turn off
+        # Use the predefined delay for LED turn-off
         elif "arrivalTime" in stop_time:
             arrival_time = (
                 stop_time.get("arrivalTime")
@@ -541,7 +541,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
             delay = calculate_led_off_delay(route)
         # CASE #6: Only scheduled departure time is available
         # [start stop with no realtime data]
-        # Use the predefined delay for LED turn off
+        # Use the predefined delay for LED turn-off
         elif "departureTime" in stop_time:
             arrival_time = (
                 stop_time.get("departureTime")
@@ -601,7 +601,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
                 f"was in the past, skipping",
             )
 
-    # Check if there is any active alerts in the response and process them
+    # Check if there are any active alerts in the response and process them
     alerts = json_response["data"]["entry"].get("alertIds", [])
     if len(alerts) > 0:
         process_alerts(json_response, route)
@@ -646,7 +646,7 @@ def process_alerts(json_response: Any, route: Route) -> None:
         for alert_route in alert_details["routes"]:
             effect_type: str = alert_route.get("effectType", "")
 
-            # If the effectType is not NO_SERVICE
+            # If the effectType is not NO_SERVICE,
             # we don't process the TransitAlertRoute anymore
             if effect_type != "NO_SERVICE":
                 continue
@@ -708,11 +708,11 @@ def departure_action(
     Changes the LED of the specified stop(stop_id) to the associated color,
     and schedules the turn-off of the LED in APScheduler after the supplied delay.
 
-    :param stop: The Stop object the departure are related to
+    :param stop: The Stop object the departure is related to
     :param trip_id: tripId from the BKK OpenData API
     :param job_time: The time this job was scheduled in APScheduler
     :param delay: The amount of time needs to be elapsed in seconds
-        between the turn on and turn off action
+        between the turn-on and turn off action
     """
     if job_time < datetime.now() - timedelta(seconds=20):
         logger.trace(  # type: ignore[attr-defined]
@@ -728,7 +728,7 @@ def departure_action(
     # FIXME
     # led_id: int = stop.led.index
 
-    # Change LED color according to the color of the route
+    # Change the LED color according to the color of the route
     # led_control.set_led_color(led_id, led_control.ROUTE_COLORS[route_id])
 
     # Schedule an action at the departure time to turn the LED back to the default value
@@ -823,7 +823,7 @@ def calculate_schedule_interval(json_response: Any, route: Route) -> None:
     # Iterate through the TransitScheduleStopTimes
     # in the TransitArrivalsAndDepartures
     for stop_time in stop_times[1:]:  # skip the first item
-        # Check if the stopId and stopHeadsign is the same as the first one
+        # Check if the stopId and stopHeadsign are the same as the first one
         if (
             stop_time.get("stopId") != stop_id
             or stop_time.get("stopHeadsign") != stop_headsign

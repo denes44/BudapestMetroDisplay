@@ -178,7 +178,7 @@ class LogConfig(BaseSettings):
     @model_validator(mode="before")
     @classmethod
     def ensure_log_directory_exists(cls, values: Any) -> Any:
-        """Check if the specified directory exists, and create if not."""
+        """Check if the specified directory exists and create if not."""
         path = values.get("path", Path("./log"))
         path = Path(path)  # Ensure `path` is a Path object
 

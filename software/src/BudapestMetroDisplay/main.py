@@ -89,7 +89,7 @@ def main() -> None:  # noqa: D103
         help="Enable trace mode for verbose output.",
     )
 
-    # Set up logging with or without debug mode
+    # Set up logging
     log.setup_logging(parser)
     logger.info(f"Program started, version {__version__}")
 
@@ -101,7 +101,7 @@ def main() -> None:  # noqa: D103
         # Schedule the updates from each other by settings.bkk.api_update_interval
         delay = i * settings.bkk.api_update_interval
 
-        # Create schedules for updating the departures data
+        # Create schedules for updating the departure data
         bkk_opendata.create_schedule_updates(route, "REGULAR", delay)
         if route.type == "railway":
             # Create schedules for updating the realtime data
