@@ -854,7 +854,7 @@ def calculate_led_off_delay(route: Route) -> int:
     """
     delay: int = 0
 
-    if route.schedule_interval > 0:
+    if route.schedule_interval >= 0:
         if route.type == "subway":
             if route.schedule_interval <= 2:
                 delay = 15
