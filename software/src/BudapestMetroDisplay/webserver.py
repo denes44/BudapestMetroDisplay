@@ -25,7 +25,7 @@ import threading
 
 from flask import Flask, render_template
 
-from BudapestMetroDisplay import network
+from BudapestMetroDisplay.network import network
 
 logger = logging.getLogger(__name__)
 
@@ -45,13 +45,13 @@ def get_schedules(route_id: str | None) -> str:
     jobs = departure_scheduler.get_jobs()
     job_list = []
     for job in jobs:
-        if route_id is None or job.args[0].route_id == route_id:
+        if route_id is None or job.args[0].route.route_id == route_id:
             # Add the job to the list if route_id wasn't specified,
             # or if it matches the route_id of the job
             job_info = {
                 "id": job.id,
                 "stop_name": job.args[0].name,
-                "arg1": job.args[0].route_id,
+                "arg1": job.args[0].route.name,
                 "arg2": job.args[1],
                 "arg3": job.args[2],
                 "arg4": job.args[3],
