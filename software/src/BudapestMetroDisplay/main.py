@@ -88,6 +88,7 @@ def main() -> None:  # noqa: D103
         action="store_true",
         help="Enable trace mode for verbose output.",
     )
+    args = parser.parse_args()
 
     # Set up logging
     log.setup_logging(parser)
@@ -115,7 +116,7 @@ def main() -> None:  # noqa: D103
     # Start sending LED data via sACN
     led_control.activate_sacn()
 
-    webserver.start_webserver()
+    webserver.start_webserver(debug_mode=(args.debug or args.trace))
 
     gui.start_gui()
 

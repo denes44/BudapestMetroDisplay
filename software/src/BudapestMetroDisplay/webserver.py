@@ -71,10 +71,10 @@ def get_jobs() -> str:
     return render_template("jobs.html", jobs=jobs)
 
 
-def start_webserver() -> None:
+def start_webserver(*, debug_mode: bool) -> None:
     """Start the webserver in a separate thread."""
     thread = threading.Thread(
-        target=lambda: app.run(debug=False, use_reloader=False),
+        target=lambda: app.run(debug=debug_mode, use_reloader=False),
         daemon=True,
         name="Webserver thread",
     )
