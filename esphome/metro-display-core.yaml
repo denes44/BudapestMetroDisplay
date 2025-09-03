@@ -16,7 +16,7 @@ esphome:
   platformio_options:
     board_build.flash_mode: dio
   on_boot:
-    priority: -100
+    priority: 800
     then:
       - script.execute: default_values
 
