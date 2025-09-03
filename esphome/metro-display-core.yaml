@@ -45,6 +45,7 @@ captive_portal:
 # Home Assistant API
 
 api:
+  reboot_timeout : 0s
 
 time:
   - platform: homeassistant
