@@ -12,7 +12,7 @@ esphome:
   min_version: 2025.2.0
   project:
     name: "denes44.BudapestMetroDisplay"
-    version: 1.0.1
+    version: 1.1.0
   platformio_options:
     board_build.flash_mode: dio
   on_boot:
