@@ -123,7 +123,7 @@ light:
     web_server:
       sorting_weight: 1
       sorting_group_id: sg_led
-    restore_mode: ALWAYS_OFF
+    restore_mode: RESTORE_DEFAULT_OFF
     pin: GPIO07
     num_leds: 63
     rmt_symbols: 96
