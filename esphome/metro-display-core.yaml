@@ -222,17 +222,17 @@ script:
           id: leds
           range_from: 0
           range_to: 2
-          red: 75%
-          green: 55%
-          blue: 0%
+          red: 100%
+          green: 0%
+          blue: 100%
           color_brightness: 20%
       - light.addressable_set: #H7
           id: leds
           range_from: 3
           range_to: 5
-          red: 75%
-          green: 55%
-          blue: 0%
+          red: 100%
+          green: 0%
+          blue: 100%
           color_brightness: 20%
       - light.addressable_set: #M4/1
           id: leds
@@ -288,7 +288,7 @@ script:
           range_to: 26
           red: 100%
           green: 0%
-          blue: 60%
+          blue: 100%
           color_brightness: 20%
       - light.addressable_set: #H5
           id: leds
@@ -351,8 +351,8 @@ script:
           range_from: 25
           range_to: 25
           red: 100%
-          green: 55%
-          blue: 55%
+          green: 0%
+          blue: 60%
           color_brightness: 20%
       - delay: 1s
       - light.turn_on:
