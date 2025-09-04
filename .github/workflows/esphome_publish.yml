@@ -16,9 +16,9 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Build Firmware
-        uses: esphome/build-action@v6.0.0
+        uses: esphome/build-action@v6
         id: esphome-build
         with:
           yaml-file: esphome/metro-display.factory.yaml
