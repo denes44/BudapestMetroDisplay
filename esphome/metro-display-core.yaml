@@ -328,7 +328,7 @@ script:
           range_to: 17
           red: 100%
           green: 0%
-          blue: 60%
+          blue: 75%
           color_brightness: 20%
       - light.addressable_set: #M1/M2/M3 Deák Ferenc tér
           id: leds
@@ -343,7 +343,7 @@ script:
           range_from: 22
           range_to: 22
           red: 100%
-          green: 60%
+          green: 75%
           blue: 0%
           color_brightness: 20%
       - light.addressable_set: #M2/H9 Örs vezér tere
@@ -352,7 +352,7 @@ script:
           range_to: 25
           red: 100%
           green: 0%
-          blue: 60%
+          blue: 75%
           color_brightness: 20%
       - delay: 1s
       - light.turn_on:
