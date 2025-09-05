@@ -116,7 +116,8 @@ def main() -> None:  # noqa: D103
     # Start sending LED data via sACN
     led_control.activate_sacn()
 
-    webserver.start_webserver(debug_mode=(args.debug or args.trace))
+    if args.debug or args.trace:
+        webserver.start_webserver(debug_mode=True)
 
     try:
         while True:

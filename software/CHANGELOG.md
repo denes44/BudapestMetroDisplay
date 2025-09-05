@@ -20,8 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Completely new, OO data structure for storing the public transport data
   and relations.
 - General code-quality improvements
-- Webserver lines are now color-coded with route colors
-- When the software runs in debug (or trace) mode, the webserver also runs in debug mode
+- Webserver table lines are now color-coded with route colors
+- Webserver only started when the software is run in debug or trace mode
+    - The webserver is also run in debug mode
 - Some logging is moved from debug to trace level
 
 ### Removed
