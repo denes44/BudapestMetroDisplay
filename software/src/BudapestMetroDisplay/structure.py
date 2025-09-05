@@ -302,11 +302,13 @@ class StopId(BaseModel):
     stop_id: The API ID of the StopId
     stop: The Stop object this StopId belongs to
     in_service: Whether the StopId is in service
+    vehicle_present: Whether a vehicle is present at the StopId
     """
 
     stop_id: str
     stop: Stop | None = None
     in_service: bool = True
+    vehicle_present: bool = False
 
 
 # ========= fader (animation engine for fades) =========
