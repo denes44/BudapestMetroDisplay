@@ -5,6 +5,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.0] - Unreleased
 
+### Breaking change
+
+- The default sACN mode is now unicast, because multicast can cause troubles with
+  most home networks, if not properly configured
+    - Requires ESPHome firmware 1.2.0 or newer
+
 ### Added
 
 - The webserver now can list the API update jobs too for debug purposes
@@ -12,11 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Completely new, OO data structure for storing the public transport data
-and relations.
+  and relations.
 - General code-quality improvements
-- Webserver lines are now color coded with route colors
+- Webserver lines are now color-coded with route colors
 - When the software runs in debug (or trace) mode, the webserver also runs in debug mode
-- Some logging are moved from debug to trace level
+- Some logging is moved from debug to trace level
 
 ### Removed
 
@@ -25,8 +31,9 @@ and relations.
 ## [1.1.1] - 2025-09-02
 
 ### Fixed
+
 - Fixed calculation of schedule interval time, which in some cases could have
-caused the LEDs not to turn on during a departure
+  caused the LEDs not to turn on during a departure
 
 ## [1.1.0] - 2025-08-26
 

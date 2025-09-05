@@ -62,7 +62,7 @@ class SACNConfig(BaseSettings):
     """Class to store sACN related settings."""
 
     multicast: bool = Field(
-        default=True,
+        default=False,
         description="Whether the sACN protocol should use multicast or unicast",
     )
     unicast_ip: IPvAnyAddress | None = Field(
