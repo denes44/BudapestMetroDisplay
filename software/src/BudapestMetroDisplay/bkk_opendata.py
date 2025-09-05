@@ -32,7 +32,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from BudapestMetroDisplay import aps_helpers
 from BudapestMetroDisplay._version import __version__
 from BudapestMetroDisplay.config import settings
-from BudapestMetroDisplay.structure import Route, Stop
+from BudapestMetroDisplay.structure import Route, StopId
 
 logger = logging.getLogger(__name__)
 # Set the logging level for urllib3 to INFO
@@ -61,18 +61,11 @@ logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
 logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
 
 # Initialize APScheduler with a persistent job store
-# for scheduling the departures (when we turn on the LEDs)
+# for scheduling the arrival and departure updates
 departure_scheduler: BackgroundScheduler = BackgroundScheduler(
     jobstores={"default": MemoryJobStore()},  # Use in-memory job storage
 )
 departure_scheduler.start()
-
-# Initialize scheduler with MemoryJobStore
-# for scheduling turning off the LEDs after departure
-led_scheduler: BackgroundScheduler = BackgroundScheduler(
-    jobstores={"default": MemoryJobStore()},  # Use in-memory job storage
-)
-led_scheduler.start()
 
 # Initialize scheduler with MemoryJobStore for scheduling the API updates
 api_update_scheduler: BackgroundScheduler = BackgroundScheduler(
@@ -328,7 +321,7 @@ def fetch_alerts_for_route(route: Route) -> None:
         response = requests.get(url, headers=headers, params=params, timeout=5)
 
         if response.status_code == 200:
-            process_alerts(response.json(), route, True)
+            process_alerts(response.json(), route, is_alert_only=True)
 
             logger.debug(
                 f"Successfully updated alerts for route {route.name}. "
@@ -339,7 +332,8 @@ def fetch_alerts_for_route(route: Route) -> None:
             job_time = datetime.now() + timedelta(minutes=1)
 
             logger.error(
-                f"Failed to update alerts for route {route.name}: {response.status_code}."
+                f"Failed to update alerts for route {route.name}, "
+                f" HTTP {response.status_code}. "
                 f"Rescheduled for {job_time!s}.",
             )
     except requests.exceptions.JSONDecodeError as e:
@@ -396,9 +390,8 @@ def process_schedule(json_response: Any, route: Route) -> int:
 
     Processes the ArrivalsAndDeparturesForStopOTPMethodResponse API response
     from the arrivals-and-departures-for-stop method.
-
     As a result, stores the retrieved departures in an APScheduler instance
-    which will control the LED states.
+    which will control the vehicle_present status of the StopIds.
 
     :param json_response: JSON return data from the BKK OpenData API
     :param route: The Route that the schedule data belongs to
@@ -445,7 +438,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
         )
         return -1
 
-    # Get stopId, when there is only one stop in the response
+    # Get stopId when there is only one stop in the response
     stop_id_global: str = json_response["data"]["entry"].get("stopId", None)
 
     # Get stopTimes from TransitArrivalsAndDepartures
@@ -482,7 +475,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
             and not stop_time.get("uncertain", False)
         ):
             # Arrival time is different from the departure,
-            # let's use the difference between them for the LED turn-off delay
+            # let's use the difference between them for the departure delay
             if stop_time.get("predictedArrivalTime") != stop_time.get(
                 "predictedDepartureTime",
             ):
@@ -491,71 +484,71 @@ def process_schedule(json_response: Any, route: Route) -> int:
                     "predictedArrivalTime",
                 )
             # Arrival time is the same as the departure,
-            # use predefined delay for LED turn-off
+            # use predefined delay for departure delay
             else:
                 arrival_time = stop_time.get(
                     "predictedDepartureTime",
-                ) - calculate_led_off_delay(route)
-                delay = calculate_led_off_delay(route)
+                ) - calculate_departure_delay(route)
+                delay = calculate_departure_delay(route)
         # CASE #2: Only predicted arrival time is available
         # [end stop with realtime data]
-        # Use the predefined delay for LED turn-off
+        # Use the predefined delay for departure delay
         elif "predictedArrivalTime" in stop_time and not stop_time.get(
             "uncertain",
             False,
         ):
             arrival_time = stop_time.get(
                 "predictedArrivalTime",
-            ) - calculate_led_off_delay(route)
-            delay = calculate_led_off_delay(route)
+            ) - calculate_departure_delay(route)
+            delay = calculate_departure_delay(route)
         # CASE #3: Only predicted departure time is available
         # [start stop with realtime data]
-        # Use the predefined delay for LED turn-off
+        # Use the predefined delay for departure delay
         elif "predictedDepartureTime" in stop_time and not stop_time.get(
             "uncertain",
             False,
         ):
             arrival_time = stop_time.get(
                 "predictedDepartureTime",
-            ) - calculate_led_off_delay(route)
-            delay = calculate_led_off_delay(route)
+            ) - calculate_departure_delay(route)
+            delay = calculate_departure_delay(route)
         # CASE #4: Both arrival and departure time available as scheduled time
         # [middle stop, no realtime data]
         elif "arrivalTime" in stop_time and "departureTime" in stop_time:
             # Arrival time is different from the departure,
-            # let's use the difference between them for the LED turn-off delay
+            # let's use the difference between them for the departure delay
             if stop_time.get("arrivalTime") != stop_time.get("departureTime"):
                 arrival_time = stop_time.get("arrivalTime") + randint(-3, 3)
                 delay = stop_time.get("departureTime") - stop_time.get("arrivalTime")
             # Arrival time is the same as the departure,
-            # use predefined delay for LED turn-off
+            # use predefined delay for departure delay
             else:
                 arrival_time = (
                     stop_time.get("departureTime")
-                    - calculate_led_off_delay(route)
+                    - calculate_departure_delay(route)
                     + randint(-3, 3)
                 )
-                delay = calculate_led_off_delay(route)
+                delay = calculate_departure_delay(route)
         # CASE #5: Only scheduled arrival time is available
         # [end stop with no realtime data]
-        # Use the predefined delay for LED turn-off
+        # Use the predefined delay for departure delay
         elif "arrivalTime" in stop_time:
             arrival_time = (
                 stop_time.get("arrivalTime")
-                - calculate_led_off_delay(route)
+                - calculate_departure_delay(route)
                 + randint(-3, 3)
             )
-            delay = calculate_led_off_delay(route)
+            delay = calculate_departure_delay(route)
         # CASE #6: Only scheduled departure time is available
         # [start stop with no realtime data]
-        # Use the predefined delay for LED turn-off
+        # Use the predefined delay for departure delay
         elif "departureTime" in stop_time:
             arrival_time = (
                 stop_time.get("departureTime")
-                - calculate_led_off_delay(route)
+                - calculate_departure_delay(route)
                 + randint(-3, 3)
             )
-            delay = calculate_led_off_delay(route)
+            delay = calculate_departure_delay(route)
         # CASE #7: No valid time data is available
         else:
             logger.debug(
@@ -569,27 +562,18 @@ def process_schedule(json_response: Any, route: Route) -> int:
         if not route.get_stop_id(stop_id).in_service:
             route.get_stop_id(stop_id).in_service = True
 
-            # FIXME
-            # Reset the LED to the default color
-            # led_control.calculate_default_color(stops_led[stop_id])
-            # Change the LED color to the default color
-            # if there is no ongoing LED action for this LED
-            # if not led_control.led_locks[stops_led[stop_id]].locked():
-            #    led_control.reset_led_to_default(stops_led[stop_id])
-            # FIXME
-
         # Schedule the action before the departure."""
-        job_id: str = f"{stop_id}+{trip_id}"
+        job_id: str = f"{stop_id}+{trip_id}_arrival"
         job_time: datetime = datetime.fromtimestamp(arrival_time)
 
         latest_departure_time = max(latest_departure_time, arrival_time)
 
         if job_time > datetime.now():
             departure_scheduler.add_job(
-                departure_action,
+                vehicle_arrival,
                 trigger="date",
                 run_date=job_time,
-                args=[route.get_stop_id(stop_id).stop, trip_id, job_time, delay],
+                args=[route.get_stop_id(stop_id), trip_id, job_time, delay],
                 id=job_id,
                 replace_existing=True,
                 # If the job exists, it will be replaced with the new time
@@ -704,34 +688,27 @@ def process_alerts(
 
                         # Update the regular schedule data for the route
                         # because of the active alert
-                        create_schedule_updates(route, "REGULAR")
-
-                        # FIXME
-                        # Calculate the default color for this stop according to
-                        # which route is operation for the stop
-                        # led_control.calculate_default_color(stops_led[stop_id])
-                        # Change the LED color to the default color
-                        # led_control.reset_led_to_default(stops_led[stop_id], fade=False)
-                        # FIXME
+                        if is_alert_only:
+                            create_schedule_updates(route, "REGULAR")
 
 
-def departure_action(
-    stop: Stop,
+def vehicle_arrival(
+    stop_id: StopId,
     trip_id: str,
     job_time: datetime,
     delay: int,
 ) -> None:
-    """Execute actions for a departure.
+    """Execute actions for a vehicle arrival.
 
     Callback function for a stop schedule.
-    Changes the LED of the specified stop(stop_id) to the associated color,
-    and schedules the turn-off of the LED in APScheduler after the supplied delay.
+    Changes the vehicle_present property of the StopId to True,
+    and schedules another action to turn it back to False after the delay.
 
-    :param stop: The Stop object the departure is related to
+    :param stop_id: The StopId object the departure is related to
     :param trip_id: tripId from the BKK OpenData API
     :param job_time: The time this job was scheduled in APScheduler
     :param delay: The amount of time needs to be elapsed in seconds
-        between the turn-on and turn off action
+        between the turn-on and turn-off action
     """
     if job_time < datetime.now() - timedelta(seconds=20):
         logger.trace(  # type: ignore[attr-defined]
@@ -740,29 +717,55 @@ def departure_action(
         return
 
     logger.trace(  # type: ignore[attr-defined]
-        f"Action triggered for stop: {stop.name}, route: {stop.route.name}, "
-        f"trip: {trip_id}, LED off delay: {delay} sec",
+        f"Vehicle arrived for stop: {stop_id.stop.name}, "
+        f"route: {stop_id.stop.route.name}, "
+        f"trip: {trip_id}, departing after: {delay} sec",
     )
 
-    # FIXME
-    # led_id: int = stop.led.index
+    stop_id.vehicle_present = True
 
-    # Change the LED color according to the color of the route
-    # led_control.set_led_color(led_id, led_control.ROUTE_COLORS[route_id])
+    # Schedule an action at the departure time to turn vehicle_present to False
+    job_time_departure = job_time + timedelta(seconds=delay)
+    job_id: str = f"{stop_id.stop_id}+{trip_id}_departure"
 
-    # Schedule an action at the departure time to turn the LED back to the default value
-    # led_job_time = job_time + timedelta(seconds=delay)
+    departure_scheduler.add_job(
+        vehicle_departure,
+        trigger="date",
+        run_date=job_time_departure,
+        args=[stop_id, trip_id, job_time_departure],
+        id=job_id,
+        replace_existing=True,
+        # If the job exists, it will be replaced with the new time
+    )
 
-    # led_scheduler.add_job(
-    #     led_control.reset_led_to_default,
-    #     trigger="date",
-    #     run_date=led_job_time,
-    #     args=[led_id],
-    #     id=str(led_id),
-    #     replace_existing=True,
-    #     # If the job exists, it will be replaced with the new time
-    # )
-    # FIXME
+
+def vehicle_departure(
+    stop_id: StopId,
+    trip_id: str,
+    job_time: datetime,
+) -> None:
+    """Execute actions for a vehicle departure.
+
+    Callback function for a stop schedule.
+    Changes the vehicle_present property of the StopId to False.
+
+    :param stop_id: The StopId object the departure is related to
+    :param trip_id: tripId from the BKK OpenData API
+    :param job_time: The time this job was scheduled in APScheduler
+    """
+    if job_time < datetime.now() - timedelta(seconds=20):
+        logger.trace(  # type: ignore[attr-defined]
+            "Action trigger time is in the past, skipping",
+        )
+        return
+
+    logger.trace(  # type: ignore[attr-defined]
+        f"Vehicle departure for stop: {stop_id.stop.name}, "
+        f"route: {stop_id.stop.route.name}, "
+        f"trip: {trip_id}",
+    )
+
+    stop_id.vehicle_present = False
 
 
 def calculate_schedule_interval(json_response: Any, route: Route) -> None:
@@ -771,7 +774,7 @@ def calculate_schedule_interval(json_response: Any, route: Route) -> None:
     Process the ArrivalsAndDeparturesForStopOTPMethodResponse API response
     from the arrivals-and-departures-for-stop method.
     It checks time between the schedules for each route
-    and updates the ACTION_DELAY dictionary accordingly.
+    and updates the Route's schedule_interval property accordingly.
 
     :param json_response: JSON return data from the BKK OpenData API
     :param route: The Route that the schedule data belongs to
@@ -866,16 +869,16 @@ def calculate_schedule_interval(json_response: Any, route: Route) -> None:
     route.schedule_interval = avg
 
     logger.debug(
-        f"Recalculated LED turn off delay for route {route.name}, schedule interval:  "
-        f"{avg:.1f} min, LED delay: {calculate_led_off_delay(route)} sec",
+        f"Recalculated departure delay for route {route.name}, schedule interval:  "
+        f"{avg:.1f} min, delay: {calculate_departure_delay(route)} sec",
     )
 
 
-def calculate_led_off_delay(route: Route) -> int:
-    """Calculate LED off time according to the average schedule interval of a Route.
+def calculate_departure_delay(route: Route) -> int:
+    """Calculate departure delay according to the average schedule interval of a Route.
 
     :param route: The Route object for the calculation
-    :return: The LED turn off delay in seconds
+    :return: The departure delay in seconds
     """
     delay: int = 0
 

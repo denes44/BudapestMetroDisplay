@@ -50,8 +50,6 @@ def handle_exit_signal(_signum, _frame) -> None:  # noqa: ANN001
     logger.info("Signal received, stopping threads...")
     bkk_opendata.departure_scheduler.shutdown()
     logger.debug("Departure scheduler shut down")
-    bkk_opendata.led_scheduler.shutdown(wait=False)
-    logger.debug("LED scheduler shut down")
     bkk_opendata.api_update_scheduler.shutdown(wait=False)
     logger.debug("API Update scheduler shut down")
     led_control.deactivate_sacn()
