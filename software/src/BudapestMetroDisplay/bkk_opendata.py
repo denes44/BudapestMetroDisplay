@@ -33,7 +33,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from BudapestMetroDisplay import aps_helpers
 from BudapestMetroDisplay._version import __version__
 from BudapestMetroDisplay.config import settings
-from BudapestMetroDisplay.structure import Route, StopId
+from BudapestMetroDisplay.model import Route, StopId
 
 logger = logging.getLogger(__name__)
 # Set the logging level for urllib3 to INFO

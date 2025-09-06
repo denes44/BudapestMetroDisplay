@@ -20,7 +20,7 @@
 #  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
 
-from structure import LED, LedStrip, Network, Route, Stop, StopId
+from model import LED, LedStrip, Network, Route, Stop, StopId
 
 # 63 LEDs, indices 0..62
 leds = [LED(index=i) for i in range(63)]
