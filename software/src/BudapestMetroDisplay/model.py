@@ -1,16 +1,22 @@
 # transit_leds.py
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import field
 from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from BudapestMetroDisplay.config import settings
-from BudapestMetroDisplay.led_helpers import _clamp8, _rgb_clamp, _rgb_max, _rgb_scale
+from BudapestMetroDisplay.led_helpers import (
+    _clamp8,
+    _rgb_clamp,
+    _rgb_max,
+    _rgb_scale,
+    ease_in_out_quad,
+)
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Iterator
 
 RGB = tuple[int, int, int]
 
@@ -349,24 +355,67 @@ class StopId(BaseModel):
     vehicle_present: bool = False
 
 
-@dataclass
-class _Anim:
-    led: LED
-    start: RGB
-    end: RGB
-    t0: float
-    dur: float
-    ease: Callable[[float], float]
+class Animation(BaseModel):
+    """Represents one animation that drives a LED from a start to an end color.
 
-    def step(self, now: float) -> bool:
-        """Advance animation. Return True when finished."""
+    Fields:
+      - led   : the LED instance to mutate each frame
+      - start : starting RGB at the moment the animation began
+      - end   : target RGB we want to reach
+      - t0    : start time (monotonic perf_counter) to compute progress
+      - dur   : total duration in seconds (0 means snap instantly)
+    """
+
+    # Allow non-Pydantic types (callables, LED objects) inside this model.
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    led: LED  # LED object to update
+    start: RGB  # Starting color
+    end: RGB  # Target color
+    t0: float  # Time when animation started (seconds, monotonic)
+    dur: float = settings.led.fade_time  # Duration in seconds (>= 0)
+
+    def sample(self, now: float) -> RGB:
+        """Compute the interpolated color for the time 'now'.
+
+        Returns the color we should display at 'now'.
+        """
+        # Snap instantly if the duration is zero (or negative for safety).
         if self.dur <= 0:
-            self.led.set_rgb(*self.end)
-            return True
-        u = max(0.0, min(1.0, (now - self.t0) / self.dur))
-        k = self.ease(u)
+            return _rgb_clamp(self.end)
+
+        # Compute normalized progress u in [0,1].
+        u: float = (now - self.t0) / self.dur
+
+        # If not yet started, stay at the start color.
+        if u <= 0.0:
+            return _rgb_clamp(self.start)
+
+        # If finished (or overshot), use the end color.
+        if u >= 1.0:
+            return _rgb_clamp(self.end)
+
+        # Apply easing to the linear progress to get a smoother curve.
+        k: float = ease_in_out_quad(u)
+
+        # Interpolate each channel separately using the eased progress.
         r = int(self.start[0] + (self.end[0] - self.start[0]) * k)
         g = int(self.start[1] + (self.end[1] - self.start[1]) * k)
         b = int(self.start[2] + (self.end[2] - self.start[2]) * k)
-        self.led.set_rgb(r, g, b)
-        return u >= 1.0
+
+        # Clamp to ensure valid DMX/sACN byte values and return.
+        return _clamp8(r), _clamp8(g), _clamp8(b)
+
+    def step(self, now: float) -> bool:
+        """Advance the LED to the color corresponding to time 'now'.
+
+        Returns True when the animation is finished.
+        """
+        # Compute the color for 'now' (does not mutate LED yet).
+        r, g, b = self.sample(now)
+
+        # Write the computed color onto the actual LED object (stateful side effect).
+        self.led.r, self.led.g, self.led.b = r, g, b
+
+        # Tell the caller whether we're done (for pruning finished animations).
+        return (self.dur <= 0) or (now - self.t0 >= self.dur)
