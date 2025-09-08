@@ -42,6 +42,17 @@ class LED(BaseModel):
     color_override: RGB | None = None
 
     @property
+    def color(self) -> RGB:
+        """Get the LED color as an RGB tuple."""
+        return self.r, self.g, self.b
+
+    @color.setter
+    def color(self, value: RGB) -> None:
+        """Set the LED color from an (r, g, b) tuple (auto-clamped to 0..255)."""
+        r, g, b = _rgb_clamp(value)
+        self.r, self.g, self.b = r, g, b
+
+    @property
     def default_color(self) -> RGB:
         """Return the default color of the LED.
 
