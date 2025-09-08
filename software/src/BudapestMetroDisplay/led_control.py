@@ -32,12 +32,12 @@ from sacn import sACNsender
 from BudapestMetroDisplay._version import __version__
 from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay.model import LedStrip
-from BudapestMetroDisplay.network import network
+from BudapestMetroDisplay.network import led_strip
 
 logger = logging.getLogger(__name__)
 
 # sACN sender interface
-sender: sACNsender | None = None
+sender: sACNsender
 
 
 def start_renderer(stop_event: threading.Event | None = None) -> None:
@@ -45,7 +45,7 @@ def start_renderer(stop_event: threading.Event | None = None) -> None:
     thread = threading.Thread(
         target=run_renderer,
         kwargs={
-            "strip": network.led_strip,
+            "strip": led_strip,
             "set_dmx": update_sacn,
             "stop_event": stop_event,
         },
@@ -71,6 +71,8 @@ def run_renderer(
       2) Pack LEDs into a DMX tuple (strip.to_tuple) and send via set_dmx(...)
       3) Sleep just enough to maintain the target frame rate (frame pacing)
     """
+    logger.info("LED renderer thread started")
+
     # Convert FPS to a frame duration in seconds (guard against bad configs like 0 or negative).
     frame = 1.0 / max(1, int(settings.sacn.fps))
 
