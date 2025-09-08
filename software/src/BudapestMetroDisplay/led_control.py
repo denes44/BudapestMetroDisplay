@@ -79,10 +79,10 @@ def run_renderer(
     logger.info("LED renderer thread started")
 
     # Convert FPS to a frame duration in seconds (guard against 0 or negative).
-    frame = 1.0 / max(1, int(settings.sacn.fps))
+    frame: float = 1.0 / max(1, int(settings.sacn.fps))
 
     # Anchor a monotonic "next frame" timestamp; using monotonic avoids time jumps.
-    next_tick = _t.perf_counter()
+    next_tick: float = _t.perf_counter()
 
     # Infinite loop until you signal stop_event (or kill the thread/process).
     while True:
@@ -94,7 +94,7 @@ def run_renderer(
         strip.step()
 
         # 2) Pack the current LED colors into the exact DMX ordering and send it
-        payload = strip.to_tuple()  # (led1_r, led1_g, led1_b, led2_r, ...)
+        payload: tuple[int, ...] = strip.to_tuple()
         set_dmx(payload)  # You implement this to push into your sACN sender
 
         # 3) Frame pacing to hit the requested FPS (simple fixed-step scheduler)
@@ -165,4 +165,4 @@ def update_sacn(payload: tuple[int, ...]) -> None:
             # Convert the modified list to a tuple and assign it to dmx_data
             sender[settings.sacn.universe].dmx_data = tuple(modified_payload)
         else:
-            sender[settings.sacn.universe].dmx_data = tuple(payload)
+            sender[settings.sacn.universe].dmx_data = payload
