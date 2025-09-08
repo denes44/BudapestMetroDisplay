@@ -1,7 +1,6 @@
 # transit_leds.py
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
@@ -316,80 +315,3 @@ class _Anim:
         b = int(self.start[2] + (self.end[2] - self.start[2]) * k)
         self.led.set_rgb(r, g, b)
         return u >= 1.0
-
-
-class Fader:
-    """Drives per-LED fades. Call step() at your frame rate, then pack via strip.to_tuple().
-    One active animation per LED index (new fades overwrite running ones for that LED).
-    """
-
-    def __init__(self, leds: list[LED]) -> None:
-        self._anims: dict[int, _Anim] = {}
-        self._leds: dict[int, LED] = {led.index: led for led in leds}
-
-    def fade_led(
-        self,
-        index: int,
-        to: RGB,
-        duration: float = 0.5,
-        ease: Callable[[float], float] = ease_linear,
-    ) -> None:
-        led = self._leds[index]
-        self._anims[index] = _Anim(
-            led=led,
-            start=(led.r, led.g, led.b),
-            end=_rgb_clamp(to),
-            t0=time.perf_counter(),
-            dur=max(0.0, float(duration)),
-            ease=ease,
-        )
-
-    def fade_stop(
-        self,
-        stop: Stop,
-        to: RGB,
-        duration: float = 0.5,
-        ease: Callable[[float], float] = ease_linear,
-    ) -> None:
-        self.fade_led(stop.led.index, to, duration, ease)
-
-    def fade_route(
-        self,
-        route: Route,
-        to: RGB,
-        duration: float = 0.5,
-        ease: Callable[[float], float] = ease_linear,
-    ) -> None:
-        for st in route.stops:
-            self.fade_led(st.led.index, to, duration, ease)
-
-    def fade_to_defaults(
-        self,
-        duration: float = 0.5,
-        ease: Callable[[float], float] = ease_linear,
-    ) -> None:
-        now = time.perf_counter()
-        for led in self._leds.values():
-            target = led.get_default_color()
-            self._anims[led.index] = _Anim(
-                led=led,
-                start=(led.r, led.g, led.b),
-                end=_rgb_clamp(target),
-                t0=now,
-                dur=max(0.0, float(duration)),
-                ease=ease,
-            )
-
-    def cancel_led(self, index: int, *, snap_to_end: bool = False) -> None:
-        anim = self._anims.pop(index, None)
-        if anim and snap_to_end:
-            anim.led.set_rgb(*anim.end)
-
-    def step(self) -> None:
-        now = time.perf_counter()
-        finished = [idx for idx, anim in self._anims.items() if anim.step(now)]
-        for idx in finished:
-            self._anims.pop(idx, None)
-
-    def is_active(self) -> bool:
-        return bool(self._anims)
