@@ -33,6 +33,22 @@ class LED(BaseModel):
     color_override: RGB | None = None
 
     @property
+    def default_color(self) -> RGB:
+        """Return the default color of the LED.
+
+        If override set -> return it.
+        Else -> per-channel max of default colors from Routes of attached Stops.
+        If no stops -> black.
+        """
+        if self.color_override is not None:
+            return self.color_override
+        c: RGB = (0, 0, 0)
+        for st in self.stops:
+            if st.route is not None:
+                c = _rgb_max(c, st.route.color)
+        return c
+
+    @property
     def target_color(self) -> RGB:
         """Compute the desired target color for the LED.
 
@@ -91,24 +107,13 @@ class LED(BaseModel):
         """
         self.color_override = None if color is None else _rgb_clamp(color)
 
-    def get_default_color(self) -> RGB:
-        """Return the default color of the LED.
-
-        If override set -> return it.
-        Else -> per-channel max of default colors from Routes of attached Stops.
-        If no stops -> black.
-        """
-        if self.color_override is not None:
-            return self.color_override
-        c: RGB = (0, 0, 0)
-        for st in self.stops:
-            if st.route is not None:
-                c = _rgb_max(c, st.route.color)
-        return c
-
     def reset_to_default(self) -> None:
         """Reset the LEDs color to its default."""
-        self.set_rgb(*self.get_default_color())
+        self.set_rgb(
+            self.default_color[0],
+            self.default_color[1],
+            self.default_color[2],
+        )
 
 
 class LedStrip(BaseModel):
