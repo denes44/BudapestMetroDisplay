@@ -313,7 +313,8 @@ class Stop(BaseModel):
         if stop_id.stop is not self:
             stop_id.stop = self
 
-    def is_in_service(self) -> bool:
+    @property
+    def in_service(self) -> bool:
         """Return the in service status of the Stop.
 
         If it's a terminus Stop, the Stop is no service if ANY of its
