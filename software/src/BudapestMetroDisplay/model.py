@@ -1,6 +1,7 @@
 # transit_leds.py
 from __future__ import annotations
 
+import time as _t
 from dataclasses import field
 from typing import TYPE_CHECKING, Any
 
@@ -127,31 +128,75 @@ class LedStrip(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    leds: list[LED]
+    leds: list[LED] = Field(default_factory=list)
 
-    def off(self) -> None:
+    # Active animations for LEDs that are currently transitioning colors.
+    anims: dict[int, Animation] = Field(default_factory=dict)
+
+    @property
+    def n_leds(self) -> int:
+        """Number of LEDs tracked by this strip."""
+        return len(self.leds)
+
+    def clear(self) -> None:
         """Turn off all LEDs in the LED Strip."""
         for led in self.leds:
             led.off()
 
-    def reset_to_default(self) -> None:
-        """Reset all LEDs in the LED Strip to its default color."""
-        for led in self.leds:
-            led.reset_to_default()
-
-    def set_led(self, index: int, rgb: RGB) -> None:
-        """Set the color of a LED with a specific index."""
+    def get_led(self, index: int) -> LED:
+        """Return the LED object with the given 1-based index; raises KeyError if missing."""
         for led in self.leds:
             if led.index == index:
-                led.set_rgb(*_rgb_clamp(rgb))
+                return led
+        raise KeyError(f"LED with index {index} not found in strip")
 
     def to_tuple(self) -> tuple[int, ...]:
-        """Return the values of the LEDs in the LED Strip as one big tuple."""
+        """Pack current LED colors to sACN/DMX order.
+
+        (led1_r, led1_g, led1_b, led2_r, led2_g, led2_b, ...)
+        Ordered by ascending LED.index for stable output.
+        """
         out: list[int] = []
-        for idx in sorted(self.leds_by_index.keys()):
-            led = self.leds_by_index[idx]
+        for led in sorted(self.leds, key=lambda l: l.index):
             out.extend((led.r, led.g, led.b))
         return tuple(out)
+
+    def step(self) -> None:
+        """Advance all active animations to the current time and remove those that finished."""
+        # Grab the timestamp once per frame for consistent stepping.
+        now: float = _t.perf_counter()
+
+        # Check if any LEDs have its target color changed
+        for led in self.leds:
+            anim: Animation = self.anims.get(led.index)
+            if anim is not None:
+                target_color: RGB = led.target_color
+                if target_color != anim.end:
+                    # Target color changed, start a new animation.
+
+                    # If mid-fade, sample the current color.
+                    start_color: RGB = anim.sample(now)
+
+                    self.anims[led.index] = Animation(
+                        led=led,
+                        start=start_color,  # starting color (sampled if mid-fade)
+                        end=target_color,  # new target color
+                        t0=now,  # start timestamp
+                    )
+
+        # Collect indices that finish this frame to remove after iteration.
+        finished: list[int] = []
+
+        now = _t.perf_counter()
+
+        # Drive each animation: set the LED.r/g/b to the correct mid-fade color.
+        for idx, anim in self.anims.items():
+            if anim.step(now):  # step returns True if finished
+                finished.append(idx)
+
+        # Drop finished animations
+        for idx in finished:
+            self.anims.pop(idx, None)
 
 
 # ========= transit domain =========
