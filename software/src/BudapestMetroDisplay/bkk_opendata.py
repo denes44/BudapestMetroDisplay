@@ -405,6 +405,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
     :return: Timestamp of the latest departure in the data provided,
         -1 if there are no valid departures
     """
+    start = time2.perf_counter()
     # Check if JSON looks valid
     if (
         not json_response
@@ -603,6 +604,9 @@ def process_schedule(json_response: Any, route: Route) -> int:
     alerts = json_response["data"]["entry"].get("alertIds", [])
     if len(alerts) > 0:
         process_alerts(json_response, route)
+
+    end = time2.perf_counter()
+    logger.debug(f"Execution time: {end - start:.6f} seconds")
 
     return latest_departure_time
 
