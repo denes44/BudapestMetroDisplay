@@ -86,7 +86,7 @@ class LED(BaseModel):
                 continue  # A Stop without a Route contributes nothing
             # Presence for a Stop means any of its StopIds report vehicle_present=True.
             if st.vehicle_present:
-                present_colors.append(st.route.default_color)
+                present_colors.append(st.route.color)
 
         if present_colors:
             # Max-blend all present Route colors channel-wise to get the presence color.
@@ -98,7 +98,7 @@ class LED(BaseModel):
 
         # ---------- Rule 3: idle → dimmed default ----------
         # Apply your globally configured idle dim ratio to the default color
-        return _rgb_scale(self.get_default_color(), settings.led.dim_ratio)
+        return _rgb_scale(self.default_color, settings.led.dim_ratio)
 
     def set_rgb(self, r: int, g: int, b: int) -> None:
         """Set the LED colors to a specific value."""
