@@ -328,6 +328,11 @@ class Stop(BaseModel):
             return False
         return all(states) if self.is_terminus else any(states)
 
+    @property
+    def vehicle_present(self) -> bool:
+        """Return the vehicle present status of the Stop."""
+        return any(si.vehicle_present for si in self.stop_ids)
+
 
 class StopId(BaseModel):
     """A single StopId that is part of a Stop.
