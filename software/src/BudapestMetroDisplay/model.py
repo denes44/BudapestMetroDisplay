@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from BudapestMetroDisplay.led_helpers import _clamp8, _rgb_clamp, _rgb_max
+from BudapestMetroDisplay.config import settings
+from BudapestMetroDisplay.led_helpers import _clamp8, _rgb_clamp, _rgb_max, _rgb_scale
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -30,6 +31,49 @@ class LED(BaseModel):
     b: int = 0
     stops: list[Stop] = field(default_factory=list)  # back-references from Stops
     color_override: RGB | None = None
+
+    @property
+    def target_color(self) -> RGB:
+        """Compute the desired target color for the LED.
+
+        1) If ALL Stops on an LED are NOT operational
+              → BLACK (0,0,0)
+        2) Else if ANY vehicle present on that LED
+              → channel-wise MAX of present Routes' default_color
+        3) Else (idle)
+              → LED.get_default_color() * settings.led.dim_ratio
+        """
+        # ---------- Rule 1: blackout if ALL attached Stops are down ----------
+        # We assume "down" until we find a Stop that says it IS in service.
+        all_down: bool = True
+        for st in self.stops:
+            if st.in_service:
+                all_down = False
+                break
+        if all_down:
+            return 0, 0, 0  # Absolute priority: black out this LED
+
+        # ---------- Rule 2: presence color if ANY vehicle present ----------
+        # Collect the default_color of Routes that currently have presence on this LED.
+        present_colors: list[RGB] = []
+        for st in self.stops:
+            if st.route is None:
+                continue  # A Stop without a Route contributes nothing
+            # Presence for a Stop means any of its StopIds report vehicle_present=True.
+            if st.vehicle_present:
+                present_colors.append(st.route.default_color)
+
+        if present_colors:
+            # Max-blend all present Route colors channel-wise to get the presence color.
+            c: RGB = (0, 0, 0)
+            for col in present_colors:
+                c = _rgb_max(c, col)
+
+            return c
+
+        # ---------- Rule 3: idle → dimmed default ----------
+        # Apply your globally configured idle dim ratio to the default color
+        return _rgb_scale(self.get_default_color(), settings.led.dim_ratio)
 
     def set_rgb(self, r: int, g: int, b: int) -> None:
         """Set the LED colors to a specific value."""
