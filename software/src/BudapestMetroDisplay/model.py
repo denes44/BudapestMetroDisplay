@@ -1,6 +1,7 @@
 # transit_leds.py
 from __future__ import annotations
 
+import logging
 import time as _t
 from dataclasses import field
 from typing import TYPE_CHECKING, Any
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 RGB = tuple[int, int, int]
+logger = logging.getLogger(__name__)
 
 
 class LED(BaseModel):
@@ -132,6 +134,7 @@ class LedStrip(BaseModel):
 
     # Active animations for LEDs that are currently transitioning colors.
     anims: dict[int, Animation] = Field(default_factory=dict)
+    previous_target_color: dict[int, RGB] = Field(default_factory=dict)
 
     @property
     def n_leds(self) -> int:
@@ -168,9 +171,10 @@ class LedStrip(BaseModel):
 
         # Check if any LEDs have its target color changed
         for led in self.leds:
+            target_color: RGB = led.target_color
+
             anim: Animation = self.anims.get(led.index)
             if anim is not None:
-                target_color: RGB = led.target_color
                 if target_color != anim.end:
                     # Target color changed, start a new animation.
 
@@ -183,6 +187,18 @@ class LedStrip(BaseModel):
                         end=target_color,  # new target color
                         t0=now,  # start timestamp
                     )
+            elif (
+                self.previous_target_color.get(led.index) is not None
+                and target_color != self.previous_target_color[led.index]
+            ):
+                self.anims[led.index] = Animation(
+                    led=led,
+                    start=led.color,  # starting color
+                    end=target_color,  # new target color
+                    t0=now,  # start timestamp
+                )
+
+            self.previous_target_color[led.index] = target_color
 
         # Collect indices that finish this frame to remove after iteration.
         finished: list[int] = []
