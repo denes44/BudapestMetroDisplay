@@ -304,15 +304,6 @@ class Stop(BaseModel):
         """The default LED color of the Stop inherited from its Route."""
         return (0, 0, 0) if self.route is None else self.route.color
 
-    def add_stop_id(self, stop_id: StopId) -> None:
-        """Add a StopId to the Stop."""
-        if stop_id not in self.stop_ids:
-            self.stop_ids.append(stop_id)
-
-        # Link Stop <-> StopId
-        if stop_id.stop is not self:
-            stop_id.stop = self
-
     @property
     def in_service(self) -> bool:
         """Return the in service status of the Stop.
@@ -332,6 +323,15 @@ class Stop(BaseModel):
     def vehicle_present(self) -> bool:
         """Return the vehicle present status of the Stop."""
         return any(si.vehicle_present for si in self.stop_ids)
+
+    def add_stop_id(self, stop_id: StopId) -> None:
+        """Add a StopId to the Stop."""
+        if stop_id not in self.stop_ids:
+            self.stop_ids.append(stop_id)
+
+        # Link Stop <-> StopId
+        if stop_id.stop is not self:
+            stop_id.stop = self
 
 
 class StopId(BaseModel):
