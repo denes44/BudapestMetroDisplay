@@ -61,7 +61,7 @@ def start_renderer(stop_event: threading.Event | None = None) -> None:
 
 
 def run_renderer(
-    strip: LedStrip,  # Packs current LED.r/g/b → DMX tuple
+    strip: LedStrip,
     set_dmx: Callable[
         [tuple[int, ...]],
         None,
@@ -78,7 +78,7 @@ def run_renderer(
     """
     logger.info("LED renderer thread started")
 
-    # Convert FPS to a frame duration in seconds (guard against bad configs like 0 or negative).
+    # Convert FPS to a frame duration in seconds (guard against 0 or negative).
     frame = 1.0 / max(1, int(settings.sacn.fps))
 
     # Anchor a monotonic "next frame" timestamp; using monotonic avoids time jumps.
@@ -90,22 +90,22 @@ def run_renderer(
         if stop_event is not None and stop_event.is_set():
             break
 
-        # ---- 1) Advance all animations to NOW (writes LED.r/g/b with the mid-fade color) ----
+        # 1) Advance all animations to NOW (writes LED.r/g/b with the mid-fade color)
         strip.step()
 
-        # ---- 2) Pack the current LED colors into the exact DMX ordering and send it ----
+        # 2) Pack the current LED colors into the exact DMX ordering and send it
         payload = strip.to_tuple()  # (led1_r, led1_g, led1_b, led2_r, ...)
         set_dmx(payload)  # You implement this to push into your sACN sender
 
-        # ---- 3) Frame pacing to hit the requested FPS (simple fixed-step scheduler) ----
+        # 3) Frame pacing to hit the requested FPS (simple fixed-step scheduler)
         next_tick += frame  # Schedule the ideal time of the next frame
         sleep_for = (
             next_tick - _t.perf_counter()
-        )  # How much time remains for this frame
+        )  # Sleep for the remaining time in the frame
         if sleep_for > 0:
             _t.sleep(sleep_for)  # Sleep the remaining budget
         else:
-            # If we're late (negative budget), skip sleeping and re-anchor to "now"
+            # If we're late (negative budget), skip sleeping and re-anchor to NOW
             # so we don't drift further behind in future frames.
             next_tick = _t.perf_counter()
 
