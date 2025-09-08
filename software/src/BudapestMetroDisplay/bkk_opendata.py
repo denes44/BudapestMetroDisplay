@@ -21,7 +21,6 @@
 #  OTHER DEALINGS IN THE SOFTWARE.
 
 import logging
-import time as time2
 from datetime import datetime, time, timedelta
 from random import randint
 from typing import Any
@@ -165,8 +164,6 @@ def fetch_schedule_for_route(
     :param route: A Route object we want to get the schedules for
     :param schedule_type: REGULAR or REALTIME, affects the API update parameters
     """
-    start = time2.perf_counter()
-
     # Calculate the next schedule time
     if schedule_type == "REALTIME" and (
         time(0, 30) <= datetime.now().time() <= time(4, 0)
@@ -294,10 +291,6 @@ def fetch_schedule_for_route(
         replace_existing=True,
         # If the job exists, it will be replaced with the new time
     )
-
-    end = time2.perf_counter()
-
-    logger.debug(f"Execution time: {end - start:.6f} seconds")
 
 
 def fetch_alerts_for_route(route: Route) -> None:
