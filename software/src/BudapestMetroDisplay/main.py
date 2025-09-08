@@ -25,6 +25,7 @@ import asyncio
 import logging
 import signal
 import sys
+import threading
 import time
 from asyncio import AbstractEventLoop
 
@@ -43,20 +44,29 @@ logger = logging.getLogger(__name__)
 
 parser = None
 loop: AbstractEventLoop
+stop_renderer_event: threading.Event = threading.Event()
 
 
 def handle_exit_signal(_signum, _frame) -> None:  # noqa: ANN001
     """Handle signals for a clean exit."""
     logger.info("Signal received, stopping threads...")
+
     bkk_opendata.departure_scheduler.shutdown()
     logger.debug("Departure scheduler shut down")
+
     bkk_opendata.api_update_scheduler.shutdown(wait=False)
     logger.debug("API Update scheduler shut down")
+
+    stop_renderer_event.set()
+    logger.debug("LED renderer shut down")
+
     led_control.deactivate_sacn()
     logger.debug("sACN update thread shut down")
+
     if settings.esphome.used:
         loop.stop()
         logger.debug("ESPHome update thread shut down")
+
     logger.info("Cleanup complete. Exiting...")
     sys.exit(0)
 
@@ -109,10 +119,10 @@ def main() -> None:  # noqa: D103
             # Create schedules for updating the alarm data for non-realtime stops
             bkk_opendata.create_alert_updates(route, delay)
 
-    # Start the sACN sending routine with continuous updates
-    led_control.reset_leds_to_default()
     # Start sending LED data via sACN
     led_control.activate_sacn()
+    # Start the LED renderer
+    led_control.start_renderer(stop_renderer_event)
 
     if args.debug or args.trace:
         webserver.start_webserver(debug_mode=True)

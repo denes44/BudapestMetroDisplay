@@ -32,11 +32,27 @@ from sacn import sACNsender
 from BudapestMetroDisplay._version import __version__
 from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay.model import LedStrip
+from BudapestMetroDisplay.network import network
 
 logger = logging.getLogger(__name__)
 
 # sACN sender interface
 sender: sACNsender | None = None
+
+
+def start_renderer(stop_event: threading.Event | None = None) -> None:
+    """Start the rendering loop in a separate thread."""
+    thread = threading.Thread(
+        target=run_renderer,
+        kwargs={
+            "strip": network.led_strip,
+            "set_dmx": update_sacn,
+            "stop_event": stop_event,
+        },
+        daemon=True,
+        name="Renderer thread",
+    )
+    thread.start()
 
 
 def run_renderer(
