@@ -7,28 +7,12 @@ from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from BudapestMetroDisplay.led_helpers import _clamp8, _rgb_clamp, _rgb_max
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
 
 RGB = tuple[int, int, int]
-
-
-# ========= helpers =========
-
-
-def _clamp8(x: int) -> int:
-    return 0 if x < 0 else min(x, 255)
-
-
-def _rgb_clamp(rgb: RGB) -> RGB:
-    return _clamp8(rgb[0]), _clamp8(rgb[1]), _clamp8(rgb[2])
-
-
-def _rgb_max(a: RGB, b: RGB) -> RGB:
-    return max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2])
-
-
-# ========= lighting core =========
 
 
 class LED(BaseModel):
@@ -309,19 +293,6 @@ class StopId(BaseModel):
     stop: Stop | None = None
     in_service: bool = True
     vehicle_present: bool = False
-
-
-# ========= fader (animation engine for fades) =========
-
-
-def ease_linear(t: float) -> float:
-    """Return a linear easing value for smooth constant transitions."""
-    return t
-
-
-def ease_in_out_quad(t: float) -> float:
-    """Return a quadratic easing value for smooth acceleration and deceleration."""
-    return 2 * t * t if t < 0.5 else 1 - ((-2 * t + 2) ** 2) / 2
 
 
 @dataclass
