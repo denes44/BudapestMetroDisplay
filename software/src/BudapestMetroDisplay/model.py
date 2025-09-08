@@ -186,9 +186,8 @@ class LedStrip(BaseModel):
 
             anim: Animation = self.anims.get(led.index)
             if anim is not None:
+                # Target color changed, start a new animation.
                 if target_color != anim.end:
-                    # Target color changed, start a new animation.
-
                     # If mid-fade, sample the current color.
                     start_color: RGB = anim.sample(now)
 
@@ -202,6 +201,8 @@ class LedStrip(BaseModel):
                 self.previous_target_color.get(led.index) is not None
                 and target_color != self.previous_target_color[led.index]
             ):
+                # Animation does not exist, but the target color has changed
+                # since the previous frame.
                 self.anims[led.index] = Animation(
                     led=led,
                     start=led.color,  # starting color
