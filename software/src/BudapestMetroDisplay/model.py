@@ -145,23 +145,6 @@ class LedStrip(BaseModel):
     anims: dict[int, Animation] = Field(default_factory=dict)
     previous_target_color: dict[int, RGB] = Field(default_factory=dict)
 
-    @property
-    def n_leds(self) -> int:
-        """Number of LEDs tracked by this strip."""
-        return len(self.leds)
-
-    def clear(self) -> None:
-        """Turn off all LEDs in the LED Strip."""
-        for led in self.leds:
-            led.off()
-
-    def get_led(self, index: int) -> LED:
-        """Return the LED object with the given 1-based index; raises KeyError if missing."""
-        for led in self.leds:
-            if led.index == index:
-                return led
-        raise KeyError(f"LED with index {index} not found in strip")
-
     def to_tuple(self) -> tuple[int, ...]:
         """Pack current LED colors to sACN/DMX order.
 
