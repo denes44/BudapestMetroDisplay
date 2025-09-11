@@ -44,7 +44,7 @@ def start_renderer(stop_event: threading.Event | None = None) -> None:
     """Start the rendering loop in a separate thread."""
     # Set the LEDs to their initial target color.
     for led in led_strip.leds:
-        led.set_rgb(led.target_color[0], led.target_color[1], led.target_color[2])
+        led.color = led.target_color
 
     # Start the renderer in a separate thread.
     thread = threading.Thread(
