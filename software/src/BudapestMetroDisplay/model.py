@@ -109,30 +109,6 @@ class LED(BaseModel):
         # Apply your globally configured idle dim ratio to the default color
         return _rgb_scale(self.default_color, settings.led.dim_ratio)
 
-    def set_rgb(self, r: int, g: int, b: int) -> None:
-        """Set the LED colors to a specific value."""
-        self.r, self.g, self.b = _clamp8(r), _clamp8(g), _clamp8(b)
-
-    def off(self) -> None:
-        """Set the LED colors to off."""
-        self.r = self.g = self.b = 0
-
-    def set_color_override(self, color: RGB | None) -> None:
-        """Set an override color to the LED.
-
-        If an override color is set, it will be used instead of the computed
-        color from the Routes that the LED belongs to.
-        """
-        self.color_override = None if color is None else _rgb_clamp(color)
-
-    def reset_to_default(self) -> None:
-        """Reset the LEDs color to its default."""
-        self.set_rgb(
-            self.default_color[0],
-            self.default_color[1],
-            self.default_color[2],
-        )
-
 
 class LedStrip(BaseModel):
     """An LED Strip that holds LEDs to make them easier to handle."""
