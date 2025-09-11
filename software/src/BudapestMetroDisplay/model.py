@@ -63,7 +63,7 @@ class LED(BaseModel):
         c: RGB = (0, 0, 0)
         for st in self.stops:
             if st.route is not None:
-                c = _rgb_max(c, st.route.color)
+                c = _rgb_max(c, st.color)
         return c
 
     @property
@@ -95,7 +95,7 @@ class LED(BaseModel):
                 continue  # A Stop without a Route contributes nothing
             # Presence for a Stop means any of its StopIds report vehicle_present=True.
             if st.vehicle_present:
-                present_colors.append(st.route.color)
+                present_colors.append(st.color)
 
         if present_colors:
             # Max-blend all present Route colors channel-wise to get the presence color.
@@ -303,7 +303,7 @@ class Stop(BaseModel):
             self.led.stops.append(self)
 
     @property
-    def default_color(self) -> RGB:
+    def color(self) -> RGB:
         """The default LED color of the Stop inherited from its Route."""
         return (0, 0, 0) if self.route is None else self.route.color
 
