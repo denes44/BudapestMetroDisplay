@@ -5,7 +5,7 @@ import logging
 import time as _t
 from dataclasses import field
 from threading import Lock
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
@@ -17,9 +17,6 @@ from BudapestMetroDisplay.led_helpers import (
     _rgb_scale,
     ease_in_out_quad,
 )
-
-if TYPE_CHECKING:
-    from collections.abc import Iterator
 
 RGB = tuple[int, int, int]
 logger = logging.getLogger(__name__)
@@ -243,52 +240,6 @@ class Network(BaseModel):
         """Add a Route to the Network."""
         if route not in self.routes:
             self.routes.append(route)
-
-    def get_route(self, route_id: str) -> Route | None:
-        """Return the Route with a specific ID."""
-        for r in self.routes:
-            if r.route_id == route_id:
-                return r
-        return None
-
-    # -- derived iterators --
-    def iter_stops(self) -> Iterator[Stop]:
-        """Collect all Stops from the Routes of the Network."""
-        for r in self.routes:
-            yield from r.stops
-
-    def iter_leds(self) -> Iterator[LED]:
-        """Collect all LEDs from the Stops of the Network."""
-        seen: set[int] = set()
-        for stop in self.iter_stops():
-            led_index = stop.led.index
-            if led_index not in seen:
-                seen.add(led_index)
-                yield stop.led
-
-    # -- lookups --
-    def get_stopid(self, stop_id: str) -> StopId | None:
-        """Look up a StopId by its API ID string."""
-        return next(
-            (
-                sid
-                for stop in self.iter_stops()
-                for sid in stop.stop_ids
-                if sid.stop_id == stop_id
-            ),
-            None,
-        )
-
-    def get_stop_by_stopid(self, stop_id: str) -> Stop | None:
-        """Look up a Stop by the API ID string of a corresponding StopId."""
-        return next(
-            (
-                stop
-                for stop in self.iter_stops()
-                if any(sid.stop_id == stop_id for sid in stop.stop_ids)
-            ),
-            None,
-        )
 
 
 class Route(BaseModel):
