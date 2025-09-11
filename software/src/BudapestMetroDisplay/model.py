@@ -4,9 +4,10 @@ from __future__ import annotations
 import logging
 import time as _t
 from dataclasses import field
+from threading import Lock
 from typing import TYPE_CHECKING, Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
 from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay.led_helpers import (
@@ -309,6 +310,12 @@ class Route(BaseModel):
     type: str | None = None
     stops: list[Stop] = Field(default_factory=list)
     schedule_interval: float = -1
+    _lock: Lock = PrivateAttr(default_factory=Lock)
+
+    @property
+    def lock(self) -> Lock:
+        """Return the lock object for this Route."""
+        return self._lock
 
     @property
     def color(self) -> RGB:
@@ -322,10 +329,11 @@ class Route(BaseModel):
 
     def add_stop(self, stop: Stop) -> None:
         """Link Route <-> Stop."""
-        if stop not in self.stops:
-            self.stops.append(stop)  # Add Stop to the Route
-        if stop.route is not self:
-            stop.route = self  # Set the Route for the Stop
+        with self._lock:
+            if stop not in self.stops:
+                self.stops.append(stop)  # Add Stop to the Route
+            if stop.route is not self:
+                stop.route = self  # Set the Route for the Stop
 
     def get_stop_id(self, stop_id: str) -> StopId | None:
         """Return the StopId object in this Route that matches stop_id.
@@ -372,6 +380,12 @@ class Stop(BaseModel):
     route: Route | None = None
     is_terminus: bool = False
     stop_ids: list[StopId] = Field(default_factory=list)
+    _lock: Lock = PrivateAttr(default_factory=Lock)
+
+    @property
+    def lock(self) -> Lock:
+        """Return the lock object for this Stop."""
+        return self._lock
 
     def model_post_init(self, __context: Any, /) -> None:
         """Link Stop <-> LED."""
@@ -394,8 +408,10 @@ class Stop(BaseModel):
         If there are no StopIds associated with the Stop, it always returns False.
         """
         states = [si.in_service for si in self.stop_ids]
+
         if not states:
             return False
+
         return all(states) if self.is_terminus else any(states)
 
     @property
@@ -405,12 +421,13 @@ class Stop(BaseModel):
 
     def add_stop_id(self, stop_id: StopId) -> None:
         """Add a StopId to the Stop."""
-        if stop_id not in self.stop_ids:
-            self.stop_ids.append(stop_id)
+        with self._lock:
+            if stop_id not in self.stop_ids:
+                self.stop_ids.append(stop_id)
 
-        # Link Stop <-> StopId
-        if stop_id.stop is not self:
-            stop_id.stop = self
+            # Link Stop <-> StopId
+            if stop_id.stop is not self:
+                stop_id.stop = self
 
 
 class StopId(BaseModel):
