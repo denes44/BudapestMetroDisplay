@@ -64,12 +64,22 @@ logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
 # for scheduling the arrival and departure updates
 departure_scheduler: BackgroundScheduler = BackgroundScheduler(
     jobstores={"default": MemoryJobStore()},  # Use in-memory job storage
+    job_defaults={
+        "max_instances": 10,  # allow up to 10 concurrent instances
+        "coalesce": False,  # don't merge missed runs
+        "misfire_grace_time": 15,  # no limit for late jobs
+    },
 )
 departure_scheduler.start()
 
 # Initialize scheduler with MemoryJobStore for scheduling the API updates
 api_update_scheduler: BackgroundScheduler = BackgroundScheduler(
     jobstores={"default": MemoryJobStore()},  # Use in-memory job storage
+    job_defaults={
+        "max_instances": 20,  # allow up to 10 concurrent instances
+        "coalesce": False,  # don't merge missed runs
+        "misfire_grace_time": None,  # no limit for late jobs
+    },
 )
 api_update_scheduler.start()
 
@@ -449,6 +459,10 @@ def process_schedule(json_response: Any, route: Route) -> int:
         )
 
     latest_departure_time: int = -1
+
+    with route.lock:
+        stop_ids_list: list[str] = route.get_stop_ids(string_only=True)
+
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
     for stop_time in stop_times:
         trip_id: str = stop_time.get("tripId")
@@ -457,12 +471,14 @@ def process_schedule(json_response: Any, route: Route) -> int:
         stop_id = stop_time.get("stopId") if "stopId" in stop_time else stop_id_global
 
         # Check if we are interested in the provided stopId
-        if stop_id not in route.get_stop_ids(string_only=True):
+        if stop_id not in stop_ids_list:
             logger.debug(
                 f"Got update for stop ID {stop_id}, route {route.name}, "
                 f"but we don't need that, skipping",
             )
             continue
+
+        route_departure_delay: int = calculate_departure_delay(route)
 
         # Get the predicted or scheduled departure and arrival times
         # CASE #1: Both arrival and departure time available as predicted
@@ -486,10 +502,13 @@ def process_schedule(json_response: Any, route: Route) -> int:
             # Arrival time is the same as the departure,
             # use predefined delay for departure delay
             else:
-                arrival_time = stop_time.get(
-                    "predictedDepartureTime",
-                ) - calculate_departure_delay(route)
-                delay = calculate_departure_delay(route)
+                arrival_time = (
+                    stop_time.get(
+                        "predictedDepartureTime",
+                    )
+                    - route_departure_delay
+                )
+                delay = route_departure_delay
         # CASE #2: Only predicted arrival time is available
         # [end stop with realtime data]
         # Use the predefined delay for departure delay
@@ -497,10 +516,13 @@ def process_schedule(json_response: Any, route: Route) -> int:
             "uncertain",
             False,
         ):
-            arrival_time = stop_time.get(
-                "predictedArrivalTime",
-            ) - calculate_departure_delay(route)
-            delay = calculate_departure_delay(route)
+            arrival_time = (
+                stop_time.get(
+                    "predictedArrivalTime",
+                )
+                - route_departure_delay
+            )
+            delay = route_departure_delay
         # CASE #3: Only predicted departure time is available
         # [start stop with realtime data]
         # Use the predefined delay for departure delay
@@ -508,10 +530,13 @@ def process_schedule(json_response: Any, route: Route) -> int:
             "uncertain",
             False,
         ):
-            arrival_time = stop_time.get(
-                "predictedDepartureTime",
-            ) - calculate_departure_delay(route)
-            delay = calculate_departure_delay(route)
+            arrival_time = (
+                stop_time.get(
+                    "predictedDepartureTime",
+                )
+                - route_departure_delay
+            )
+            delay = route_departure_delay
         # CASE #4: Both arrival and departure time available as scheduled time
         # [middle stop, no realtime data]
         elif "arrivalTime" in stop_time and "departureTime" in stop_time:
@@ -525,30 +550,26 @@ def process_schedule(json_response: Any, route: Route) -> int:
             else:
                 arrival_time = (
                     stop_time.get("departureTime")
-                    - calculate_departure_delay(route)
+                    - route_departure_delay
                     + randint(-3, 3)
                 )
-                delay = calculate_departure_delay(route)
+                delay = route_departure_delay
         # CASE #5: Only scheduled arrival time is available
         # [end stop with no realtime data]
         # Use the predefined delay for departure delay
         elif "arrivalTime" in stop_time:
             arrival_time = (
-                stop_time.get("arrivalTime")
-                - calculate_departure_delay(route)
-                + randint(-3, 3)
+                stop_time.get("arrivalTime") - route_departure_delay + randint(-3, 3)
             )
-            delay = calculate_departure_delay(route)
+            delay = route_departure_delay
         # CASE #6: Only scheduled departure time is available
         # [start stop with no realtime data]
         # Use the predefined delay for departure delay
         elif "departureTime" in stop_time:
             arrival_time = (
-                stop_time.get("departureTime")
-                - calculate_departure_delay(route)
-                + randint(-3, 3)
+                stop_time.get("departureTime") - route_departure_delay + randint(-3, 3)
             )
-            delay = calculate_departure_delay(route)
+            delay = route_departure_delay
         # CASE #7: No valid time data is available
         else:
             logger.debug(
@@ -559,7 +580,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
 
         # We processed valid schedule data for this stop,
         # that means that the stop is operational
-        if not route.get_stop_id(stop_id).in_service:
+        with route.get_stop_id(stop_id).stop.lock:
             route.get_stop_id(stop_id).in_service = True
 
         # Schedule the action before the departure."""
@@ -635,6 +656,8 @@ def process_alerts(
             f"No alert data found when updating route {route.name}",
         )
 
+    stop_ids_list: list[str] = route.get_stop_ids(string_only=True)
+
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
     for alert_details in alerts.values():
         # If the start time of the alert is in the future, return False
@@ -653,43 +676,44 @@ def process_alerts(
             # Iterate through stopIds in the TransitAlertRoute
             for stop_id in alert_route.get("stopIds", []):
                 # Check if we are interested in the stopId
-                if stop_id not in route.get_stop_ids(string_only=True):
+                if stop_id not in stop_ids_list:
                     continue
 
                 sid = route.get_stop_id(stop_id)
-                # Check whether the stop is operational now
-                if sid.in_service:
-                    # Check if we have a schedule for this stop_id,
-                    # because if we have, then the stop is not really out of service
-                    soonest_job = aps_helpers.find_soonest_job_by_argument(
-                        departure_scheduler,
-                        stop_id,
-                        0,
-                    )
-
-                    if soonest_job is not None:
-                        # We found at least one schedule for this stop,
-                        # so we'll ignore the NO_SERVICE alert
-                        logger.debug(
-                            f"Found NO_SERVICE alert {alert_details['id']} "
-                            f"for {sid.stop.name}, route {route.name}, "
-                            f"but there are active schedules for that stop, "
-                            f"so we'll ignore that",
+                with sid.stop.lock:
+                    # Check whether the stop is operational now
+                    if sid.in_service:
+                        # Check if we have a schedule for this stop_id,
+                        # because if we have, then the stop is not really out of service
+                        soonest_job = aps_helpers.find_soonest_job_by_argument(
+                            departure_scheduler,
+                            stop_id,
+                            0,
                         )
-                    else:
-                        # No schedule found for this stop,
-                        # so we'll process the NO_SERVICE alert
-                        logger.debug(
-                            f"Found NO_SERVICE alert {alert_details['id']} "
-                            f"for {sid.stop.name}, route {route.name}",
-                        )
-                        # Set the operation state of this StopId
-                        sid.in_service = False
 
-                        # Update the regular schedule data for the route
-                        # because of the active alert
-                        if is_alert_only:
-                            create_schedule_updates(route, "REGULAR")
+                        if soonest_job is not None:
+                            # We found at least one schedule for this stop,
+                            # so we'll ignore the NO_SERVICE alert
+                            logger.debug(
+                                f"Found NO_SERVICE alert {alert_details['id']} "
+                                f"for {sid.stop.name}, route {route.name}, "
+                                f"but there are active schedules for that stop, "
+                                f"so we'll ignore that",
+                            )
+                        else:
+                            # No schedule found for this stop,
+                            # so we'll process the NO_SERVICE alert
+                            logger.debug(
+                                f"Found NO_SERVICE alert {alert_details['id']} "
+                                f"for {sid.stop.name}, route {route.name}",
+                            )
+                            # Set the operation state of this StopId
+                            sid.in_service = False
+
+                            # Update the regular schedule data for the route
+                            # because of the active alert
+                            if is_alert_only:
+                                create_schedule_updates(route, "REGULAR")
 
 
 def vehicle_arrival(
@@ -721,8 +745,8 @@ def vehicle_arrival(
         f"route: {stop_id.stop.route.name}, "
         f"trip: {trip_id}, departing after: {delay} sec",
     )
-
-    stop_id.vehicle_present = True
+    with stop_id.stop.lock:
+        stop_id.vehicle_present = True
 
     # Schedule an action at the departure time to turn vehicle_present to False
     job_time_departure = job_time + timedelta(seconds=delay)
@@ -765,7 +789,8 @@ def vehicle_departure(
         f"trip: {trip_id}",
     )
 
-    stop_id.vehicle_present = False
+    with stop_id.stop.lock:
+        stop_id.vehicle_present = False
 
 
 def calculate_schedule_interval(json_response: Any, route: Route) -> None:
@@ -866,7 +891,8 @@ def calculate_schedule_interval(json_response: Any, route: Route) -> None:
     avg = sum(deltas) / len(deltas) / 60 if deltas else -1
 
     # Store result
-    route.schedule_interval = avg
+    with route.lock:
+        route.schedule_interval = avg
 
     logger.debug(
         f"Recalculated departure delay for route {route.name}, schedule interval:  "
@@ -881,24 +907,26 @@ def calculate_departure_delay(route: Route) -> int:
     :return: The departure delay in seconds
     """
     delay: int = 0
+    with route.lock:
+        schedule_interval: float = route.schedule_interval
 
-    if route.schedule_interval >= 0:
+    if schedule_interval >= 0:
         if route.type == "subway":
-            if route.schedule_interval <= 2:
+            if schedule_interval <= 2:
                 delay = 15
-            elif route.schedule_interval < 5.5:
+            elif schedule_interval < 5.5:
                 delay = 20
             else:
                 delay = 30
         elif route.type == "railway":
-            if route.schedule_interval < 5.5:
+            if schedule_interval < 5.5:
                 delay = 20
-            elif route.schedule_interval < 10.5:
+            elif schedule_interval < 10.5:
                 delay = 30
             else:
                 delay = 45
     # No valid schedule data found, set the default delay
-    elif route.schedule_interval == -1:
+    elif schedule_interval == -1:
         if route.type == "subway":
             delay = 30
         elif route.type == "railway":

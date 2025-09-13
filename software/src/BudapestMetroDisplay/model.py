@@ -317,7 +317,8 @@ class Stop(BaseModel):
             StopIds are in no service.
         If there are no StopIds associated with the Stop, it always returns False.
         """
-        states = [si.in_service for si in self.stop_ids]
+        with self._lock:
+            states = [si.in_service for si in self.stop_ids]
 
         if not states:
             return False
@@ -327,7 +328,8 @@ class Stop(BaseModel):
     @property
     def vehicle_present(self) -> bool:
         """Return the vehicle present status of the Stop."""
-        return any(si.vehicle_present for si in self.stop_ids)
+        with self._lock:
+            return any(si.vehicle_present for si in self.stop_ids)
 
     def add_stop_id(self, stop_id: StopId) -> None:
         """Add a StopId to the Stop."""
