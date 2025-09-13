@@ -11,3 +11,4 @@ venv
 run.bat
 rebuild.bat
 *__pycache__*
+*callgraph*
