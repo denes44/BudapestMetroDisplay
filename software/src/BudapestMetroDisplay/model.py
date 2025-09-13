@@ -216,26 +216,18 @@ class Route(BaseModel):
 
     route_id: str
     name: str
-    _color: RGB = (0, 0, 0)
-    type: str | None = None
-    stops: list[Stop] = Field(default_factory=list)
+    type: str
+    color: RGB = (0, 0, 0)
     schedule_interval: float = -1
+
+    stops: list[Stop] = Field(default_factory=list)
+
     _lock: Lock = PrivateAttr(default_factory=Lock)
 
     @property
     def lock(self) -> Lock:
         """Return the lock object for this Route."""
         return self._lock
-
-    @property
-    def color(self) -> RGB:
-        """Return the color of the Route."""
-        return self._color
-
-    @color.setter
-    def color(self, rgb: RGB) -> None:
-        """Set the color of the Route."""
-        self._color = _rgb_clamp(rgb)
 
     def add_stop(self, stop: Stop) -> None:
         """Link Route <-> Stop."""
