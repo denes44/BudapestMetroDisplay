@@ -498,7 +498,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
             if stop_time.get("predictedArrivalTime") != stop_time.get(
                 "predictedDepartureTime",
             ):
-                arrival_time = stop_time.get("predictedArrivalTime")
+                arrival_time = stop_time.get("predictedArrivalTime") + randint(-3, 3)
                 delay = stop_time.get("predictedDepartureTime") - stop_time.get(
                     "predictedArrivalTime",
                 )
@@ -510,6 +510,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
                         "predictedDepartureTime",
                     )
                     - route_departure_delay
+                    + randint(-3, 3)
                 )
                 delay = route_departure_delay
         # CASE #2: Only predicted arrival time is available
@@ -524,6 +525,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
                     "predictedArrivalTime",
                 )
                 - route_departure_delay
+                + randint(-3, 3)
             )
             delay = route_departure_delay
         # CASE #3: Only predicted departure time is available
@@ -538,6 +540,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
                     "predictedDepartureTime",
                 )
                 - route_departure_delay
+                + randint(-3, 3)
             )
             delay = route_departure_delay
         # CASE #4: Both arrival and departure time available as scheduled time
