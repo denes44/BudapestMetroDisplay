@@ -227,6 +227,9 @@ def fetch_schedule_for_route(
                 job_time = datetime.fromtimestamp(latest_departure_time) - timedelta(
                     minutes=5,
                 )
+                if job_time < datetime.now():
+                    job_time = datetime.now() + timedelta(minutes=5)
+
                 logger.debug(
                     f"The calculated next {schedule_type} schedule update "
                     f"for route {route.name} is later than the last departure "
