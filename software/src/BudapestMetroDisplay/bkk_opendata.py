@@ -669,12 +669,18 @@ def process_alerts(
 
         # Iterate the TransitAlertRoutes in the TransitAlert
         for alert_route in alert_details["routes"]:
+            # If this route is for another Route, skip it
+            if alert_route["routeId"] != route.route_id:
+                continue
+
             effect_type: str = alert_route.get("effectType", "")
 
             # If the effectType is not NO_SERVICE,
             # we don't process the TransitAlertRoute anymore
             if effect_type != "NO_SERVICE":
                 continue
+
+            is_alert_found: bool = False
 
             # Iterate through stopIds in the TransitAlertRoute
             for stop_id in alert_route.get("stopIds", []):
@@ -712,11 +718,12 @@ def process_alerts(
                             )
                             # Set the operation state of this StopId
                             sid.in_service = False
+                            is_alert_found = True
 
-                            # Update the regular schedule data for the route
-                            # because of the active alert
-                            if is_alert_only:
-                                create_schedule_updates(route, "REGULAR")
+            # Update the regular schedule data for the route
+            # because of the active alert
+            if is_alert_found and is_alert_only:
+                create_schedule_updates(route, "REGULAR")
 
 
 def vehicle_arrival(
