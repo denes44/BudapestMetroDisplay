@@ -1,170 +1,82 @@
-name: HA Add-on: bump & release on software release
+name: HA Add-on, Release from PR
 
 on:
-  release:
-    types: [published]
+  pull_request:
+    types: [closed]
+    branches: [main]
+    paths:
+      - ha-addon/**
 
 permissions:
-  contents: write
+  contents: write  # needed to create tag & release
 
 jobs:
-  check_version:
-    name: Check software version
-    if: startsWith(github.event.release.name, 'software-')
+  tag_and_release:
+    name: Tag merge commit and create release
+    # Only run when PR was merged and the branch name matches "ha-addon-{docker_version}"
+    if: >
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'ha-addon-')
     runs-on: ubuntu-latest
     env:
-      TZ: Europe/Budapest
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    outputs:
-      software_version: ${{ steps.swver.outputs.software_version }}
-    steps:
-      - name: Checkout default branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.repository.default_branch }}
-
-      - name: Read software version from VERSION file
-        id: swver
-        shell: bash
-        run: |
-          SOFTWARE_VERSION="$(tr -d ' \t\r\n' < software/src/BudapestMetroDisplay/VERSION)"
-          if [ -z "$SOFTWARE_VERSION" ]; then
-            echo "VERSION file is empty." >&2
-            exit 1
-          fi
-          echo "software_version=$SOFTWARE_VERSION" >> "$GITHUB_OUTPUT"
-          echo "Software version: $SOFTWARE_VERSION"
-
-      - name: Stop if build.yaml already has this APP_VERSION
-        shell: bash
-        run: |
-          if grep -qE "^[[:space:]]*APP_VERSION:[[:space:]]*${{ steps.swver.outputs.software_version }}[[:space:]]*$" ha-addon/build.yaml; then
-            echo "ERROR: ha-addon already uses ${{ steps.swver.outputs.software_version }} version." >&2
-            exit 1
-          fi
-
-  update_and_commit:
-    name: Update files & commit
-    needs: [check_version]
-    runs-on: ubuntu-latest
-    env:
-      TZ: Europe/Budapest
-    outputs:
-      docker_version: ${{ steps.update.outputs.docker_version }}
-    steps:
-      - name: Checkout default branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.repository.default_branch }}
-
-      - name: Update build.yaml (APP_VERSION), bump config.yaml, update CHANGELOG.md
-        id: update
-        shell: bash
-        run: |
-          python3 - << 'PY'
-          import re
-          from pathlib import Path
-          from datetime import datetime
-          from zoneinfo import ZoneInfo
-
-          repo = Path(".")
-          build_path  = repo / "ha-addon" / "build.yaml"
-          config_path = repo / "ha-addon" / "config.yaml"
-          changelog   = repo / "ha-addon" / "CHANGELOG.md"
-
-          software_version = """${{ needs.check_version.outputs.software_version }}"""
-
-          # --- ha-addon/build.yaml: update APP_VERSION inside args: (robust to extra keys)
-          lines = build_path.read_text(encoding="utf-8").splitlines(keepends=True)
-          args_start = None
-          args_indent = None
-          for i, ln in enumerate(lines):
-              m = re.match(r'^(\s*)args:\s*$', ln)
-              if m:
-                  args_start = i
-                  args_indent = len(m.group(1))
-                  break
-          if args_start is None:
-              raise SystemExit("Could not find 'args:' in ha-addon/build.yaml")
-
-          appver_idx = None
-          for j in range(args_start + 1, len(lines)):
-              ln = lines[j]
-              # end of args block when indentation dedents to <= args indent
-              if ln.strip() and not ln.lstrip().startswith(('#','-')):
-                  current_indent = len(ln) - len(ln.lstrip(' '))
-                  if current_indent <= args_indent:
-                      break
-              m = re.match(r'^(\s*)APP_VERSION:\s*.*?(\s*)$', ln)
-              if m:
-                  lead = m.group(1)
-                  lines[j] = f"{lead}APP_VERSION: {software_version}\n"
-                  appver_idx = j
-                  break
-          if appver_idx is None:
-              raise SystemExit("Could not find 'APP_VERSION:' under 'args:' in ha-addon/build.yaml")
-          build_path.write_text(''.join(lines), encoding="utf-8")
-
-          # --- ha-addon/config.yaml: bump patch of version "x.y.z"
-          cfg = config_path.read_text(encoding="utf-8")
-          m = re.search(r'^(\s*version:\s*"?)(\d+)\.(\d+)\.(\d+)("?\s*)$', cfg, flags=re.MULTILINE)
-          if not m:
-              raise SystemExit("Could not find semver in ha-addon/config.yaml 'version:'")
-          major, minor, patch = map(int, (m.group(2), m.group(3), m.group(4)))
-          docker_version = f"{major}.{minor}.{patch+1}"
-          cfg_new = cfg[:m.start()] + f"{m.group(1)}{docker_version}{m.group(5)}" + cfg[m.end():]
-          config_path.write_text(cfg_new, encoding="utf-8")
-
-          # --- ha-addon/CHANGELOG.md: prepend new entry
-          cl = changelog.read_text(encoding="utf-8")
-          date_str = datetime.now(ZoneInfo("Europe/Budapest")).strftime("%Y-%m-%d")
-          entry = (
-              f"## [{docker_version}] - {date_str}\n\n"
-              f"- Bumped BudapestMetroDisplay to {software_version}\n\n"
-          )
-          idx = cl.find("\n## [")
-          if idx == -1:
-              if not cl.endswith("\n"):
-                  cl += "\n"
-              cl_new = cl + "\n" + entry
-          else:
-              cut = idx + 1
-              cl_new = cl[:cut] + entry + cl[cut:]
-          changelog.write_text(cl_new, encoding="utf-8")
-
-          (repo / ".docker_version").write_text(docker_version, encoding="utf-8")
-          PY
-
-          echo "docker_version=$(cat .docker_version)" >> "$GITHUB_OUTPUT"
-
-      - name: Commit changes (and create ha-addon tag)
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: |
-            ha-addon: bump BudapestMetroDisplay to ${{ needs.check_version.outputs.software_version }}
-          tagging_message: ha-addon-${{ steps.update.outputs.docker_version }}
-          file_pattern: |
-            ha-addon/build.yaml
-            ha-addon/config.yaml
-            ha-addon/CHANGELOG.md
-
-  create_release:
-    name: Create GitHub Release
-    needs: [update_and_commit]
-    runs-on: ubuntu-latest
-    env:
-      TZ: Europe/Budapest
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Publish release for ha-addon tag
+      - name: Extract addon_version from branch name
+        id: vars
         shell: bash
         run: |
-          TAG="ha-addon-${{ needs.update_and_commit.outputs.docker_version }}"
-          DATE=$(date +%F)
-          BODY="## [${{ needs.update_and_commit.outputs.docker_version }}] - ${DATE}
+          BRANCH="${{ github.event.pull_request.head.ref }}"   # e.g. "ha-addon-0.1.2"
+          ADDON_VERSION="${BRANCH#ha-addon-}"
+          TAG="ha-addon-${DOCKER_VERSION}"
+          echo "addon_version=${ADDON_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Branch=${BRANCH}, Addon=${ADDON_VERSION}, Tag=${TAG}"
 
-- Bumped BudapestMetroDisplay to ${{ needs.check_version.outputs.software_version }}"
+      - name: Checkout repository at the merge commit
+        uses: actions/checkout@v5
+        with:
+          # Use the exact merge commit so the changelog reflects what landed in main
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
 
-          gh release create "$TAG" --title "$TAG" --notes "$BODY"
+      - name: Build release notes from ha-addon/CHANGELOG.md (top entry)
+        id: notes
+        shell: bash
+        run: |
+          # Grab the first changelog section (from first "## [" to the next "## [" or EOF)
+          if [ ! -f "ha-addon/CHANGELOG.md" ]; then
+            echo "CHANGELOG not found at ha-addon/CHANGELOG.md" >&2
+            exit 1
+          fi
+
+          BODY="$(awk '
+            BEGIN{found=0}
+            /^## \[/ {
+              if(found==1){exit}
+              found=1
+            }
+            { if(found==1) print }
+          ' ha-addon/CHANGELOG.md)"
+
+          # Fallback minimal body if parsing failed for some reason
+          if [ -z "$BODY" ]; then
+            BODY="ha-addon ${{
+              steps.vars.outputs.addon_version
+            }} released."
+          fi
+
+          {
+            echo 'body<<EOF'
+            printf '%s\n' "$BODY"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create tag and GitHub Release
+        shell: bash
+        run: |
+          TAG="${{ steps.vars.outputs.tag }}"
+          TARGET="${{ github.event.pull_request.merge_commit_sha }}"
+          TITLE="${TAG}"
+          BODY="${{ steps.notes.outputs.body }}"
+
+          # Create release (creates the tag if it does not exist), pointing to the merge commit
+          gh release create "$TAG" --title "$TITLE" --notes "$BODY" --target "$TARGET"
