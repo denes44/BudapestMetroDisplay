@@ -1,4 +1,4 @@
-name: ESPHome maintain esphome-latest release
+name: ESPHome maintain latest release
 
 on:
   release:
