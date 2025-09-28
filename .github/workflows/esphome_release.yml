@@ -22,6 +22,9 @@ jobs:
         github.event.pull_request.merged == true &&
         startsWith(github.event.pull_request.head.ref, 'esphome-')
       )
+    outputs:
+      project_version: ${{ steps.esphome-build.outputs.project-version }}
+      project_name:    ${{ steps.esphome-build.outputs.name }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -46,7 +49,7 @@ jobs:
   extract_release_notes:
     name: Extract release notes for release
     runs-on: ubuntu-latest
-    needs: esphome_build
+    needs: build-firmware
     outputs:
       notes: ${{ steps.extract_notes.outputs.notes }}
     steps:
@@ -58,7 +61,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          VERSION="${{ needs.esphome_build.outputs.project_version }}"
+          VERSION="${{ needs.build-firmware.outputs.project_version }}"
           CHANGELOG="esphome/CHANGELOG.md"
 
           # Stream-normalize CRLF and extract the section for the version:
@@ -85,7 +88,7 @@ jobs:
 
   create_release:
     name: Create GitHub Release
-    needs: extract_release_notes
+    needs: [build-firmware,extract_release_notes]
     runs-on: ubuntu-latest
     steps:
       - name: Download firmware artifacts
