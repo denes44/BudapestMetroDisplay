@@ -1,0 +1,103 @@
+name: ESPHome: maintain esphome-latest
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write  # needed to move tags and create/edit releases
+
+jobs:
+  roll_latest:
+    name: Point esphome-latest to newest esphome-* release
+    # Only handle releases with name or tag starting with "esphome-"
+    if: startsWith(github.event.release.name, 'esphome-') || startsWith(github.event.release.tag_name, 'esphome-')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout (for git tag operations)
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set vars
+        id: vars
+        shell: bash
+        run: |
+          SRC_TAG="${{ github.event.release.tag_name }}"
+          TRACK="esphome"
+          ROLLING_TAG="${TRACK}-latest"
+          echo "src_tag=${SRC_TAG}" >> "$GITHUB_OUTPUT"
+          echo "rolling_tag=${ROLLING_TAG}" >> "$GITHUB_OUTPUT"
+          echo "Source tag: ${SRC_TAG}"
+          echo "Rolling tag: ${ROLLING_TAG}"
+
+      - name: Move rolling tag to this release's commit
+        shell: bash
+        run: |
+          SRC_TAG="${{ steps.vars.outputs.src_tag }}"
+          ROLLING_TAG="${{ steps.vars.outputs.rolling_tag }}"
+
+          git fetch --tags --force
+
+          SRC_SHA="$(git rev-list -n1 "$SRC_TAG")"
+          if [ -z "$SRC_SHA" ]; then
+            echo "Could not resolve commit for $SRC_TAG" >&2
+            exit 1
+          fi
+          echo "Source tag $SRC_TAG -> $SRC_SHA"
+
+          git tag -f "$ROLLING_TAG" "$SRC_SHA"
+          git push origin ":refs/tags/$ROLLING_TAG" || true
+          git push origin "refs/tags/$ROLLING_TAG"
+
+      - name: Fetch source release body
+        id: body
+        shell: bash
+        run: |
+          SRC_TAG="${{ steps.vars.outputs.src_tag }}"
+          BODY="$(gh release view "$SRC_TAG" --json body --jq .body)"
+          # Fallback to a simple note if body is empty
+          if [ -z "$BODY" ]; then
+            BODY="Rolling latest ESPHome build mirrored from $SRC_TAG"
+          fi
+          printf '%s' "$BODY" > body.md
+          echo "body_file=body.md" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure esphome-latest release exists (copy body)
+        shell: bash
+        run: |
+          ROLLING_TAG="${{ steps.vars.outputs.rolling_tag }}"
+          BODY_FILE="${{ steps.body.outputs.body_file }}"
+
+          if gh release view "$ROLLING_TAG" >/dev/null 2>&1; then
+            gh release edit "$ROLLING_TAG" \
+              --title "$ROLLING_TAG" \
+              --notes-file "$BODY_FILE"
+          else
+            # Target the rolling tag (already moved to the desired commit)
+            gh release create "$ROLLING_TAG" \
+              --title "$ROLLING_TAG" \
+              --notes-file "$BODY_FILE" \
+              --target "$ROLLING_TAG"
+          fi
+
+      - name: Mirror assets from source release to esphome-latest (overwrite)
+        shell: bash
+        run: |
+          SRC_TAG="${{ steps.vars.outputs.src_tag }}"
+          ROLLING_TAG="${{ steps.vars.outputs.rolling_tag }}"
+
+          mkdir -p _assets
+          gh release download "$SRC_TAG" --dir _assets
+
+          shopt -s nullglob
+          files=( _assets/* )
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No assets found on $SRC_TAG. Nothing to upload."
+            exit 0
+          fi
+
+          gh release upload "$ROLLING_TAG" "${files[@]}" --clobber
+          echo "Uploaded ${#files[@]} asset(s) to $ROLLING_TAG."
