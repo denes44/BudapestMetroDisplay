@@ -1,4 +1,4 @@
-name: ESPHome Publish
+name: ESPHome Release
 
 on:
   pull_request:
