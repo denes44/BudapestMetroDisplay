@@ -83,12 +83,24 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Create tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.vars.outputs.tag }}
+          BODY: ${{ steps.notes.outputs.body }}
+          TARGET_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.target_ref
+                       || github.event.pull_request.merge_commit_sha }}
         shell: bash
         run: |
-          TAG="${{ steps.vars.outputs.tag }}"
-          TARGET="${{ github.event.pull_request.merge_commit_sha }}"
-          TITLE="${TAG}"
-          BODY="${{ steps.notes.outputs.body }}"
+          if [ -z "$TARGET_REF" ]; then
+            echo "ERROR: TARGET_REF is empty. For manual runs, provide 'target_ref'." >&2
+            exit 1
+          fi
 
-          # Create release (creates the tag if it does not exist), pointing to the merge commit
-          gh release create "$TAG" --title "$TITLE" --notes "$BODY" --target "$TARGET"
+          TITLE="$TAG"
+
+          # If the release already exists, update it; otherwise create it (tag created if missing).
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "$TITLE" --notes "$BODY" --target "$TARGET_REF"
+          else
+            gh release create "$TAG" --title "$TITLE" --notes "$BODY" --target "$TARGET_REF"
+          fi
