@@ -6,6 +6,12 @@ on:
     branches: [main]
     paths:
       - ha-addon/**
+  workflow_dispatch:
+    inputs:
+      target_ref:
+        description: "Branch, tag, or commit SHA to run against"
+        required: true
+        default: ""
 
 permissions:
   contents: write  # needed to create tag & release
@@ -15,28 +21,34 @@ jobs:
     name: Tag merge commit and create release
     # Only run when PR was merged and the branch name matches "ha-addon-{addon_version}"
     if: >
-      github.event.pull_request.merged == true &&
-      startsWith(github.event.pull_request.head.ref, 'ha-addon-')
+      (github.event_name == 'workflow_dispatch')
+      ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.merged == true &&
+       startsWith(github.event.pull_request.head.ref, 'ha-addon-'))
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Extract addon_version from branch name
+      - name: Extract addon_version from ha-addon/config.yaml
         id: vars
         shell: bash
         run: |
-          BRANCH="${{ github.event.pull_request.head.ref }}"   # e.g. "ha-addon-0.1.2"
-          ADDON_VERSION="${BRANCH#ha-addon-}"
+          CONFIG_FILE="ha-addon/config.yaml"
+          ADDON_VERSION=$(grep '^version:' "$CONFIG_FILE" | sed 's/version:[[:space:]]*//')
           TAG="ha-addon-${ADDON_VERSION}"
+
           echo "addon_version=${ADDON_VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-          echo "Branch=${BRANCH}, Addon=${ADDON_VERSION}, Tag=${TAG}"
+
+          echo "Addon=${ADDON_VERSION}, Tag=${TAG}"
 
       - name: Checkout repository at the merge commit
         uses: actions/checkout@v5
         with:
-          # Use the exact merge commit so the changelog reflects what landed in main
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.target_ref
+                || github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
 
       - name: Build release notes from ha-addon/CHANGELOG.md (top entry)
         id: notes
