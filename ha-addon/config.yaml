@@ -16,7 +16,6 @@ arch:
   - i386
 startup: application
 ports:
-  5000/tcp: 5000
   5568/udp: 5568
 map:
   - addon_config:rw

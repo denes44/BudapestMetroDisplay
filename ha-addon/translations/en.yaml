@@ -1,5 +1,4 @@
 network:
-  5000/tcp: Debug webserver
   5568/udp: sACN output
 
 configuration:
