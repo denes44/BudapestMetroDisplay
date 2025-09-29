@@ -42,7 +42,7 @@ jobs:
         shell: bash
         run: |
           CONFIG_FILE="ha-addon/config.yaml"
-          ADDON_VERSION=$(grep '^version:' "$CONFIG_FILE" | sed 's/version:[[:space:]]*//')
+          ADDON_VERSION=$(grep '^version:' "$CONFIG_FILE" | sed 's/version:[[:space:]]*//; s/"//g')
           TAG="ha-addon-${ADDON_VERSION}"
 
           echo "addon_version=${ADDON_VERSION}" >> "$GITHUB_OUTPUT"
