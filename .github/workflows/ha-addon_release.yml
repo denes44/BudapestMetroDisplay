@@ -30,6 +30,13 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Checkout repository at the merge commit
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.target_ref
+                || github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+
       - name: Extract addon_version from ha-addon/config.yaml
         id: vars
         shell: bash
@@ -42,13 +49,6 @@ jobs:
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
           echo "Addon=${ADDON_VERSION}, Tag=${TAG}"
-
-      - name: Checkout repository at the merge commit
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.target_ref
-                || github.event.pull_request.merge_commit_sha }}
-          fetch-depth: 0
 
       - name: Build release notes from ha-addon/CHANGELOG.md (top entry)
         id: notes
