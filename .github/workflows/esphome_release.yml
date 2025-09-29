@@ -7,6 +7,11 @@ on:
     paths:
       - esphome/**/*.yaml
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to release (e.g., esphome-1.2.3)"
+        required: true
+        type: string
 
 jobs:
   build-firmware:
@@ -28,6 +33,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch'
+                  && format('refs/tags/{0}', inputs.tag)
+                  || github.event.pull_request.merge_commit_sha }}
 
       - name: Build Firmware
         uses: esphome/build-action@v6
@@ -55,6 +65,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch'
+                  && format('refs/tags/{0}', inputs.tag)
+                  || github.event.pull_request.merge_commit_sha }}
       - name: Extract release notes from CHANGELOG
         id: extract_notes
         shell: bash
