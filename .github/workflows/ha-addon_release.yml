@@ -13,7 +13,7 @@ permissions:
 jobs:
   tag_and_release:
     name: Tag merge commit and create release
-    # Only run when PR was merged and the branch name matches "ha-addon-{docker_version}"
+    # Only run when PR was merged and the branch name matches "ha-addon-{addon_version}"
     if: >
       github.event.pull_request.merged == true &&
       startsWith(github.event.pull_request.head.ref, 'ha-addon-')
@@ -27,7 +27,7 @@ jobs:
         run: |
           BRANCH="${{ github.event.pull_request.head.ref }}"   # e.g. "ha-addon-0.1.2"
           ADDON_VERSION="${BRANCH#ha-addon-}"
-          TAG="ha-addon-${DOCKER_VERSION}"
+          TAG="ha-addon-${ADDON_VERSION}"
           echo "addon_version=${ADDON_VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "Branch=${BRANCH}, Addon=${ADDON_VERSION}, Tag=${TAG}"
