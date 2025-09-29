@@ -1,7 +1,7 @@
 name: "BudapestMetroDisplay"
 description: "Backgorund service for a BudapestMetroDisplay hardware LED display"
 url: "https://github.com/denes44/BudapestMetroDisplay/tree/main/ha-addon"
-version: "0.1.1"
+version: "1.0.0"
 slug: "budapestmetrodisplay"
 init: false
 legacy: true
