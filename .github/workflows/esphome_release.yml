@@ -30,6 +30,7 @@ jobs:
     outputs:
       project_version: ${{ steps.esphome-build.outputs.project-version }}
       project_name:    ${{ steps.esphome-build.outputs.name }}
+      esphome_version: ${{ steps.esphome-build.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -45,7 +46,6 @@ jobs:
         with:
           yaml-file: esphome/metro-display.factory.yaml
           complete-manifest: true
-          cache: true
 
       - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4
@@ -70,16 +70,17 @@ jobs:
           ref: ${{ github.event_name == 'workflow_dispatch'
                   && format('refs/tags/{0}', inputs.tag)
                   || github.event.pull_request.merge_commit_sha }}
-      - name: Extract release notes from CHANGELOG
-        id: extract_notes
+      - name: Extract changelog notes
+        id: notes
+        env:
+          VERSION: ${{ needs.build-firmware.outputs.project_version }}
+          ESPHOME: ${{ needs.build-firmware.outputs.esphome_version }}
         shell: bash
         run: |
           set -euo pipefail
 
-          VERSION="${{ needs.build-firmware.outputs.project_version }}"
           CHANGELOG="esphome/CHANGELOG.md"
 
-          # Stream-normalize CRLF and extract the section for the version:
           NOTES="$(tr -d '\r' < "$CHANGELOG" | awk -v ver="$VERSION" '
             BEGIN { found=0 }
             /^## \[/ {
@@ -96,8 +97,11 @@ jobs:
           fi
 
           {
-            echo "notes<<'EOF_NOTES'"
+            echo "notes<<EOF_NOTES"
             printf "%s\n" "$NOTES"
+            echo
+            echo
+            echo "Built by esphome $ESPHOME"
             echo "EOF_NOTES"
           } >> "$GITHUB_OUTPUT"
 
