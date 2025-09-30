@@ -109,6 +109,8 @@ jobs:
     name: Create GitHub Release
     needs: [build-firmware,extract_release_notes]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Download firmware artifacts
         uses: actions/download-artifact@v4
@@ -119,6 +121,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: esphome-${{ needs.build-firmware.outputs.project_version }}
           name: esphome-${{ needs.build-firmware.outputs.project_version }}
           body: ${{ needs.extract_release_notes.outputs.notes }}
