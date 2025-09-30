@@ -71,7 +71,7 @@ jobs:
                   && format('refs/tags/{0}', inputs.tag)
                   || github.event.pull_request.merge_commit_sha }}
       - name: Extract changelog notes
-        id: notes
+        id: extract_notes
         env:
           VERSION: ${{ needs.build-firmware.outputs.project_version }}
           ESPHOME: ${{ needs.build-firmware.outputs.esphome_version }}
