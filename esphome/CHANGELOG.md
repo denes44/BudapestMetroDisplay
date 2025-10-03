@@ -3,6 +3,15 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - Unreleased
+
+### Added
+
+- Factory resetting the device is now possible
+	- From the Web GUI
+	- Or by power-cycling the device 5 times with less then 10s between
+	  the power cycles
+
 ## [1.1.0] - 2025-09-04
 
 ### Changed
