@@ -5,6 +5,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.0] - Unreleased
 
+### Breaking change
+
+- The default sACN mode is unicast from now on
+
 ### Added
 
 - Factory resetting the device is now possible

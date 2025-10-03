@@ -182,7 +182,7 @@ light:
           channels: RGB
 
 e131:
-  method: multicast
+  method: unicast
 
 switch:
   - platform: template
