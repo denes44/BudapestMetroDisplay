@@ -47,3 +47,16 @@ what's installed on the device.
 
 If you do a firmware install from the dashboard, the build process will use
 the new core yaml file from GitHub dynamically.
+
+## Factory reset
+
+The only custom setting stored on the device is the WiFi network setting.
+
+## Power cycle
+
+You can factory reset the device by doing a power cycle 5 times.
+The maximum delay between 2 power cycles is 10 seconds.
+
+## Web GUI
+
+You can use the Factory Reset button in the Web GUI to reset the device.

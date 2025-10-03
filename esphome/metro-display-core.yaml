@@ -12,7 +12,7 @@ esphome:
   min_version: 2025.2.0
   project:
     name: "denes44.BudapestMetroDisplay"
-    version: 1.1.0
+    version: 1.2.0
   platformio_options:
     board_build.flash_mode: dio
   on_boot:
@@ -30,6 +30,10 @@ esp32:
       CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
 
 logger:
+
+factory_reset:
+  resets_required: 5
+  max_delay: 10s
 
 
 # WiFi, AP, Network, etc.
@@ -98,6 +102,14 @@ button:
     entity_category: config
     web_server:
       sorting_weight: 3
+      sorting_group_id: sg_restart
+
+  - platform: factory_reset
+    name: Factory reset
+    id: _factory
+    entity_category: config
+    web_server:
+      sorting_weight: 4
       sorting_group_id: sg_restart
 
 sensor:
