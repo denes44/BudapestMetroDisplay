@@ -40,7 +40,7 @@ script:
   - id: check_update
     then:
       - http_request.get:
-          url: https://raw.githubusercontent.com/denes44/BudapestMetroDisplay/refs/heads/main/esphome/firmware/manifest.json
+          url: source: https://github.com/denes44/BudapestMetroDisplay/releases/download/esphome-latest/manifest.json
           capture_response: true
           on_response:
             then:

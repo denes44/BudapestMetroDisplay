@@ -6,7 +6,11 @@
 
 ## Firmware
 
-The default firmware to use is [firmware/metro-display-esp32s3.factory.bin](firmware/metro-display-esp32s3.factory.bin).
+The default firmware to use is **metro-display-esp32s3.factory.bin**.
+
+You can download the latest firmware from GitHub Releases:
+https://github.com/denes44/BudapestMetroDisplay/releases/tag/esphome-latest
+
 With this firmware you can use [Improv via BLE](https://esphome.io/components/esp32_improv)
 or [Improv via Serial](https://esphome.io/components/improv_serial)
 to provision your device.
