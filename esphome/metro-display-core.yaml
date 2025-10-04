@@ -9,14 +9,14 @@
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  min_version: 2024.10.0
+  min_version: 2025.2.0
   project:
     name: "denes44.BudapestMetroDisplay"
-    version: 1.0.0
+    version: 1.1.0
   platformio_options:
     board_build.flash_mode: dio
   on_boot:
-    priority: -100
+    priority: 800
     then:
       - script.execute: default_values
 
@@ -24,7 +24,10 @@ esp32:
   board: adafruit_feather_esp32s3
   framework:
     type: esp-idf
-    version: recommended
+    platform_version: 6.9.0
+    version: 5.3.1
+    sdkconfig_options:
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
 
 logger:
 
@@ -42,6 +45,7 @@ captive_portal:
 # Home Assistant API
 
 api:
+  reboot_timeout : 0s
 
 time:
   - platform: homeassistant
@@ -119,10 +123,11 @@ light:
     web_server:
       sorting_weight: 1
       sorting_group_id: sg_led
-    restore_mode: ALWAYS_OFF
+    restore_mode: RESTORE_DEFAULT_OFF
     pin: GPIO07
     num_leds: 63
-    rmt_channel: 0
+    rmt_symbols: 96
+    use_psram: false
     chipset: SK6812
     rgb_order: GRB
 
@@ -217,17 +222,17 @@ script:
           id: leds
           range_from: 0
           range_to: 2
-          red: 75%
-          green: 55%
-          blue: 0%
+          red: 100%
+          green: 0%
+          blue: 100%
           color_brightness: 20%
       - light.addressable_set: #H7
           id: leds
           range_from: 3
           range_to: 5
-          red: 75%
-          green: 55%
-          blue: 0%
+          red: 100%
+          green: 0%
+          blue: 100%
           color_brightness: 20%
       - light.addressable_set: #M4/1
           id: leds
@@ -283,7 +288,7 @@ script:
           range_to: 26
           red: 100%
           green: 0%
-          blue: 60%
+          blue: 100%
           color_brightness: 20%
       - light.addressable_set: #H5
           id: leds
@@ -323,7 +328,7 @@ script:
           range_to: 17
           red: 100%
           green: 0%
-          blue: 60%
+          blue: 75%
           color_brightness: 20%
       - light.addressable_set: #M1/M2/M3 Deák Ferenc tér
           id: leds
@@ -338,7 +343,7 @@ script:
           range_from: 22
           range_to: 22
           red: 100%
-          green: 60%
+          green: 75%
           blue: 0%
           color_brightness: 20%
       - light.addressable_set: #M2/H9 Örs vezér tere
@@ -346,8 +351,8 @@ script:
           range_from: 25
           range_to: 25
           red: 100%
-          green: 55%
-          blue: 55%
+          green: 0%
+          blue: 75%
           color_brightness: 20%
       - delay: 1s
       - light.turn_on:

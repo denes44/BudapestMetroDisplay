@@ -1,5 +1,8 @@
-name: Labeler
-on: [pull_request_target]
+name: PR Labeler
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, reopened, edited, closed, synchronize]
 
 jobs:
   label:

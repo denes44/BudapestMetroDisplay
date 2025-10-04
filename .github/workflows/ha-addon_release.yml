@@ -1,0 +1,106 @@
+name: HA Add-on, Release from PR
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+    paths:
+      - ha-addon/**
+  workflow_dispatch:
+    inputs:
+      target_ref:
+        description: "Branch, tag, or commit SHA to run against"
+        required: true
+        default: ""
+
+permissions:
+  contents: write  # needed to create tag & release
+
+jobs:
+  tag_and_release:
+    name: Tag merge commit and create release
+    # Only run when PR was merged and the branch name matches "ha-addon-{addon_version}"
+    if: >
+      (github.event_name == 'workflow_dispatch')
+      ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.merged == true &&
+       startsWith(github.event.pull_request.head.ref, 'ha-addon-'))
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repository at the merge commit
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.target_ref
+                || github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+
+      - name: Extract addon_version from ha-addon/config.yaml
+        id: vars
+        shell: bash
+        run: |
+          CONFIG_FILE="ha-addon/config.yaml"
+          ADDON_VERSION=$(grep '^version:' "$CONFIG_FILE" | sed 's/version:[[:space:]]*//; s/"//g')
+          TAG="ha-addon-${ADDON_VERSION}"
+
+          echo "addon_version=${ADDON_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+          echo "Addon=${ADDON_VERSION}, Tag=${TAG}"
+
+      - name: Build release notes from ha-addon/CHANGELOG.md (top entry)
+        id: notes
+        shell: bash
+        run: |
+          # Grab the first changelog section (from first "## [" to the next "## [" or EOF)
+          if [ ! -f "ha-addon/CHANGELOG.md" ]; then
+            echo "CHANGELOG not found at ha-addon/CHANGELOG.md" >&2
+            exit 1
+          fi
+
+          BODY="$(awk '
+            BEGIN{found=0}
+            /^## \[/ {
+              if(found==1){exit}
+              found=1
+            }
+            { if(found==1) print }
+          ' ha-addon/CHANGELOG.md)"
+
+          # Fallback minimal body if parsing failed for some reason
+          if [ -z "$BODY" ]; then
+            BODY="ha-addon ${{
+              steps.vars.outputs.addon_version
+            }} released."
+          fi
+
+          {
+            echo 'body<<EOF'
+            printf '%s\n' "$BODY"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.vars.outputs.tag }}
+          BODY: ${{ steps.notes.outputs.body }}
+          TARGET_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.target_ref
+                       || github.event.pull_request.merge_commit_sha }}
+        shell: bash
+        run: |
+          if [ -z "$TARGET_REF" ]; then
+            echo "ERROR: TARGET_REF is empty. For manual runs, provide 'target_ref'." >&2
+            exit 1
+          fi
+
+          TITLE="$TAG"
+
+          # If the release already exists, update it; otherwise create it (tag created if missing).
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "$TITLE" --notes "$BODY" --target "$TARGET_REF"
+          else
+            gh release create "$TAG" --title "$TITLE" --notes "$BODY" --target "$TARGET_REF"
+          fi

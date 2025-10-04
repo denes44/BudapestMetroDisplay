@@ -1,7 +1,6 @@
 #include <tunables/global>
 
-# github slug: 12f81477
-profile local_budapestmetrodisplay flags=(attach_disconnected,mediate_deleted) {
+profile 12f81477_budapestmetrodisplay flags=(attach_disconnected,mediate_deleted) {
   #include <abstractions/base>
 
   # Capabilities

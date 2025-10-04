@@ -1,52 +1,54 @@
-- label: "documentation"
-  files:
-  - '.*\\.md$'
-  
-- label: "esphome"
-  files:
-  - "esphome\\/.*$"
+version: 1
+labels:
+  - label: "documentation"
+    files:
+    - '.*\\.md$'
 
-- label: "hardware"
-  files:
-  - "hardware\\/.*$"
+  - label: "esphome"
+    files:
+    - "esphome\\/.*$"
 
-- label: "software"
-  files:
-  - "software\\/.*$"
+  - label: "hardware"
+    files:
+    - "hardware\\/.*$"
 
-- label: "ha-addon"
-  files:
-  - "ha-addon\\/.*$"
+  - label: "software"
+    files:
+    - "software\\/.*$"
 
-- label: "proxmox-script"
-  files:
-  - "proxmox-script\\/.*$"
+  - label: "ha-addon"
+    files:
+    - "ha-addon\\/.*$"
 
-- label: "S"
-  size:
-      below: 10
-- label: "M"
-  size:
-      above: 9
-      below: 100
-- label: "L"
-  size:
-      above: 100
+  - label: "proxmox-script"
+    files:
+    - "proxmox-script\\/.*$"
 
-- label: "dependency"
-  body: "\[x\] Dependency upgrade"
-  
-- label: "bugfix"
-  body: "\[x\] Bugfix"
-  
-- label: "new-feature"
-  body: "\[x\] New feature"
+  - label: "S"
+    size:
+        below: 10
+  - label: "M"
+    size:
+        above: 9
+        below: 100
+  - label: "L"
+    size:
+        above: 100
 
-- label: "deprecation"
-  body: "\[x\] Deprecation"
+  - label: "dependency"
+    body: ".*\\[x\\] Dependency upgrade.*"
 
-- label: "breaking-change"
-  body: "\[x\] Breaking change"
+  - label: "bugfix"
+    body: ".*\\[x\\] Bugfix.*"
 
-- label: "code-quality"
-  body: "\[x\] Code quality"
+  - label: "new-feature"
+    body: ".*\\[x\\] New feature.*"
+
+  - label: "deprecation"
+    body: ".*\\[x\\] Deprecation.*"
+
+  - label: "breaking-change"
+    body: ".*\\[x\\] Breaking change.*"
+
+  - label: "code-quality"
+    body: ".*\\[x\\] Code quality.*"

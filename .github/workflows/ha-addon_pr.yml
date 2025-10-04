@@ -1,0 +1,227 @@
+name: HA Add-on, PW for new SW
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check_version:
+    name: Check software version
+    if: startsWith(github.event.release.name, 'software-')
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Budapest
+    outputs:
+      software_version: ${{ steps.swver.outputs.software_version }}
+      software_changelog: ${{ steps.extract.outputs.software_changelog }}
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Read software version from VERSION file
+        id: swver
+        shell: bash
+        run: |
+          SOFTWARE_VERSION="$(tr -d ' \t\r\n' < software/src/BudapestMetroDisplay/VERSION)"
+          if [ -z "$SOFTWARE_VERSION" ]; then
+            echo "VERSION file is empty." >&2
+            exit 1
+          fi
+          echo "software_version=$SOFTWARE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Software version: $SOFTWARE_VERSION"
+
+      - name: Fail if build.yaml already has this APP_VERSION
+        shell: bash
+        run: |
+          if grep -qE "^[[:space:]]*APP_VERSION:[[:space:]]*${{ steps.swver.outputs.software_version }}[[:space:]]*$" ha-addon/build.yaml; then
+            echo "ERROR: ha-addon/build.yaml already contains APP_VERSION=${{ steps.swver.outputs.software_version }}." >&2
+            exit 1
+          fi
+
+      - name: Extract changelog section from software/CHANGELOG.md
+        id: extract
+        shell: bash
+        run: |
+          SW_SECTION="$(python3 - << 'PY'
+          import re
+          from pathlib import Path
+
+          sw_chlog = Path("software/CHANGELOG.md")
+          software_version = """${{ steps.swver.outputs.software_version }}"""
+
+          if not sw_chlog.exists():
+              raise SystemExit("software/CHANGELOG.md not found")
+
+          sw_text = sw_chlog.read_text(encoding="utf-8")
+
+          # Match the header line like: ## [1.1.1] - 2025-09-02
+          header_rx = re.compile(rf'^##\\s*\\[\\s*{re.escape(software_version)}\\s*\\]\\s*-\\s*.+\\s*$', re.MULTILINE)
+          header = header_rx.search(sw_text)
+          if not header:
+              raise SystemExit(f"Version {software_version} not found in software/CHANGELOG.md")
+
+          start = header.start()
+          next_hdr = re.search(r'^##\\s*\\[', sw_text[header.end():], flags=re.MULTILINE)
+          end = header.end() + (next_hdr.start() if next_hdr else len(sw_text) - header.end())
+
+          sw_section = sw_text[start:end].rstrip() + "\\n"
+          print(sw_section)
+          PY
+          )"
+
+          {
+            echo 'software_changelog<<EOF'
+            printf '%s\n' "$SW_SECTION"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+  update_and_commit:
+    name: Update files & push branch
+    needs: [check_version]
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Budapest
+    outputs:
+      docker_version: ${{ steps.update.outputs.docker_version }}
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Update build.yaml (APP_VERSION), bump config.yaml, update CHANGELOG.md
+        id: update
+        shell: bash
+        run: |
+          python3 - << 'PY'
+          import re
+          from pathlib import Path
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          repo = Path(".")
+          build_path  = repo / "ha-addon" / "build.yaml"
+          config_path = repo / "ha-addon" / "config.yaml"
+          changelog   = repo / "ha-addon" / "CHANGELOG.md"
+
+          software_version = """${{ needs.check_version.outputs.software_version }}"""
+
+          # --- ha-addon/build.yaml
+          lines = build_path.read_text(encoding="utf-8").splitlines(keepends=True)
+          args_start = None
+          args_indent = None
+          for i, ln in enumerate(lines):
+              m = re.match(r'^(\s*)args:\s*$', ln)
+              if m:
+                  args_start = i
+                  args_indent = len(m.group(1))
+                  break
+          if args_start is None:
+              raise SystemExit("Could not find 'args:' in ha-addon/build.yaml")
+
+          for j in range(args_start + 1, len(lines)):
+              ln = lines[j]
+              if ln.strip() and not ln.lstrip().startswith(('#','-')):
+                  current_indent = len(ln) - len(ln.lstrip(' '))
+                  if current_indent <= args_indent:
+                      break
+              m = re.match(r'^(\s*)APP_VERSION:\s*.*?(\s*)$', ln)
+              if m:
+                  lead = m.group(1)
+                  lines[j] = f"{lead}APP_VERSION: {software_version}\n"
+                  break
+          build_path.write_text(''.join(lines), encoding="utf-8")
+
+          # --- ha-addon/config.yaml
+          cfg = config_path.read_text(encoding="utf-8")
+          m = re.search(r'^(\s*version:\s*"?)(\d+)\.(\d+)\.(\d+)("?\s*)$', cfg, flags=re.MULTILINE)
+          if not m:
+              raise SystemExit("Could not find semver in ha-addon/config.yaml 'version:'")
+          major, minor, patch = map(int, (m.group(2), m.group(3), m.group(4)))
+          docker_version = f"{major}.{minor}.{patch+1}"
+          cfg_new = cfg[:m.start()] + f"{m.group(1)}{docker_version}{m.group(5)}" + cfg[m.end():]
+          config_path.write_text(cfg_new, encoding="utf-8")
+
+          # --- ha-addon/CHANGELOG.md
+          cl = changelog.read_text(encoding="utf-8")
+          date_str = datetime.now(ZoneInfo("Europe/Budapest")).strftime("%Y-%m-%d")
+          entry = (
+              f"## [{docker_version}] - {date_str}\n\n"
+              f"- Bumped BudapestMetroDisplay to {software_version}\n\n"
+          )
+          idx = cl.find("\n## [")
+          if idx == -1:
+              if not cl.endswith("\n"):
+                  cl += "\n"
+              cl_new = cl + "\n" + entry
+          else:
+              cut = idx + 1
+              cl_new = cl[:cut] + entry + cl[cut:]
+          changelog.write_text(cl_new, encoding="utf-8")
+
+          Path(".docker_version").write_text(docker_version, encoding="utf-8")
+          PY
+
+          echo "docker_version=$(cat .docker_version)" >> "$GITHUB_OUTPUT"
+
+      - name: Commit changes to branch
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          branch: ha-addon-${{ steps.update.outputs.docker_version }}
+          create_branch: true
+          commit_message: |
+            ha-addon: bump BudapestMetroDisplay to ${{ needs.check_version.outputs.software_version }}
+          file_pattern: |
+            ha-addon/build.yaml
+            ha-addon/config.yaml
+            ha-addon/CHANGELOG.md
+
+  create_pr:
+    name: Open PR
+    needs: [update_and_commit, check_version]
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Budapest
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Open pull request to default branch
+        shell: bash
+        run: |
+          BASE="${{ github.event.repository.default_branch }}"
+          HEAD="ha-addon-${{ needs.update_and_commit.outputs.docker_version }}"
+          DV="${{ needs.update_and_commit.outputs.docker_version }}"
+          SW="${{ needs.check_version.outputs.software_version }}"
+          TITLE="ha-addon ${DV}: bump BudapestMetroDisplay to ${SW}"
+
+          read -r -d '' BODY <<EOB
+          This PR bumps the Home Assistant add-on version and updates
+          BudapestMetroDisplay to the latest version.
+
+          **Summary**
+          - \`ha-addon/config.yaml\`: bump version → \`${DV}\`
+          - \`ha-addon/build.yaml\`: \`args.APP_VERSION\` → \`${SW}\`
+          - \`ha-addon/CHANGELOG.md\`: new entry added for version \`${DV}\`
+
+          **Software changelog (\`software/CHANGELOG.md\`) for \`${SW}\`**
+          \`\`\`markdown
+          ${{ needs.check_version.outputs.software_changelog }}
+          \`\`\`
+          EOB
+
+          gh pr create --base "$BASE" --head "$HEAD" --title "$TITLE" --body "$BODY" || {
+            echo "PR may already exist. Attempting to update title/body..."
+            PR_NUMBER="$(gh pr list --base "$BASE" --head "$HEAD" --json number --jq '.[0].number')"
+            if [ -n "$PR_NUMBER" ]; then
+              gh pr edit "$PR_NUMBER" --title "$TITLE" --body "$BODY"
+            else
+              exit 1
+            fi
+          }
