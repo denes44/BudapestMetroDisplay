@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Controlling both the internal (on the ESP32-S3) and external
+(on the front of the PCB) status LED
+
+### Changed
+
+- Added 2 more LEDs for the ABA hardware version, and separated the LED strip
+  to map and logo
+
 ## [1.1.0] - 2025-09-04
 
 ### Changed
