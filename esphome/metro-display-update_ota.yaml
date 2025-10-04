@@ -19,7 +19,7 @@ update:
     web_server:
       sorting_weight: 1
       sorting_group_id: sg_firmware
-    source: https://raw.githubusercontent.com/denes44/BudapestMetroDisplay/refs/heads/main/esphome/firmware/manifest.json
+    source: https://github.com/denes44/BudapestMetroDisplay/releases/download/esphome-latest/manifest.json
 
 button:
   - platform: template

@@ -3,17 +3,29 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.0.0] - Unreleased
+
+### Breaking change
+
+- The default sACN mode is unicast from now on
 
 ### Added
 
 - Controlling both the internal (on the ESP32-S3) and external
 (on the front of the PCB) status LED
+- Factory resetting the device is now possible
+	- From the Web GUI
+	- Or by power-cycling the device 5 times with less then 10s between
+	  the power cycles
 
 ### Changed
 
 - Added 2 more LEDs for the ABA hardware version, and separated the LED strip
   to map and logo
+- Update functions uses binary from the latest GitHub Release
+  instead comitting the binary files to the repository
+- Dashboard import file re-enabled the API reboot timeout to the default
+  15min
 
 ## [1.1.0] - 2025-09-04
 

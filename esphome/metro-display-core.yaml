@@ -71,6 +71,10 @@ esp32:
 
 logger:
 
+factory_reset:
+  resets_required: 5
+  max_delay: 10s
+
 
 # WiFi, AP, Network, etc.
 
@@ -138,6 +142,14 @@ button:
     entity_category: config
     web_server:
       sorting_weight: 3
+      sorting_group_id: sg_restart
+
+  - platform: factory_reset
+    name: Factory reset
+    id: _factory
+    entity_category: config
+    web_server:
+      sorting_weight: 4
       sorting_group_id: sg_restart
 
 sensor:
@@ -269,7 +281,7 @@ light:
       sorting_group_id: sg_led
 
 e131:
-  method: multicast
+  method: unicast
 
 switch:
   - platform: template
