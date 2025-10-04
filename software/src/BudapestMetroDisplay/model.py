@@ -62,7 +62,7 @@ class LED(BaseModel):
             return self.color_override
         c: RGB = (0, 0, 0)
         for st in self.stops:
-            if st.route is not None:
+            if st.in_service:
                 c = _rgb_max(c, st.color)
         return c
 
