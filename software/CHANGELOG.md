@@ -14,16 +14,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - The webserver now can list the API update jobs too for debug purposes
+- Webserver table lines are now color-coded with route colors
 
 ### Changed
 
 - Completely new, OO data structure for storing the public transport data
   and relations.
-- General code-quality improvements
-- Webserver table lines are now color-coded with route colors
 - Webserver only started when the software is run in debug or trace mode
     - The webserver is also run in debug mode
 - Some logging is moved from debug to trace level
+- General code-quality improvements
+
+### Fixed
+
+- Fixed multi-thread handling, so updating the schedule data won't stop
+  after a long run.
 
 ### Removed
 
