@@ -3,13 +3,13 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.2.0] - Unreleased
+## [2.0.0] - Unreleased
 
 ### Breaking change
 
 - The default sACN mode is now unicast, because multicast can cause troubles with
   most home networks, if not properly configured
-    - Requires ESPHome firmware 1.2.0 or newer
+    - Requires ESPHome firmware 2.0.0 or newer
 
 ### Added
 
@@ -18,8 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Completely new, OO data structure for storing the public transport data
-  and relations.
+- Completely new data structure for storing the public transport data
+  and relations
+- New animation engine which handles fading and handling LEDs better,
+  especially for stops that belong to multiple routes
 - Webserver only started when the software is run in debug or trace mode
     - The webserver is also run in debug mode
 - Some logging is moved from debug to trace level
@@ -28,7 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed multi-thread handling, so updating the schedule data won't stop
-  after a long run.
+  after a long run
+- Fix the handling of alerts, so the default color of the LEDs is properly
+  calculated from the stop's no service status
 
 ### Removed
 
