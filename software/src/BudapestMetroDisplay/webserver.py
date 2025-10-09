@@ -22,11 +22,14 @@
 
 import logging
 import threading
+from typing import TYPE_CHECKING
 
-from apscheduler.job import Job
 from flask import Flask, render_template
 
 from BudapestMetroDisplay.network import network
+
+if TYPE_CHECKING:
+    from apscheduler.job import Job
 
 logger = logging.getLogger(__name__)
 

@@ -128,12 +128,12 @@ class LedStrip(BaseModel):
         Ordered by ascending LED.index for stable output.
         """
         out: list[int] = []
-        for led in sorted(self.leds, key=lambda l: l.index):
+        for led in sorted(self.leds, key=lambda i: i.index):
             out.extend((led.r, led.g, led.b))
         return tuple(out)
 
     def step(self) -> None:
-        """Advance all active animations to the current time and remove those that finished."""
+        """Advance all animations to the current time and remove which are finished."""
         # Grab the timestamp once per frame for consistent stepping.
         now: float = _t.perf_counter()
 
