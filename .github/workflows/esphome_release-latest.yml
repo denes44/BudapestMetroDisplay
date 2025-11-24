@@ -3,6 +3,10 @@ name: ESPHome maintain latest release
 on:
   release:
     types: [published]
+  workflow_run:
+    workflows: ["ESPHome Release"]
+    types: [completed]
+  workflow_dispatch:
 
 permissions:
   contents: write  # needed to move tags and create/edit releases
@@ -11,7 +15,20 @@ jobs:
   roll_latest:
     name: Point esphome-latest to newest esphome-* release
     # Only handle releases with name or tag starting with "esphome-"
-    if: startsWith(github.event.release.name, 'esphome-') || startsWith(github.event.release.tag_name, 'esphome-')
+    if: >
+      (
+        github.event_name == 'release' &&
+        (
+          startsWith(github.event.release.tag_name, 'esphome-') ||
+          startsWith(github.event.release.name, 'esphome-')
+        )
+      ) ||
+      (
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main'
+      ) ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -25,9 +42,13 @@ jobs:
         id: vars
         shell: bash
         run: |
-          SRC_TAG="${{ github.event.release.tag_name }}"
-          TRACK="esphome"
-          ROLLING_TAG="${TRACK}-latest"
+          # If manually triggered, use the selected tag from the dropdown
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SRC_TAG="${{ github.ref_name }}"
+          else
+            SRC_TAG="${{ github.event.release.tag_name }}"
+          fi
+          ROLLING_TAG="esphome-latest"
           echo "src_tag=${SRC_TAG}" >> "$GITHUB_OUTPUT"
           echo "rolling_tag=${ROLLING_TAG}" >> "$GITHUB_OUTPUT"
           echo "Source tag: ${SRC_TAG}"
