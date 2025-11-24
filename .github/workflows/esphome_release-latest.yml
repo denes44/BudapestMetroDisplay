@@ -67,7 +67,7 @@ jobs:
 
           git fetch --tags --force
 
-          SRC_SHA="$(git rev-list -n1 "$SRC_TAG")"
+          SRC_SHA="$(git rev-list -n1 "refs/tags/$SRC_TAG")"
           if [ -z "$SRC_SHA" ]; then
             echo "Could not resolve commit for $SRC_TAG" >&2
             exit 1
