@@ -1,4 +1,4 @@
-name: HA Add-on, PW for new SW
+name: HA Add-on, PR for new SW
 
 on:
   release:
