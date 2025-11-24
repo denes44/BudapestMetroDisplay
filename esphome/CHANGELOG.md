@@ -11,8 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Controlling both the internal (on the ESP32-S3) and external
-(on the front of the PCB) status LED
+- Added support for front *(from hardver version ABA)* and back status LED
+- Added support for front logo *(from hardver version ABA)*
+- Added support for ambient light sensor *(from hardver version ABA)*
+  - Only sensor value is supplied, no in-device backlight control yet
 - Factory resetting the device is now possible
 	- From the Web GUI
 	- Or by power-cycling the device 5 times with less then 10s between
@@ -20,8 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Added 2 more LEDs for the ABA hardware version, and separated the LED strip
-  to map and logo
 - Update functions uses binary from the latest GitHub Release
   instead comitting the binary files to the repository
 - Dashboard import file re-enabled the API reboot timeout to the default

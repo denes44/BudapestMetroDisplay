@@ -4,6 +4,16 @@
 
 ![Latest version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdenes44%2FBudapestMetroDisplay%2Frefs%2Fheads%2Fmain%2Fesphome%2Ffirmware%2Fmanifest.json&query=%24.version&logo=esphome&label=latest%20version&color=orange&logo=esphome)
 
+## Using the device
+
+You can use the device 3 different ways:
+
+### Factory firmware without Home Assistant
+
+### Factory firmware with Home Assistant
+
+### ESPHome device builder with Home Assistant
+
 ## Firmware
 
 The default firmware to use is **metro-display-esp32s3.factory.bin**.
@@ -56,11 +66,11 @@ the new core yaml file from GitHub dynamically.
 
 The only custom setting stored on the device is the WiFi network setting.
 
-## Power cycle
+### Power cycle
 
 You can factory reset the device by doing a power cycle 5 times.
 The maximum delay between 2 power cycles is 10 seconds.
 
-## Web GUI
+### Web GUI
 
 You can use the Factory Reset button in the Web GUI to reset the device.
