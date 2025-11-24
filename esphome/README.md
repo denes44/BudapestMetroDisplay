@@ -4,9 +4,23 @@
 
 ![Latest version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdenes44%2FBudapestMetroDisplay%2Frefs%2Fheads%2Fmain%2Fesphome%2Ffirmware%2Fmanifest.json&query=%24.version&logo=esphome&label=latest%20version&color=orange&logo=esphome)
 
+## Using the device
+
+You can use the device 3 different ways:
+
+### Factory firmware without Home Assistant
+
+### Factory firmware with Home Assistant
+
+### ESPHome device builder with Home Assistant
+
 ## Firmware
 
-The default firmware to use is [firmware/metro-display-esp32s3.factory.bin](firmware/metro-display-esp32s3.factory.bin).
+The default firmware to use is **metro-display-esp32s3.factory.bin**.
+
+You can download the latest firmware from GitHub Releases:
+https://github.com/denes44/BudapestMetroDisplay/releases/tag/esphome-latest
+
 With this firmware you can use [Improv via BLE](https://esphome.io/components/esp32_improv)
 or [Improv via Serial](https://esphome.io/components/improv_serial)
 to provision your device.
@@ -47,3 +61,16 @@ what's installed on the device.
 
 If you do a firmware install from the dashboard, the build process will use
 the new core yaml file from GitHub dynamically.
+
+## Factory reset
+
+The only custom setting stored on the device is the WiFi network setting.
+
+### Power cycle
+
+You can factory reset the device by doing a power cycle 5 times.
+The maximum delay between 2 power cycles is 10 seconds.
+
+### Web GUI
+
+You can use the Factory Reset button in the Web GUI to reset the device.

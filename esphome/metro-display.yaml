@@ -30,6 +30,7 @@ packages:
 api:
   # encryption:
     # key: ""
+  reboot_timeout: 15min # default setting
 
 
 

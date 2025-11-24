@@ -12,29 +12,108 @@ esphome:
   min_version: 2025.2.0
   project:
     name: "denes44.BudapestMetroDisplay"
-    version: 1.1.0
+    version: 2.0.0
   platformio_options:
     board_build.flash_mode: dio
   on_boot:
-    priority: 800
+    - priority: 800
+      then:
+        - light.turn_on:
+            id: status_led
+            red: 100%
+            green: 0%
+            blue: 0%
+            brightness: 20%
+    - priority: 600
+      then:
+        - script.execute: default_values
+    - priority: 240
+      then:
+        - lambda: |-
+            id(leds_logo).setup();
+  on_loop:
     then:
-      - script.execute: default_values
+      - lambda: |-
+          auto state = App.get_app_state();
+          auto call = id(status_led).turn_on();
+          std::string new_state;
+          
+          if (state & STATUS_LED_ERROR) {
+            new_state = "ERROR";
+          } else {
+            if (!id(wifi_id).is_connected()) {
+              new_state = "WIFI_NOK";
+            } else {
+              new_state = "WIFI_OK";
+
+              if (id(leds_map).remote_values.is_on() && id(leds_map).get_effect_name() == "E1.31") {
+                new_state = "LED_OK";
+              } else if (id(leds_map).remote_values.is_on() && id(leds_map).get_effect_name() != "E1.31") {
+                new_state = "LED_NO_EFFECT";
+              } else if (!id(leds_map).remote_values.is_on()) {
+                new_state = "LED_OFF";
+              }
+            }
+          }
+          
+          if (new_state != id(status_var)) {                     
+            if (new_state == "WIFI_OK") {
+              call.set_rgb(0.0, 0.0, 1.0);
+              call.set_effect("None");
+            } else if (new_state == "WIFI_NOK") {
+              call.set_rgb(1.0, 0.0, 0.0);
+              call.set_effect("None");
+            } else if (new_state == "LED_OK") {
+              call.set_rgb(0.0, 1.0, 0.0);
+              call.set_effect("None");
+            } else if (new_state == "LED_NO_EFFECT") {
+              call.set_rgb(1.0, 1.0, 0.0);
+              call.set_effect("Slow Pulse");
+            } else if (new_state == "LED_OFF") {
+              call.set_rgb(1.0, 1.0, 0.0);
+              call.set_effect("None");
+            } else if (new_state == "ERROR") {
+              call.set_rgb(1.0, 0.0, 0.0);
+              call.set_effect("Fast Pulse");
+            } else {
+              call.set_rgb(1.0, 0.0, 0.0);
+              call.set_effect("Fast Pulse");
+            }
+            
+            call.set_brightness(0.2);
+            call.perform();
+            
+            id(status_var) = new_state;
+            ESP_LOGI("status_led", "Old state: '%s', new state: '%s'", id(status_var).c_str(),new_state.c_str());
+          }
+
+globals:
+  - id: status_var
+    type: std::string
 
 esp32:
   board: adafruit_feather_esp32s3
   framework:
     type: esp-idf
-    platform_version: 6.9.0
-    version: 5.3.1
     sdkconfig_options:
       CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
 
+i2c:
+  sda: GPIO05
+  scl: GPIO06
+  scan: false
+
 logger:
+
+factory_reset:
+  resets_required: 5
+  max_delay: 10s
 
 
 # WiFi, AP, Network, etc.
 
 wifi:
+  id: wifi_id
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: ${friendly_name} Fallback AP
@@ -62,15 +141,18 @@ web_server:
     - id: sg_led
       name: "LED Settings"
       sorting_weight: 1
+    - id: sg_ambient
+      name: "Ambient Light"
+      sorting_weight: 2
     - id: sg_restart
       name: "Restart & Shutdown"
-      sorting_weight: 3
+      sorting_weight: 4
     - id: sg_firmware
       name: "Firmware Upgrade"
-      sorting_weight: 4
+      sorting_weight: 5
     - id: sg_status
       name: "WiFi & API Status"
-      sorting_weight: 2
+      sorting_weight: 3
 
 
 # Generic sensors and buttons
@@ -100,6 +182,14 @@ button:
       sorting_weight: 3
       sorting_group_id: sg_restart
 
+  - platform: factory_reset
+    name: Factory reset
+    id: _factory
+    entity_category: config
+    web_server:
+      sorting_weight: 4
+      sorting_group_id: sg_restart
+
 sensor:
   - platform: wifi_signal
     name: Wifi
@@ -113,24 +203,29 @@ sensor:
     - sliding_window_moving_average:
         window_size: 15
         send_every: 15
+  - platform: veml7700
+    address: 0x10
+    update_interval: 10s
+    auto_mode: true
+    ambient_light:
+      name: "Ambient light"
+      web_server:
+        sorting_weight: 1
+        sorting_group_id: sg_ambient
 
 # Light, sensors and other stuff for the hardware
 
 light:
   - platform: esp32_rmt_led_strip
-    name: ${friendly_name}
     id: leds
-    web_server:
-      sorting_weight: 1
-      sorting_group_id: sg_led
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: ALWAYS_OFF
     pin: GPIO07
-    num_leds: 63
+    num_leds: 65
     rmt_symbols: 96
     use_psram: false
     chipset: SK6812
     rgb_order: GRB
-
+    default_transition_length: 10ms
     effects:
       - addressable_color_wipe:
           name: LED Test
@@ -165,12 +260,85 @@ light:
               num_leds: 63
           add_led_interval: 50ms
           reverse: false
+    
+  - platform: esp32_rmt_led_strip
+    id: status_led_int
+    restore_mode: ALWAYS_OFF
+    pin: GPIO48
+    num_leds: 1
+    rmt_symbols: 48
+    chipset: SK6812
+    rgb_order: GRB
+    
+  - platform: esp32_rmt_led_strip
+    id: status_led_ext
+    restore_mode: ALWAYS_OFF
+    pin: GPIO08
+    num_leds: 1
+    rmt_symbols: 48
+    chipset: SK6812
+    rgb_order: GRB
+
+  - platform: partition
+    id: status_led
+    segments:
+      - id: status_led_int
+        from: 0
+        to: 0
+      - id: status_led_ext
+        from: 0
+        to: 0
+    default_transition_length: 10ms
+    effects:
+      - pulse:
+          name: "Slow Pulse"
+          transition_length: 250ms
+          update_interval: 250ms
+          min_brightness: 8%
+          max_brightness: 20%
+      - pulse:
+          name: "Fast Pulse"
+          transition_length: 100ms
+          update_interval: 100ms
+          min_brightness: 8%
+          max_brightness: 20%    
+  
+  - platform: partition
+    name: ${friendly_name}
+    id: leds_map
+    restore_mode: RESTORE_AND_OFF
+    segments:
+      - id: leds
+        from: 0
+        to: 62
+    web_server:
+      sorting_weight: 1
+      sorting_group_id: sg_led
+    default_transition_length: 10ms
+    effects:
       - e131:
           universe: 1
           channels: RGB
 
+  - platform: partition
+    name: ${friendly_name} Logo
+    id: leds_logo
+    restore_mode: RESTORE_DEFAULT_ON
+    initial_state:
+      red: 100%
+      green: 100%
+      blue: 100%
+      brightness: 40%
+    segments:
+      - id: leds
+        from: 63
+        to: 64
+    web_server:
+      sorting_weight: 2
+      sorting_group_id: sg_led
+
 e131:
-  method: multicast
+  method: unicast
 
 switch:
   - platform: template
@@ -178,19 +346,27 @@ switch:
     id: led_test
     optimistic: true
     web_server:
-      sorting_weight: 1
+      sorting_weight: 3
       sorting_group_id: sg_led
     entity_category: config
     turn_on_action:
       - light.turn_off:
           id: leds
-          transition_length: 0s
       - delay: 1s
       - light.turn_on:
           id: leds
           effect: LED Test
     turn_off_action:
+      - light.turn_off:
+          id: leds
+      - delay: 1s
       - script.execute: default_values
+      - light.turn_off:
+          id: leds_logo
+          transition_length: 10ms
+      - light.turn_on:
+          id: leds_logo
+          transition_length: 10ms
 
 binary_sensor:
   - platform: gpio
@@ -215,11 +391,15 @@ script:
   - id: default_values
     then:
       - light.turn_on:
-          id: leds
+          id: leds_map
+          red: 100%
+          green: 100%
+          blue: 100%
+          color_brightness: 10%
           effect: None
-      - delay: 1.2s
+      - delay: 1s
       - light.addressable_set: #H6
-          id: leds
+          id: leds_map
           range_from: 0
           range_to: 2
           red: 100%
@@ -227,7 +407,7 @@ script:
           blue: 100%
           color_brightness: 20%
       - light.addressable_set: #H7
-          id: leds
+          id: leds_map
           range_from: 3
           range_to: 5
           red: 100%
@@ -235,7 +415,7 @@ script:
           blue: 100%
           color_brightness: 20%
       - light.addressable_set: #M4/1
-          id: leds
+          id: leds_map
           range_from: 6
           range_to: 11
           red: 0%
@@ -243,7 +423,7 @@ script:
           blue: 0%
           color_brightness: 20%
       - light.addressable_set: #M4/2
-          id: leds
+          id: leds_map
           range_from: 13
           range_to: 14
           red: 0%
@@ -251,7 +431,7 @@ script:
           blue: 0%
           color_brightness: 20%
       - light.addressable_set: #M2/1
-          id: leds
+          id: leds_map
           range_from: 15
           range_to: 16
           red: 100%
@@ -259,7 +439,7 @@ script:
           blue: 0%
           color_brightness: 20%
       - light.addressable_set: #M2/2
-          id: leds
+          id: leds_map
           range_from: 18
           range_to: 18
           red: 100%
@@ -267,7 +447,7 @@ script:
           blue: 0%
           color_brightness: 20%
       - light.addressable_set: #M2/3
-          id: leds
+          id: leds_map
           range_from: 20
           range_to: 21
           red: 100%
@@ -275,7 +455,7 @@ script:
           blue: 0%
           color_brightness: 20%
       - light.addressable_set: #M2/4
-          id: leds
+          id: leds_map
           range_from: 23
           range_to: 24
           red: 100%
@@ -283,7 +463,7 @@ script:
           blue: 0%
           color_brightness: 20%
       - light.addressable_set: #H9
-          id: leds
+          id: leds_map
           range_from: 26
           range_to: 26
           red: 100%
@@ -291,7 +471,7 @@ script:
           blue: 100%
           color_brightness: 20%
       - light.addressable_set: #H5
-          id: leds
+          id: leds_map
           range_from: 27
           range_to: 34
           red: 100%
@@ -299,7 +479,7 @@ script:
           blue: 100%
           color_brightness: 20%
       - light.addressable_set: #M3
-          id: leds
+          id: leds_map
           range_from: 35
           range_to: 52
           red: 0%
@@ -307,7 +487,7 @@ script:
           blue: 100%
           color_brightness: 20%
       - light.addressable_set: #M1
-          id: leds
+          id: leds_map
           range_from: 53
           range_to: 62
           red: 100%
@@ -315,7 +495,7 @@ script:
           blue: 0%
           color_brightness: 20%
       - light.addressable_set: #M4/M3 Kálvin tér
-          id: leds
+          id: leds_map
           range_from: 12
           range_to: 12
           red: 0%
@@ -323,7 +503,7 @@ script:
           blue: 100%
           color_brightness: 20%
       - light.addressable_set: #M2/H5 Batthány tér
-          id: leds
+          id: leds_map
           range_from: 17
           range_to: 17
           red: 100%
@@ -331,7 +511,7 @@ script:
           blue: 75%
           color_brightness: 20%
       - light.addressable_set: #M1/M2/M3 Deák Ferenc tér
-          id: leds
+          id: leds_map
           range_from: 19
           range_to: 19
           red: 100%
@@ -339,7 +519,7 @@ script:
           blue: 100%
           color_brightness: 20%
       - light.addressable_set: #M2/M4 Keleti pályaudvar
-          id: leds
+          id: leds_map
           range_from: 22
           range_to: 22
           red: 100%
@@ -347,7 +527,7 @@ script:
           blue: 0%
           color_brightness: 20%
       - light.addressable_set: #M2/H9 Örs vezér tere
-          id: leds
+          id: leds_map
           range_from: 25
           range_to: 25
           red: 100%
@@ -356,5 +536,5 @@ script:
           color_brightness: 20%
       - delay: 1s
       - light.turn_on:
-          id: leds
+          id: leds_map
           effect: E1.31
