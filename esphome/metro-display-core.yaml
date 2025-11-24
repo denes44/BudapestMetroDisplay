@@ -220,59 +220,7 @@ light:
     use_psram: false
     chipset: SK6812
     rgb_order: GRB
-    
-  - platform: esp32_rmt_led_strip
-    id: status_led_int
-    restore_mode: ALWAYS_OFF
-    pin: GPIO48
-    num_leds: 1
-    rmt_channel: 1
-    chipset: SK6812
-    rgb_order: GRB
-    
-  - platform: esp32_rmt_led_strip
-    id: status_led_ext
-    restore_mode: ALWAYS_OFF
-    pin: GPIO09
-    num_leds: 1
-    rmt_channel: 1
-    chipset: SK6812
-    rgb_order: GRB
-
-  - platform: partition
-    id: status_led
-    segments:
-      - id: status_led_int
-        from: 0
-        to: 0
-      - id: status_led_ext
-        from: 0
-        to: 0
-    effects:
-      - pulse:
-          name: "Slow Pulse"
-          transition_length: 250ms
-          update_interval: 250ms
-          min_brightness: 50%
-          max_brightness: 100%
-      - pulse:
-          name: "Fast Pulse"
-          transition_length: 100ms
-          update_interval: 100ms
-          min_brightness: 50%
-          max_brightness: 100%    
-  
-  - platform: partition
-    name: ${friendly_name}
-    id: leds_map
-    segments:
-      - id: leds
-        from: 0
-        to: 62
-    web_server:
-      sorting_weight: 1
-      sorting_group_id: sg_led
-
+    default_transition_length: 10ms
     effects:
       - addressable_color_wipe:
           name: LED Test
@@ -307,6 +255,62 @@ light:
               num_leds: 63
           add_led_interval: 50ms
           reverse: false
+    
+  - platform: esp32_rmt_led_strip
+    id: status_led_int
+    restore_mode: ALWAYS_OFF
+    pin: GPIO48
+    num_leds: 1
+    rmt_symbols: 48
+    chipset: SK6812
+    rgb_order: GRB
+    
+  - platform: esp32_rmt_led_strip
+    id: status_led_ext
+    restore_mode: ALWAYS_OFF
+    pin: GPIO08
+    num_leds: 1
+    rmt_symbols: 48
+    chipset: SK6812
+    rgb_order: GRB
+
+  - platform: partition
+    id: status_led
+    segments:
+      - id: status_led_int
+        from: 0
+        to: 0
+      - id: status_led_ext
+        from: 0
+        to: 0
+    default_transition_length: 10ms
+    effects:
+      - pulse:
+          name: "Slow Pulse"
+          transition_length: 250ms
+          update_interval: 250ms
+          min_brightness: 8%
+          max_brightness: 20%
+      - pulse:
+          name: "Fast Pulse"
+          transition_length: 100ms
+          update_interval: 100ms
+          min_brightness: 8%
+          max_brightness: 20%    
+  
+  - platform: partition
+    name: ${friendly_name}
+    id: leds_map
+    restore_mode: RESTORE_AND_OFF
+    segments:
+      - id: leds
+        from: 0
+        to: 62
+    web_server:
+      sorting_weight: 1
+      sorting_group_id: sg_led
+    default_transition_length: 10ms
+    effects:
       - e131:
           universe: 1
           channels: RGB
@@ -314,6 +318,12 @@ light:
   - platform: partition
     name: ${friendly_name} Logo
     id: leds_logo
+    restore_mode: RESTORE_DEFAULT_ON
+    initial_state:
+      red: 100%
+      green: 100%
+      blue: 100%
+      brightness: 40%
     segments:
       - id: leds
         from: 63
