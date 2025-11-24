@@ -69,6 +69,11 @@ esp32:
     sdkconfig_options:
       CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
 
+i2c:
+  sda: GPIO05
+  scl: GPIO06
+  scan: true
+
 logger:
 
 factory_reset:
@@ -106,15 +111,18 @@ web_server:
     - id: sg_led
       name: "LED Settings"
       sorting_weight: 1
+    - id: sg_ambient
+      name: "Ambient Light"
+      sorting_weight: 2
     - id: sg_restart
       name: "Restart & Shutdown"
-      sorting_weight: 3
+      sorting_weight: 4
     - id: sg_firmware
       name: "Firmware Upgrade"
-      sorting_weight: 4
+      sorting_weight: 5
     - id: sg_status
       name: "WiFi & API Status"
-      sorting_weight: 2
+      sorting_weight: 3
 
 
 # Generic sensors and buttons
@@ -165,6 +173,15 @@ sensor:
     - sliding_window_moving_average:
         window_size: 15
         send_every: 15
+  - platform: veml7700
+    address: 0x10
+    update_interval: 10s
+    auto_mode: true
+    ambient_light:
+      name: "Ambient light"
+      web_server:
+        sorting_weight: 1
+        sorting_group_id: sg_ambient
 
 # Light, sensors and other stuff for the hardware
 
