@@ -16,17 +16,21 @@ esphome:
   platformio_options:
     board_build.flash_mode: dio
   on_boot:
-    - priority: 600
+    - priority: 800
       then:
         - light.turn_on:
-          id: status_led
-          red: 100%
-          green: 0%
-          blue: 0%
-          color_brightness: 20%
-    - priority: -100
+            id: status_led
+            red: 100%
+            green: 0%
+            blue: 0%
+            brightness: 20%
+    - priority: 600
       then:
         - script.execute: default_values
+    - priority: 240
+      then:
+        - lambda: |-
+            id(leds_logo).setup();
   on_loop:
     then:
       - lambda: |-
@@ -97,7 +101,7 @@ esp32:
 i2c:
   sda: GPIO05
   scl: GPIO06
-  scan: true
+  scan: false
 
 logger:
 
@@ -109,6 +113,7 @@ factory_reset:
 # WiFi, AP, Network, etc.
 
 wifi:
+  id: wifi_id
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: ${friendly_name} Fallback AP
@@ -341,19 +346,27 @@ switch:
     id: led_test
     optimistic: true
     web_server:
-      sorting_weight: 1
+      sorting_weight: 3
       sorting_group_id: sg_led
     entity_category: config
     turn_on_action:
       - light.turn_off:
           id: leds
-          transition_length: 0s
       - delay: 1s
       - light.turn_on:
           id: leds
           effect: LED Test
     turn_off_action:
+      - light.turn_off:
+          id: leds
+      - delay: 1s
       - script.execute: default_values
+      - light.turn_off:
+          id: leds_logo
+          transition_length: 10ms
+      - light.turn_on:
+          id: leds_logo
+          transition_length: 10ms
 
 binary_sensor:
   - platform: gpio
@@ -379,8 +392,12 @@ script:
     then:
       - light.turn_on:
           id: leds_map
+          red: 100%
+          green: 100%
+          blue: 100%
+          color_brightness: 10%
           effect: None
-      - delay: 1.2s
+      - delay: 1s
       - light.addressable_set: #H6
           id: leds_map
           range_from: 0
@@ -521,9 +538,3 @@ script:
       - light.turn_on:
           id: leds_map
           effect: E1.31
-      - light.turn_on:
-          id: leds_logo
-          red: 100%
-          green: 100%
-          blue: 100%
-          color_brightness: 40%
