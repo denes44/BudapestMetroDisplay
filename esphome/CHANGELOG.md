@@ -16,8 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for ambient light sensor *(from hardver version ABA)*
   - Only sensor value is supplied, no in-device backlight control yet
 - Factory resetting the device is now possible
-	- From the Web GUI
-	- Or by power-cycling the device 5 times with less then 10s between
+    - From the Web GUI
+    - Or by power-cycling the device 5 times with less then 10s between
 	  the power cycles
 
 ### Changed
