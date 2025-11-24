@@ -1,0 +1,21 @@
+{
+  "name": "denes44.BudapestMetroDisplay",
+  "version": "2.0.0",
+  "home_assistant_domain": "esphome",
+  "new_install_prompt_erase": false,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "ota": {
+        "path": "metro-display-esp32s3.ota.bin",
+        "md5": "06bec1277039d52a75d7c89516b85af5"
+      },
+      "parts": [
+        {
+          "path": "metro-display-esp32s3.factory.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
