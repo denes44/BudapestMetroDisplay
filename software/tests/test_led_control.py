@@ -61,7 +61,7 @@ def test_activate_sacn() -> None:
 
     # Patch the sACNsender with the mock
     with patch(
-        "BudapestMetroDisplay.led_control.sacn.sACNsender",
+        "BudapestMetroDisplay.led_control.sACNsender",
         return_value=mock_sender,
     ):
         # Call the function to test
