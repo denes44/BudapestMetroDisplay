@@ -95,7 +95,13 @@ jobs:
         shell: bash
         run: |
           ROLLING_TAG="${{ steps.vars.outputs.rolling_tag }}"
+          ROLLING_SHA="$(git rev-list -n1 "refs/tags/$ROLLING_TAG")"
           BODY_FILE="${{ steps.body.outputs.body_file }}"
+          
+          if [ -z "$ROLLING_SHA" ]; then
+            echo "Could not resolve commit for $ROLLING_TAG" >&2
+            exit 1
+          fi
 
           if gh release view "$ROLLING_TAG" >/dev/null 2>&1; then
             gh release edit "$ROLLING_TAG" \
@@ -106,7 +112,7 @@ jobs:
             gh release create "$ROLLING_TAG" \
               --title "$ROLLING_TAG" \
               --notes-file "$BODY_FILE" \
-              --target "$ROLLING_TAG"
+              --target "$ROLLING_SHA"
           fi
 
       - name: Mirror assets from source release to esphome-latest (overwrite)
