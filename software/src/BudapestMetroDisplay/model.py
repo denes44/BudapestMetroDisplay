@@ -275,7 +275,8 @@ class Stop(BaseModel):
     _lock: Lock = PrivateAttr(default_factory=Lock)
 
     @model_validator(mode="after")
-    def after_init(self):
+    def after_init(self) -> Stop:
+        """Add Stop to its Route during init."""
         self.route.add_stop(self)
         return self
 
@@ -340,7 +341,8 @@ class StopId(BaseModel):
     vehicle_present: bool = False
 
     @model_validator(mode="after")
-    def after_init(self):
+    def after_init(self) -> StopId:
+        """Add StopId to its Stop during init."""
         self.stop.add_stop_id(self)
         return self
 
