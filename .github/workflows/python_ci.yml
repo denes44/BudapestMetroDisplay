@@ -104,7 +104,6 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         packages-dir: "software/dist"
-        skip-existing: true
 
   publish-to-testpypi:
     name: Publish Python 🐍 distribution 📦 to TestPyPI
