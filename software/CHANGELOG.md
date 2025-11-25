@@ -3,21 +3,57 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - Unreleased
+
+### Breaking change
+
+- The default sACN mode is now unicast, because multicast can cause troubles with
+  most home networks, if not properly configured
+    - Requires ESPHome firmware 2.0.0 or newer
+
+### Added
+
+- The webserver now can list the API update jobs too for debug purposes
+- Webserver table lines are now color-coded with route colors
+
+### Changed
+
+- Completely new data structure for storing the public transport data
+  and relations
+- New animation engine which handles fading and handling LEDs better,
+  especially for stops that belong to multiple routes
+- Webserver only started when the software is run in debug or trace mode
+    - The webserver is also run in debug mode
+- Some logging is moved from debug to trace level
+- General code-quality improvements
+
+### Fixed
+
+- Fixed multi-thread handling, so updating the schedule data won't stop
+  after a long run
+- Fix the handling of alerts, so the default color of the LEDs is properly
+  calculated from the stop's no service status
+
+### Removed
+
+- GUI is removed from the code
+
 ## [1.1.1] - 2025-09-02
 
 ### Fixed
+
 - Fixed calculation of schedule interval time, which in some cases could have
-caused the LEDs not to turn on during a departure
+  caused the LEDs not to turn on during a departure
 
 ## [1.1.0] - 2025-08-26
 
 ### Changed
 
-- All of the suburban railways LED color is the same as H5 now (purple)
-- Dynamically adjust next schedule update date, if the last departure time is sooner
+- All the suburban railway LED colors are the same as H5 now (purple)
+- Dynamically adjust the next schedule update date if the last departure time is sooner
   than the time of the next planned update
 - No separate API call just to calculate schedule interval for the routes
-- Log entries includes function name instead of thread name
+- Log entries include the function name instead of the thread name
 
 ## [1.0.0] - 2024-12-24
 
@@ -27,7 +63,7 @@ caused the LEDs not to turn on during a departure
 
 ## [0.2.1] - 2024-10-30
 
-## Changed
+### Changed
 
 - Bumped sACN python module minimum required version to 1.10.0
 - ESPHome API key is now an optional parameter (because using the encryption is optional as well)
@@ -38,13 +74,13 @@ caused the LEDs not to turn on during a departure
 ### Added
 
 - Added a configuration option to set the location where to save the log files
-- User friendly error message, when one of the configuration options fails the validation
+- User-friendly error message, when one of the configuration options fails the validation
 
 ### Changed
 
-- Modifying the schedule times +/- 3 seonds randomly to make it look better on the display
-    - Since the subway data is not realtime, a lot of schedules starts at the same time accross all stops
-- Now the BKK and ESPHome API key format is validated instead of checking if they are longer then 1 character
+- Modifying the schedule times +/- 3 seconds randomly to make it look better on the display
+    - Since the subway data is not realtime, a lot of schedules start at the same time across all stops
+- Now the BKK and ESPHome API key format is validated instead of checking if they are longer than one character
 
 ### Fixed
 
@@ -55,29 +91,29 @@ caused the LEDs not to turn on during a departure
 ### Added
 
 - Controlling the LEDs between the color of the route and their default color
-- With special consideration when one stops serves multiple routes (e.g. Kálvin tér with both M3 and M4)
+- With special consideration when one stops serves multiple routes (e.g., Kálvin tér with both M3 and M4)
     - The default color is the combination of the routes that are currently operational
-- User adjustable fade time for the LED actions
-- User adjustable dim ratio for the background brightness of the LEDs (it can be turned off alltogether)
+- User-adjustable fade time for the LED actions
+- User-adjustable dim ratio for the background brightness of the LEDs (it can be turned off altogether)
 - sACN output for controlling the LED display
     - The universe and FPS can be changed by the user
-    - The sACN output could work both in unicast and multicast mode defineable by the user
+    - The sACN output could work both in unicast and multicast mode definable by the user
 - Brightness feedback from the ESPHome firmware running of the device, so we can compensate
-  if the resulting value for the LED would fall under the turn on treshold of the LED (11%, decimal 28)
+  if the resulting value for the LED falls under the turn-on threshold of the LED (11%, decimal 28)
 - Schedule updating from the BKK OpenData API
     - Regular updates for every stop (interval can be changed by the user)
     - Realtime updates for the suburban railways only (interval can be changed by the user)
         - Realtime data is not available for the subway
-    - Frequent alert update for subway so the alerts not just get updated with the regular update
+    - Frequent alert update for subway so the alerts do not just get updated with the regular update
         - The frequent realtime update for the suburban railway also updates the alerts, so this is only necessary for
           the subway
-- The LED on time is determined by how busy a route is, when BKK OpenData API does not provide separate arrival and
+- The LED on time is determined by how busy a route is when BKK OpenData API does not provide separate arrival and
   departure times
 - Processing alerts from the BKK OpenData API to determine if a stop is operational or not
-    - We use this to determine the backgorund color of the LEDs
+    - We use this to determine the background color of the LEDs
         - When a stop is served by multiple routes, if one of the routes is not operational, we change the background
           color accordingly
         - The LED is turned off when there is no route that is operational for the given stop
-- Multi level loggin to file. The default log level is INFO, it can be changed by command line parameters to DEBUG or
+- Multi-level logging to file. The default log level is INFO, it can be changed by command line parameters to DEBUG or
   TRACE
 - Basic webserver for checking the stored schedules

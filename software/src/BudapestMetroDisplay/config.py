@@ -19,9 +19,9 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 #  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
-
 import logging
 import sys
+from ipaddress import IPv4Address, IPv6Address
 from pathlib import Path
 from typing import Any
 
@@ -62,10 +62,10 @@ class SACNConfig(BaseSettings):
     """Class to store sACN related settings."""
 
     multicast: bool = Field(
-        default=True,
+        default=False,
         description="Whether the sACN protocol should use multicast or unicast",
     )
-    unicast_ip: IPvAnyAddress | None = Field(
+    unicast_ip: IPv4Address | IPv6Address | None = Field(
         default=None,
         description="The destination IP address for unicast sACN",
     )
@@ -95,6 +95,8 @@ class SACNConfig(BaseSettings):
 
 class BKKConfig(BaseSettings):
     """Class to store BKK API related settings."""
+
+    api_base_url: str = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/"
 
     api_key: str = Field(
         pattern=(
@@ -136,7 +138,7 @@ class ESPHomeConfig(BaseSettings):
         description="Whether to use brightness data from ESPHome \
             to determine the minimum brightness",
     )
-    device_ip: IPvAnyAddress | None = Field(
+    device_ip: IPv4Address | IPv6Address | None = Field(
         default=None,
         description="The IP address of the ESPHome device",
     )
@@ -176,7 +178,7 @@ class LogConfig(BaseSettings):
     @model_validator(mode="before")
     @classmethod
     def ensure_log_directory_exists(cls, values: Any) -> Any:
-        """Check if the specified directory exists, and create if not."""
+        """Check if the specified directory exists and create if not."""
         path = values.get("path", Path("./log"))
         path = Path(path)  # Ensure `path` is a Path object
 

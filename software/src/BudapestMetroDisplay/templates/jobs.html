@@ -19,14 +19,6 @@
         th {
             background-color: #f2f2f2;
         }
-        .route-buttons {
-            margin-bottom: 20px;
-        }
-        .route-buttons button {
-            margin-right: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-        }
         .M1 {
             background-color: #FFF9C4;
         }
@@ -45,30 +37,20 @@
     </style>
 </head>
 <body>
-    <h1>Scheduled Jobs</h1>
-    <div class="route-buttons">
-        <button onclick="window.location.href='/schedules'">ALL</button>
-        {% for route in network.routes %}
-        <button onclick="window.location.href='/schedules/{{ route.route_id }}'" class="{{ route.name }}">{{ route.name }}</button>
-        {% endfor %}
-    </div>
+    <h1>API update Jobs</h1>
     <table>
         <tr>
             <th>ID</th>
-            <th>Stop Name</th>
-            <th>Route Id</th>
-            <th>Trip ID</th>
+            <th>Route</th>
+            <th>Schedule tpye</th>
             <th>Scheduled time</th>
-            <th>LED Off delay</th>
         </tr>
         {% for job in jobs %}
-        <tr class="{{ job.arg1 }}">
+        <tr class="{{ job.args[0].name }}">
             <td>{{ job.id }}</td>
-            <td>{{ job.stop_name }}</td>
-            <td>{{ job.arg1 }}</td>
-            <td>{{ job.arg2 }}</td>
-            <td>{{ job.arg3 }}</td>
-            <td>{{ job.arg4 }}</td>
+            <td>{{ job.args[0].name }}</td>
+            <td>{{ job.args[1] }}</td>
+            <td>{{ job.next_run_time.strftime('%H:%M:%S') }}</td>
         </tr>
         {% endfor %}
     </table>
