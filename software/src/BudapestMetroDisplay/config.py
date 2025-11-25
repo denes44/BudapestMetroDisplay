@@ -19,9 +19,9 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 #  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
-
 import logging
 import sys
+from ipaddress import IPv4Address, IPv6Address
 from pathlib import Path
 from typing import Any
 
@@ -65,7 +65,7 @@ class SACNConfig(BaseSettings):
         default=False,
         description="Whether the sACN protocol should use multicast or unicast",
     )
-    unicast_ip: IPvAnyAddress | None = Field(
+    unicast_ip: IPv4Address | IPv6Address | None = Field(
         default=None,
         description="The destination IP address for unicast sACN",
     )
@@ -138,7 +138,7 @@ class ESPHomeConfig(BaseSettings):
         description="Whether to use brightness data from ESPHome \
             to determine the minimum brightness",
     )
-    device_ip: IPvAnyAddress | None = Field(
+    device_ip: IPv4Address | IPv6Address | None = Field(
         default=None,
         description="The IP address of the ESPHome device",
     )

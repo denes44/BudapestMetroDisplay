@@ -21,6 +21,7 @@
 #  OTHER DEALINGS IN THE SOFTWARE.
 # ruff: noqa: D103, S101
 import os
+from ipaddress import IPv4Address, IPv6Address
 
 import pytest
 from pydantic import ValidationError
@@ -136,8 +137,13 @@ def test_led_config_fade_time_non_positive() -> None:
         LEDConfig(fade_time=-1.0)
 
 
-def test_sacn_config_multicast_default() -> None:
-    config = SACNConfig()
+def test_sacn_config_unicast_default() -> None:
+    config = SACNConfig(unicast_ip=IPv4Address("192.168.1.1"))
+    assert config.multicast is False
+
+
+def test_sacn_config_multicast() -> None:
+    config = SACNConfig(multicast=True)
     assert config.multicast is True
 
 
@@ -147,16 +153,18 @@ def test_sacn_config_unicast_ip_required() -> None:
 
 
 def test_sacn_config_unicast_ipv4() -> None:
-    config = SACNConfig(multicast=False, unicast_ip="192.168.1.1")
-    assert str(config.unicast_ip) == "192.168.1.1"
+    ip: str = "192.168.1.1"
+    config = SACNConfig(multicast=False, unicast_ip=IPv4Address(ip))
+    assert str(config.unicast_ip) == ip
 
 
 def test_sacn_config_unicast_ipv6() -> None:
+    ip: str = "2001:0000:130F:0000:0000:09C0:876A:130B"
     config = SACNConfig(
         multicast=False,
-        unicast_ip="2001:0000:130F:0000:0000:09C0:876A:130B",
+        unicast_ip=IPv6Address(ip),
     )
-    assert str(config.unicast_ip) == "2001:0:130f::9c0:876a:130b"
+    assert config.unicast_ip == IPv6Address(ip)
 
 
 def test_bkk_config_api_key_required_none() -> None:
@@ -190,7 +198,8 @@ def test_bkk_config_api_update_interval_positive() -> None:
 def test_bkk_config_api_update_interval_out_of_bounds() -> None:
     with pytest.raises(ValidationError):
         BKKConfig(
-            api_key="123e4567-e89b-12d3-a456-426614174000", api_update_interval=-5
+            api_key="123e4567-e89b-12d3-a456-426614174000",
+            api_update_interval=-5,
         )
 
 
@@ -205,7 +214,8 @@ def test_bkk_config_api_update_realtime_positive() -> None:
 def test_bkk_config_api_update_realtime_out_of_bounds() -> None:
     with pytest.raises(ValidationError):
         BKKConfig(
-            api_key="123e4567-e89b-12d3-a456-426614174000", api_update_realtime=-5
+            api_key="123e4567-e89b-12d3-a456-426614174000",
+            api_update_realtime=-5,
         )
 
 
@@ -247,22 +257,27 @@ def test_esphome_config_used_requires_ip_and_key() -> None:
 
 def test_esphome_config_used_empty_api_key() -> None:
     with pytest.raises(ValidationError):
-        ESPHomeConfig(used=True, device_ip="192.168.1.1", api_key="")
+        ESPHomeConfig(used=True, device_ip=IPv4Address("192.168.1.1"), api_key="")
 
 
 def test_esphome_config_used_invalid_api_key() -> None:
     with pytest.raises(ValidationError):
-        ESPHomeConfig(used=True, device_ip="192.168.1.1", api_key="test_api_key")
+        ESPHomeConfig(
+            used=True,
+            device_ip=IPv4Address("192.168.1.1"),
+            api_key="test_api_key",
+        )
 
 
 def test_esphome_config_used_ipv6() -> None:
+    ip: str = "2001:0000:130F:0000:0000:09C0:876A:130B"
     config = ESPHomeConfig(
         used=True,
-        device_ip="2001:0000:130F:0000:0000:09C0:876A:130B",
+        device_ip=IPv6Address(ip),
         api_key="0LTLKmoTVR0BO3xppXQkIBVb0VzDLZFqAplYnADTbOY=",
     )
     assert config.used is True
-    assert str(config.device_ip) == "2001:0:130f::9c0:876a:130b"
+    assert config.device_ip == IPv6Address(ip)
     assert config.api_key == "0LTLKmoTVR0BO3xppXQkIBVb0VzDLZFqAplYnADTbOY="
 
 
