@@ -7,7 +7,7 @@ from dataclasses import field
 from threading import Lock
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, model_validator
 
 from BudapestMetroDisplay.config import settings
 from BudapestMetroDisplay.led_helpers import (
@@ -234,8 +234,6 @@ class Route(BaseModel):
         with self._lock:
             if stop not in self.stops:
                 self.stops.append(stop)  # Add Stop to the Route
-            if stop.route is not self:
-                stop.route = self  # Set the Route for the Stop
 
     def get_stop_id(self, stop_id: str) -> StopId | None:
         """Return the StopId object in this Route that matches stop_id.
@@ -277,12 +275,17 @@ class Stop(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    name: str | None = None
+    name: str
     led: LED
-    route: Route | None = None
+    route: Route
     is_terminus: bool = False
     stop_ids: list[StopId] = Field(default_factory=list)
     _lock: Lock = PrivateAttr(default_factory=Lock)
+
+    @model_validator(mode="after")
+    def after_init(self):
+        self.route.add_stop(self)
+        return self
 
     @property
     def lock(self) -> Lock:
@@ -329,10 +332,6 @@ class Stop(BaseModel):
             if stop_id not in self.stop_ids:
                 self.stop_ids.append(stop_id)
 
-            # Link Stop <-> StopId
-            if stop_id.stop is not self:
-                stop_id.stop = self
-
 
 class StopId(BaseModel):
     """A single StopId that is part of a Stop.
@@ -344,9 +343,14 @@ class StopId(BaseModel):
     """
 
     stop_id: str
-    stop: Stop | None = None
+    stop: Stop
     in_service: bool = True
     vehicle_present: bool = False
+
+    @model_validator(mode="after")
+    def after_init(self):
+        self.stop.add_stop_id(self)
+        return self
 
 
 class Animation(BaseModel):
