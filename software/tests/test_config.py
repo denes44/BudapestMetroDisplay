@@ -19,9 +19,7 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 #  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
-
 # ruff: noqa: D103, S101
-
 import os
 
 import pytest
@@ -163,7 +161,7 @@ def test_sacn_config_unicast_ipv6() -> None:
 
 def test_bkk_config_api_key_required_none() -> None:
     with pytest.raises(ValidationError):
-        BKKConfig(api_key=None)
+        BKKConfig(api_key=None)  # type: ignore[arg-type]
 
 
 def test_bkk_config_api_key_required_empty() -> None:
@@ -191,7 +189,9 @@ def test_bkk_config_api_update_interval_positive() -> None:
 
 def test_bkk_config_api_update_interval_out_of_bounds() -> None:
     with pytest.raises(ValidationError):
-        BKKConfig(api_update_interval=-5)
+        BKKConfig(
+            api_key="123e4567-e89b-12d3-a456-426614174000", api_update_interval=-5
+        )
 
 
 def test_bkk_config_api_update_realtime_positive() -> None:
@@ -204,7 +204,9 @@ def test_bkk_config_api_update_realtime_positive() -> None:
 
 def test_bkk_config_api_update_realtime_out_of_bounds() -> None:
     with pytest.raises(ValidationError):
-        BKKConfig(api_update_realtime=-5)
+        BKKConfig(
+            api_key="123e4567-e89b-12d3-a456-426614174000", api_update_realtime=-5
+        )
 
 
 def test_bkk_config_api_update_regular_positive() -> None:
@@ -217,7 +219,7 @@ def test_bkk_config_api_update_regular_positive() -> None:
 
 def test_bkk_config_api_update_regular_out_of_bounds() -> None:
     with pytest.raises(ValidationError):
-        BKKConfig(api_update_regular=-5)
+        BKKConfig(api_key="123e4567-e89b-12d3-a456-426614174000", api_update_regular=-5)
 
 
 def test_bkk_config_api_update_alerts_positive() -> None:
@@ -230,7 +232,7 @@ def test_bkk_config_api_update_alerts_positive() -> None:
 
 def test_bkk_config_api_update_alerts_out_of_bounds() -> None:
     with pytest.raises(ValidationError):
-        BKKConfig(api_update_alerts=-5)
+        BKKConfig(api_key="123e4567-e89b-12d3-a456-426614174000", api_update_alerts=-5)
 
 
 def test_esphome_config_used_requires_ip() -> None:

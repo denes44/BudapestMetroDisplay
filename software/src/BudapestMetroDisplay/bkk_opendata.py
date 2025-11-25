@@ -193,7 +193,7 @@ def fetch_schedule_for_route(
 
     # Get schedule data for all stops in the stop set
     params: dict[str, str | int | list[str]] = {
-        "stopId": route.get_stop_ids(string_only=True),
+        "stopId": [s.stop_id for s in route.get_stop_ids()],
         "minutesBefore": API_SCHEDULE_PARAMETERS[schedule_type]["minutesBefore"],
         "minutesAfter": API_SCHEDULE_PARAMETERS[schedule_type]["minutesAfter"],
         "limit": API_SCHEDULE_PARAMETERS[schedule_type]["limit"],
@@ -464,7 +464,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
     latest_departure_time: int = -1
 
     with route.lock:
-        stop_ids_list: list[str] = route.get_stop_ids(string_only=True)
+        stop_ids_list: list[str] = [s.stop_id for s in route.get_stop_ids()]
 
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
     for stop_time in stop_times:
@@ -586,37 +586,44 @@ def process_schedule(json_response: Any, route: Route) -> int:
 
         # We processed valid schedule data for this stop,
         # that means that the stop is operational
-        with route.get_stop_id(stop_id).stop.lock:
-            route.get_stop_id(stop_id).in_service = True
+        sid = route.get_stop_id(stop_id)
+        if sid is not None:
+            with sid.stop.lock:
+                sid.in_service = True
 
-        # Schedule the action before the departure."""
-        job_id: str = f"{stop_id}+{trip_id}_arrival"
-        job_time: datetime = datetime.fromtimestamp(arrival_time)
+            # Schedule the action before the departure."""
+            job_id: str = f"{stop_id}+{trip_id}_arrival"
+            job_time: datetime = datetime.fromtimestamp(arrival_time)
 
-        latest_departure_time = max(latest_departure_time, arrival_time)
+            latest_departure_time = max(latest_departure_time, arrival_time)
 
-        if job_time > datetime.now():
-            departure_scheduler.add_job(
-                vehicle_arrival,
-                trigger="date",
-                run_date=job_time,
-                args=[route.get_stop_id(stop_id), trip_id, job_time, delay],
-                id=job_id,
-                replace_existing=True,
-                # If the job exists, it will be replaced with the new time
-            )
+            if job_time > datetime.now():
+                departure_scheduler.add_job(
+                    vehicle_arrival,
+                    trigger="date",
+                    run_date=job_time,
+                    args=[sid, trip_id, job_time, delay],
+                    id=job_id,
+                    replace_existing=True,
+                    # If the job exists, it will be replaced with the new time
+                )
 
-            logger.trace(  # type: ignore[attr-defined]
-                f"Scheduled action for departure: stop_id={stop_id}, "
-                f"trip_id={trip_id}, route {route.name}, "
-                f"departure_time={datetime.fromtimestamp(arrival_time)!s}",
-            )
+                logger.trace(  # type: ignore[attr-defined]
+                    f"Scheduled action for departure: stop_id={stop_id}, "
+                    f"trip_id={trip_id}, route {route.name}, "
+                    f"departure_time={datetime.fromtimestamp(arrival_time)!s}",
+                )
+            else:
+                logger.trace(  # type: ignore[attr-defined]
+                    f"Action for departure: stop_id={stop_id}, trip_id={trip_id}, "
+                    f"route {route.name}, "
+                    f"departure_time={datetime.fromtimestamp(arrival_time)!s} "
+                    f"was in the past, skipping",
+                )
         else:
-            logger.trace(  # type: ignore[attr-defined]
-                f"Action for departure: stop_id={stop_id}, trip_id={trip_id}, "
-                f"route {route.name}, "
-                f"departure_time={datetime.fromtimestamp(arrival_time)!s} "
-                f"was in the past, skipping",
+            logger.warning(
+                "Invalid stop ID found when processing schedule data: "
+                f"stop_id={stop_id}, route {route.name}",
             )
 
     # Check if there are any active alerts in the response and process them
@@ -662,7 +669,7 @@ def process_alerts(
             f"No alert data found when updating route {route.name}",
         )
 
-    stop_ids_list: list[str] = route.get_stop_ids(string_only=True)
+    stop_ids_list: list[str] = [s.stop_id for s in route.get_stop_ids()]
 
     # Iterate through the TransitScheduleStopTimes in the TransitArrivalsAndDepartures
     for alert_details in alerts.values():
@@ -692,36 +699,42 @@ def process_alerts(
                     continue
 
                 sid = route.get_stop_id(stop_id)
-                with sid.stop.lock:
-                    # Check whether the stop is operational now
-                    if sid.in_service:
-                        # Check if we have a schedule for this stop_id,
-                        # because if we have, then the stop is not really out of service
-                        soonest_job = aps_helpers.find_soonest_job_by_argument(
-                            departure_scheduler,
-                            stop_id,
-                            0,
-                        )
+                if sid is not None:
+                    with sid.stop.lock:
+                        # Check whether the stop is operational now
+                        if sid.in_service:
+                            # Check if we have a schedule for this stop_id,
+                            # because if we have, then the stop is not out of service
+                            soonest_job = aps_helpers.find_soonest_job_by_argument(
+                                departure_scheduler,
+                                stop_id,
+                                0,
+                            )
 
-                        if soonest_job is not None:
-                            # We found at least one schedule for this stop,
-                            # so we'll ignore the NO_SERVICE alert
-                            logger.debug(
-                                f"Found NO_SERVICE alert {alert_details['id']} "
-                                f"for {sid.stop.name}, route {route.name}, "
-                                f"but there are active schedules for that stop, "
-                                f"so we'll ignore that",
-                            )
-                        else:
-                            # No schedule found for this stop,
-                            # so we'll process the NO_SERVICE alert
-                            logger.debug(
-                                f"Found NO_SERVICE alert {alert_details['id']} "
-                                f"for {sid.stop.name}, route {route.name}",
-                            )
-                            # Set the operation state of this StopId
-                            sid.in_service = False
-                            is_alert_found = True
+                            if soonest_job is not None:
+                                # We found at least one schedule for this stop,
+                                # so we'll ignore the NO_SERVICE alert
+                                logger.debug(
+                                    f"Found NO_SERVICE alert {alert_details['id']} "
+                                    f"for {sid.stop.name}, route {route.name}, "
+                                    f"but there are active schedules for that stop, "
+                                    f"so we'll ignore that",
+                                )
+                            else:
+                                # No schedule found for this stop,
+                                # so we'll process the NO_SERVICE alert
+                                logger.debug(
+                                    f"Found NO_SERVICE alert {alert_details['id']} "
+                                    f"for {sid.stop.name}, route {route.name}",
+                                )
+                                # Set the operation state of this StopId
+                                sid.in_service = False
+                                is_alert_found = True
+                else:
+                    logger.warning(
+                        "Invalid stop ID found when processing alerts: "
+                        f"stop_id={stop_id}, route {route.name}",
+                    )
 
             # Update the regular schedule data for the route
             # because of the active alert

@@ -30,9 +30,7 @@ import pytest
 # Mock environment variables before importing the module
 os.environ["BKK_API_KEY"] = "test_api_key"
 
-from BudapestMetroDisplay import (
-    led_control,
-)
+from BudapestMetroDisplay import led_control
 
 
 @pytest.fixture(autouse=True)
