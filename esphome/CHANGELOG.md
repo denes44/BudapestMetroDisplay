@@ -3,6 +3,13 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-12-11
+
+### Added
+
+- Added the ability to change the status LED behavior
+  - Can be turned off either when the main light is OFF, or completely
+
 ## [2.0.0] - 2025-11-25
 
 ### Breaking change
