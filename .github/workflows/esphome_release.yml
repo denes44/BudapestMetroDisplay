@@ -33,7 +33,7 @@ jobs:
       esphome_version: ${{ steps.esphome-build.outputs.version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch'
@@ -41,7 +41,7 @@ jobs:
                   || github.event.pull_request.merge_commit_sha }}
 
       - name: Build Firmware
-        uses: esphome/build-action@v6
+        uses: esphome/build-action@v7
         id: esphome-build
         with:
           yaml-file: esphome/metro-display.factory.yaml

@@ -20,7 +20,7 @@ jobs:
       software_changelog: ${{ steps.extract.outputs.software_changelog }}
     steps:
       - name: Checkout default branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ github.event.repository.default_branch }}
@@ -92,7 +92,7 @@ jobs:
       docker_version: ${{ steps.update.outputs.docker_version }}
     steps:
       - name: Checkout default branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ github.event.repository.default_branch }}

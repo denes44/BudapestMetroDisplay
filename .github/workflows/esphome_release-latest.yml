@@ -39,7 +39,7 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout (for git tag operations)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -97,7 +97,7 @@ jobs:
           ROLLING_TAG="${{ steps.vars.outputs.rolling_tag }}"
           ROLLING_SHA="$(git rev-list -n1 "refs/tags/$ROLLING_TAG")"
           BODY_FILE="${{ steps.body.outputs.body_file }}"
-          
+
           if [ -z "$ROLLING_SHA" ]; then
             echo "Could not resolve commit for $ROLLING_TAG" >&2
             exit 1
