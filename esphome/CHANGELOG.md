@@ -3,6 +3,16 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] - 2025-12-21
+
+### Fixed
+
+- Fixed the issue when turning off the main light and back again, didn't
+  set the effect to E1.31
+- Fixed the issue when the LED Test mode was turned on, but the device was
+  also receiving data via E1.31
+- Fixed CPU frequency back to 240 MHz
+
 ## [2.0.1] - 2025-12-11
 
 ### Added
