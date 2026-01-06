@@ -12,7 +12,7 @@ esphome:
   min_version: 2025.2.0
   project:
     name: "denes44.BudapestMetroDisplay"
-    version: 2.0.1
+    version: 2.0.2
   platformio_options:
     board_build.flash_mode: dio
   on_boot:
@@ -24,11 +24,9 @@ esphome:
             green: 0%
             blue: 0%
             brightness: 20%
-    - priority: 600
-      then:
-        - script.execute: default_values
     - priority: 240
       then:
+        - light.turn_on: leds_map
         - lambda: |-
             id(leds_logo).setup();
   on_loop:
@@ -338,6 +336,8 @@ light:
       sorting_weight: 1
       sorting_group_id: sg_led
     default_transition_length: 10ms
+    on_turn_on:
+      - script.execute: default_values
     effects:
       - e131:
           universe: 1
@@ -375,6 +375,8 @@ switch:
     turn_on_action:
       - light.turn_off:
           id: leds
+      - light.turn_off:
+          id: leds_map
       - delay: 1s
       - light.turn_on:
           id: leds
@@ -383,13 +385,14 @@ switch:
       - light.turn_off:
           id: leds
       - delay: 1s
-      - script.execute: default_values
       - light.turn_off:
           id: leds_logo
           transition_length: 10ms
       - light.turn_on:
           id: leds_logo
           transition_length: 10ms
+      - light.turn_on:
+          id: leds_map
 
 binary_sensor:
   - platform: gpio
@@ -413,14 +416,7 @@ binary_sensor:
 script:
   - id: default_values
     then:
-      - light.turn_on:
-          id: leds_map
-          red: 100%
-          green: 100%
-          blue: 100%
-          color_brightness: 10%
-          effect: None
-      - delay: 1s
+      - delay: 50ms
       - light.addressable_set: #H6
           id: leds_map
           range_from: 0
@@ -428,7 +424,7 @@ script:
           red: 100%
           green: 0%
           blue: 100%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #H7
           id: leds_map
           range_from: 3
@@ -436,7 +432,7 @@ script:
           red: 100%
           green: 0%
           blue: 100%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M4/1
           id: leds_map
           range_from: 6
@@ -444,7 +440,7 @@ script:
           red: 0%
           green: 100%
           blue: 0%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M4/2
           id: leds_map
           range_from: 13
@@ -452,7 +448,7 @@ script:
           red: 0%
           green: 100%
           blue: 0%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M2/1
           id: leds_map
           range_from: 15
@@ -460,7 +456,7 @@ script:
           red: 100%
           green: 0%
           blue: 0%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M2/2
           id: leds_map
           range_from: 18
@@ -468,7 +464,7 @@ script:
           red: 100%
           green: 0%
           blue: 0%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M2/3
           id: leds_map
           range_from: 20
@@ -476,7 +472,7 @@ script:
           red: 100%
           green: 0%
           blue: 0%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M2/4
           id: leds_map
           range_from: 23
@@ -484,7 +480,7 @@ script:
           red: 100%
           green: 0%
           blue: 0%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #H9
           id: leds_map
           range_from: 26
@@ -492,7 +488,7 @@ script:
           red: 100%
           green: 0%
           blue: 100%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #H5
           id: leds_map
           range_from: 27
@@ -500,7 +496,7 @@ script:
           red: 100%
           green: 0%
           blue: 100%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M3
           id: leds_map
           range_from: 35
@@ -508,7 +504,7 @@ script:
           red: 0%
           green: 0%
           blue: 100%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M1
           id: leds_map
           range_from: 53
@@ -516,7 +512,7 @@ script:
           red: 100%
           green: 100%
           blue: 0%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M4/M3 Kálvin tér
           id: leds_map
           range_from: 12
@@ -524,15 +520,15 @@ script:
           red: 0%
           green: 100%
           blue: 100%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M2/H5 Batthány tér
           id: leds_map
           range_from: 17
           range_to: 17
           red: 100%
           green: 0%
-          blue: 75%
-          color_brightness: 20%
+          blue: 100%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M1/M2/M3 Deák Ferenc tér
           id: leds_map
           range_from: 19
@@ -540,24 +536,24 @@ script:
           red: 100%
           green: 100%
           blue: 100%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M2/M4 Keleti pályaudvar
           id: leds_map
           range_from: 22
           range_to: 22
           red: 100%
-          green: 75%
+          green: 100%
           blue: 0%
-          color_brightness: 20%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
       - light.addressable_set: #M2/H9 Örs vezér tere
           id: leds_map
           range_from: 25
           range_to: 25
           red: 100%
           green: 0%
-          blue: 75%
-          color_brightness: 20%
-      - delay: 1s
+          blue: 100%
+          color_brightness: !lambda "return id(leds_map).remote_values.get_brightness() * 0.25;"
+      - delay: 100ms
       - light.turn_on:
           id: leds_map
           effect: E1.31
