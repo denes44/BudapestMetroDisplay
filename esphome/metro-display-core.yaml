@@ -99,11 +99,11 @@ globals:
     type: std::string
 
 esp32:
-  board: adafruit_feather_esp32s3
+  variant: esp32s3
+  flash_size: 4MB
+  cpu_frequency: 240MHz
   framework:
     type: esp-idf
-    sdkconfig_options:
-      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
 
 i2c:
   sda: GPIO05
