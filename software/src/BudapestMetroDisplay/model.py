@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import logging
 import time as _t
-from dataclasses import field
 from threading import Lock
 from typing import Any
 
@@ -58,7 +57,7 @@ class LED(BaseModel):
     r: int = 0
     g: int = 0
     b: int = 0
-    stops: list[Stop] = field(default_factory=list)  # back-references from Stops
+    stops: list[Stop] = Field(default_factory=list)  # back-references from Stops
     color_override: RGB | None = None
 
     @property
