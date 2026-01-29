@@ -22,7 +22,6 @@
 
 from typing import Any
 
-import numpy as np
 from apscheduler.job import Job
 from apscheduler.schedulers.base import BaseScheduler
 
@@ -121,4 +120,4 @@ def calculate_average_time_between_jobs(filtered_jobs: list[Job]) -> float | Non
     ]
 
     # Calculate average difference
-    return np.mean(time_differences) if time_differences else None
+    return sum(time_differences) / len(time_differences) if time_differences else None
