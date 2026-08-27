@@ -96,7 +96,10 @@ class SACNConfig(BaseSettings):
 class BKKConfig(BaseSettings):
     """Class to store BKK API related settings."""
 
-    api_base_url: str = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/"
+    api_base_url: str = Field(
+        default="https://futar.bkk.hu",
+        description="Base URL for the BKK OpenData API",
+    )
 
     api_key: str = Field(
         pattern=(

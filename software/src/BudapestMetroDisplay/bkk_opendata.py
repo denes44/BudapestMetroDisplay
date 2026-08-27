@@ -22,7 +22,7 @@
 
 import logging
 from datetime import datetime, time, timedelta
-from random import randint
+from random import uniform
 from typing import Any
 
 import requests
@@ -187,7 +187,10 @@ def fetch_schedule_for_route(
             datetime.now() + API_SCHEDULE_PARAMETERS[schedule_type]["nextSchedule"]
         )
 
-    url: str = f"{settings.bkk.api_base_url}arrivals-and-departures-for-stop"
+    url: str = (
+        f"{settings.bkk.api_base_url}"
+        "/api/query/v1/ws/otp/api/where/arrivals-and-departures-for-stop"
+    )
 
     headers: dict[str, str] = {"Accept": "application/json"}
 
@@ -318,7 +321,9 @@ def fetch_alerts_for_route(route: Route) -> None:
     # Calculate the next schedule time
     job_time = datetime.now() + timedelta(seconds=settings.bkk.api_update_alerts)
 
-    url: str = f"{settings.bkk.api_base_url}route-details"
+    url: str = (
+        f"{settings.bkk.api_base_url}/api/query/v1/ws/otp/api/where/route-details"
+    )
 
     headers: dict[str, str] = {"Accept": "application/json"}
 
@@ -498,7 +503,7 @@ def process_schedule(json_response: Any, route: Route) -> int:
             if stop_time.get("predictedArrivalTime") != stop_time.get(
                 "predictedDepartureTime",
             ):
-                arrival_time = stop_time.get("predictedArrivalTime") + randint(-3, 3)
+                arrival_time = stop_time.get("predictedArrivalTime")
                 delay = stop_time.get("predictedDepartureTime") - stop_time.get(
                     "predictedArrivalTime",
                 )
@@ -510,7 +515,6 @@ def process_schedule(json_response: Any, route: Route) -> int:
                         "predictedDepartureTime",
                     )
                     - route_departure_delay
-                    + randint(-3, 3)
                 )
                 delay = route_departure_delay
         # CASE #2: Only predicted arrival time is available
@@ -525,7 +529,6 @@ def process_schedule(json_response: Any, route: Route) -> int:
                     "predictedArrivalTime",
                 )
                 - route_departure_delay
-                + randint(-3, 3)
             )
             delay = route_departure_delay
         # CASE #3: Only predicted departure time is available
@@ -540,7 +543,6 @@ def process_schedule(json_response: Any, route: Route) -> int:
                     "predictedDepartureTime",
                 )
                 - route_departure_delay
-                + randint(-3, 3)
             )
             delay = route_departure_delay
         # CASE #4: Both arrival and departure time available as scheduled time
@@ -549,32 +551,24 @@ def process_schedule(json_response: Any, route: Route) -> int:
             # Arrival time is different from the departure,
             # let's use the difference between them for the departure delay
             if stop_time.get("arrivalTime") != stop_time.get("departureTime"):
-                arrival_time = stop_time.get("arrivalTime") + randint(-3, 3)
+                arrival_time = stop_time.get("arrivalTime")
                 delay = stop_time.get("departureTime") - stop_time.get("arrivalTime")
             # Arrival time is the same as the departure,
             # use predefined delay for departure delay
             else:
-                arrival_time = (
-                    stop_time.get("departureTime")
-                    - route_departure_delay
-                    + randint(-3, 3)
-                )
+                arrival_time = stop_time.get("departureTime") - route_departure_delay
                 delay = route_departure_delay
         # CASE #5: Only scheduled arrival time is available
         # [end stop with no realtime data]
         # Use the predefined delay for departure delay
         elif "arrivalTime" in stop_time:
-            arrival_time = (
-                stop_time.get("arrivalTime") - route_departure_delay + randint(-3, 3)
-            )
+            arrival_time = stop_time.get("arrivalTime") - route_departure_delay
             delay = route_departure_delay
         # CASE #6: Only scheduled departure time is available
         # [start stop with no realtime data]
         # Use the predefined delay for departure delay
         elif "departureTime" in stop_time:
-            arrival_time = (
-                stop_time.get("departureTime") - route_departure_delay + randint(-3, 3)
-            )
+            arrival_time = stop_time.get("departureTime") - route_departure_delay
             delay = route_departure_delay
         # CASE #7: No valid time data is available
         else:
@@ -593,7 +587,9 @@ def process_schedule(json_response: Any, route: Route) -> int:
 
             # Schedule the action before the departure."""
             job_id: str = f"{stop_id}+{trip_id}_arrival"
-            job_time: datetime = datetime.fromtimestamp(arrival_time)
+            job_time: datetime = datetime.fromtimestamp(
+                arrival_time + uniform(-3.0, 3.0),
+            )
 
             latest_departure_time = max(latest_departure_time, arrival_time)
 
