@@ -3,6 +3,17 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-08-27
+
+### Added
+
+- New config option to change the API base url
+  - Now it's possible to use proxy API servers instead of BKK's servers directly
+
+### Changed
+
+- The +/- 3 second randomness was changed from integer to float for a better uniformity
+
 ## [2.0.0] - 2025-11-25
 
 ### Breaking change
