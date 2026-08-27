@@ -14,7 +14,7 @@ The edge of the PCB is designed to not interfere with the edge
 of the picture frame.
 
 There is a template available to cut out areas of the back of the picture frame,
-so the components can fit: [pcb_cutout.pdf](pcb_cutout.pdf)
+so the components can fit: [pcb_cutout_AAB.pdf](pcb_cutout_AAB.pdf)
 
 ## Schematics
 
@@ -23,7 +23,7 @@ the internal or external controller, this signal then goes to a 74AHCT series
 line driver for 5V level shifting, and the output of the driver goes through
 a resistor and then to the LEDs.
 
-[schematics.pdf](schematics.pdf)
+[schematics_AAB.pdf](schematics_AAB.pdf)
 
 ## Internal controller
 
@@ -36,7 +36,7 @@ an ESP32-C3 SuperMini would fit too.
 The task of the internal controller is to receive sACN (E1.31) data
 from the software and display it on the LEDs.
 
-<img src="https://esphome.io/guides/images/made-for-esphome-black-on-white.svg" align="left" alt="Made for ESPHome logo" width="150">
+<img src="https://esphome.io/images/made-for-esphome-black-on-white.svg" align="left" alt="Made for ESPHome logo" width="150">
 
 The default firmware is ESPHome, you can find the configuration to it in the
 [esphome](../esphome/README.md) folder.

@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the issue when the LED Test mode was turned on, but the device was
   also receiving data via E1.31
 - Fixed CPU frequency back to 240 MHz
+- Issue is fixed in esphome upstream when sometimes it was not possible to do
+  an HTTP OTA update, because of socket exhaustion: [esphome#12481](https://github.com/esphome/esphome/pull/12481)
 
 ## [2.0.1] - 2025-12-11
 

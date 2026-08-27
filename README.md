@@ -25,7 +25,7 @@ More information about the hardware (PCB size, WiFi controller, LEDs, etc.),
 can be found in the **[hardware](hardware/README.md)** folder.
 
 ### ESPHome
-<img src="https://esphome.io/guides/images/made-for-esphome-black-on-white.svg" align="left" alt="Made for ESPHome logo" width="200">
+<img src="https://esphome.io/images/made-for-esphome-black-on-white.svg" align="left" alt="Made for ESPHome logo" width="200">
 
 The display uses an ESP32-S3 controller and ESPHome as it's firmware.
 
@@ -38,7 +38,9 @@ The control software is written in python.
 
 It gets the schedule, realtime and alert data from the
 [BKK OpenData](https://opendata.bkk.hu/home) portal.
-You need to obtain an API key for yourself to use the software.
+You need to obtain an API key for yourself to use the software, if you buy this
+display from an official source, you will be provided with an API key to a
+proxy API server.
 
 The software processes the data from the API and controls the LEDs
 via sACN (E1.31) protocol.

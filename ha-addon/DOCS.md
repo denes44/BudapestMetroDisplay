@@ -9,22 +9,23 @@ tab of the add-on.
 
 #### API key and API server
 
-This is the only required value, you need to obtain your own API key from the
-[BKK OpenData](https://opendata.bkk.hu/home) portal.
+This is the only required value. If you bought this display from an official
+source, you can use the proxy API server and key that was provided to you
+during the purchase.
 
-```text
-BKK_API_KEY = "your_api_key"
-```
-
-Alternatively if you bought this display from an official source, you can use
-the proxy API server and key that was provided to you during the purchase.
-
-In that case you need to fill out both the `BKK_API_KEY` and `BKK_API_BASE_URL`
+In this case you need to fill out both the `BKK_API_KEY` and `BKK_API_BASE_URL`
 variables.
 
 ```text
 BKK_API_KEY = "your_api_key"
 BKK_API_BASE_URL = "https://proxy.example.com"
+```
+
+Otherwise you need to obtain your own API key from the
+[BKK OpenData](https://opendata.bkk.hu/home) portal.
+
+```text
+BKK_API_KEY = "your_api_key"
 ```
 
 If you are using the proxy API server, you should not change the update intervals
