@@ -187,7 +187,10 @@ def fetch_schedule_for_route(
             datetime.now() + API_SCHEDULE_PARAMETERS[schedule_type]["nextSchedule"]
         )
 
-    url: str = f"{settings.bkk.api_base_url}arrivals-and-departures-for-stop"
+    url: str = (
+        f"{settings.bkk.api_base_url}"
+        "/api/query/v1/ws/otp/api/where/arrivals-and-departures-for-stop"
+    )
 
     headers: dict[str, str] = {"Accept": "application/json"}
 
@@ -318,7 +321,9 @@ def fetch_alerts_for_route(route: Route) -> None:
     # Calculate the next schedule time
     job_time = datetime.now() + timedelta(seconds=settings.bkk.api_update_alerts)
 
-    url: str = f"{settings.bkk.api_base_url}route-details"
+    url: str = (
+        f"{settings.bkk.api_base_url}/api/query/v1/ws/otp/api/where/route-details"
+    )
 
     headers: dict[str, str] = {"Accept": "application/json"}
 
