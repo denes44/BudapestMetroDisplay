@@ -1,7 +1,7 @@
 name: "BudapestMetroDisplay"
 description: "Backgorund service for a BudapestMetroDisplay hardware LED display"
 url: "https://github.com/denes44/BudapestMetroDisplay/tree/main/ha-addon"
-version: "1.0.3"
+version: "1.0.4"
 slug: "budapestmetrodisplay"
 init: false
 legacy: true
@@ -30,6 +30,7 @@ schema:
   SACN_UNIVERSE: int(1,63999)?
   SACN_FPS: int(1,)?
   BKK_API_KEY: "match(^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$)"
+  BKK_API_BASE_URL: str?
   BKK_API_UPDATE_INTERVAL: int(1,)?
   BKK_API_UPDATE_REALTIME: int(1,)?
   BKK_API_UPDATE_REGULAR: int(1,)?

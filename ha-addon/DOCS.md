@@ -7,7 +7,7 @@ tab of the add-on.
 
 ### Public transport data
 
-#### BKK OpenData API key
+#### API key and API server
 
 This is the only required value, you need to obtain your own API key from the
 [BKK OpenData](https://opendata.bkk.hu/home) portal.
@@ -15,6 +15,20 @@ This is the only required value, you need to obtain your own API key from the
 ```text
 BKK_API_KEY = "your_api_key"
 ```
+
+Alternatively if you bought this display from an official source, you can use
+the proxy API server and key that was provided to you during the purchase.
+
+In that case you need to fill out both the `BKK_API_KEY` and `BKK_API_BASE_URL`
+variables.
+
+```text
+BKK_API_KEY = "your_api_key"
+BKK_API_BASE_URL = "https://proxy.example.com"
+```
+
+If you are using the proxy API server, you should not change the update intervals
+in the following section from their default values to avoid being rate limited.
 
 #### API update details
 
