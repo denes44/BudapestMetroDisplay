@@ -1,8 +1,6 @@
 name: ESPHome maintain latest release
 
 on:
-  release:
-    types: [published]
   workflow_run:
     workflows: ["ESPHome Release"]
     types: [completed]
@@ -19,19 +17,12 @@ permissions:
 jobs:
   roll_latest:
     name: Point esphome-latest to newest esphome-* release
-    # Only handle releases with name or tag starting with "esphome-"
+    # Only handle successful releases from "esphome-" branches
     if: >
-      (
-        github.event_name == 'release' &&
-        (
-          startsWith(github.event.release.tag_name, 'esphome-') ||
-          startsWith(github.event.release.name, 'esphome-')
-        )
-      ) ||
       (
         github.event_name == 'workflow_run' &&
         github.event.workflow_run.conclusion == 'success' &&
-        github.event.workflow_run.head_branch == 'main'
+        startsWith(github.event.workflow_run.head_branch, 'esphome-')
       ) ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
@@ -39,7 +30,7 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout (for git tag operations)
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -51,7 +42,12 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             SRC_TAG="${{ github.event.inputs.src_tag }}"
           else
-            SRC_TAG="${{ github.event.release.tag_name }}"
+            # Triggered by the release workflow: use the newest esphome-* release
+            SRC_TAG="$(gh release list --exclude-drafts --limit 50 --json tagName --jq '[.[].tagName | select(startswith("esphome-") and . != "esphome-latest")][0] // empty')"
+          fi
+          if [ -z "$SRC_TAG" ]; then
+            echo "Could not determine the source release tag" >&2
+            exit 1
           fi
           ROLLING_TAG="esphome-latest"
           echo "src_tag=${SRC_TAG}" >> "$GITHUB_OUTPUT"
