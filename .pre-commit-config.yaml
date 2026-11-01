@@ -3,7 +3,8 @@ repos:
   rev: v5.0.0
   hooks:
   - id: check-yaml
-    exclude: ^esphome/.*\.yaml$
+    # Only check the syntax, to allow ESPHome tags like !lambda or !include
+    args: [--unsafe]
   - id: check-toml
   - id: check-json
     exclude: ^esphome/firmware/.*\.json$
@@ -35,3 +36,10 @@ repos:
   - id: mypy
     additional_dependencies: ['types-requests']
     files: ^software/.*
+- repo: https://github.com/DavidAnson/markdownlint-cli2
+  rev: v0.24.0
+  hooks:
+  - id: markdownlint-cli2
+    # Same rules as the CI, fix what can be fixed automatically
+    args: [--fix, --config, .github/rules/custom.markdownlint.jsonc]
+    exclude: ^\.github/pull_request_template\.md$
