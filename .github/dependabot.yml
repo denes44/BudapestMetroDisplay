@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # Keep the commit SHA pinned GitHub Actions up to date
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      # One pull request for all action updates
+      github-actions:
+        patterns:
+          - "*"
