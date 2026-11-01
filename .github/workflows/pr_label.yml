@@ -13,6 +13,6 @@ jobs:
       pull-requests: write
 
     steps:
-    - uses: srvaroa/labeler@master
+    - uses: srvaroa/labeler@v1
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

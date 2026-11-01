@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Set up Python 3.11
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: "3.11"
         cache: 'pip'
@@ -32,7 +32,7 @@ jobs:
       run: |
         ruff check --output-format=github .
     - name: Add mypy annotator
-      uses: pr-annotators/mypy-pr-annotator@v1.0.0
+      uses: pr-annotators/mypy-pr-annotator@v1
     - name: Run mypy
       run: |
         pip install types-requests
@@ -41,7 +41,7 @@ jobs:
       working-directory: software
       run: pytest --cov --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v7
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
     - name: Upload test results to Codecov
@@ -57,11 +57,11 @@ jobs:
     - test
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
     - name: Set up Python 3.11
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: "3.11"
         cache: 'pip'
@@ -76,7 +76,7 @@ jobs:
       working-directory: software
       run: python3 -m build
     - name: Store the distribution packages
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: python-package-distributions
         path: software/dist/
@@ -96,12 +96,12 @@ jobs:
 
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: python-package-distributions
         path: software/dist/
     - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+      uses: pypa/gh-action-pypi-publish@v1
       with:
         packages-dir: "software/dist"
 
@@ -119,12 +119,12 @@ jobs:
 
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: python-package-distributions
         path: software/dist/
     - name: Publish distribution 📦 to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+      uses: pypa/gh-action-pypi-publish@v1
       with:
         repository-url: https://test.pypi.org/legacy/
         packages-dir: "software/dist"
@@ -144,12 +144,12 @@ jobs:
 
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: python-package-distributions
         path: software/dist/
     - name: Sign the dists with Sigstore
-      uses: sigstore/gh-action-sigstore-python@v3.0.0
+      uses: sigstore/gh-action-sigstore-python@v3
       with:
         inputs: >-
           ./software/dist/*.tar.gz

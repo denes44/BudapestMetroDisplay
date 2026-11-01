@@ -33,7 +33,7 @@ jobs:
       esphome_version: ${{ steps.esphome-build.outputs.version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch'
@@ -41,14 +41,14 @@ jobs:
                   || github.event.pull_request.merge_commit_sha }}
 
       - name: Build Firmware
-        uses: esphome/build-action@v7
+        uses: esphome/build-action@v8
         id: esphome-build
         with:
           yaml-file: esphome/metro-display.factory.yaml
           complete-manifest: true
 
       - name: Upload firmware artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: firmware-${{ steps.esphome-build.outputs.project-version }}
           path: |
@@ -64,7 +64,7 @@ jobs:
       notes: ${{ steps.extract_notes.outputs.notes }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch'
@@ -113,13 +113,13 @@ jobs:
       contents: write
     steps:
       - name: Download firmware artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: firmware-${{ needs.build-firmware.outputs.project_version }}
           path: ./release-assets
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: esphome-${{ needs.build-firmware.outputs.project_version }}

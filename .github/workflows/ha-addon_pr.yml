@@ -20,7 +20,7 @@ jobs:
       software_changelog: ${{ steps.extract.outputs.software_changelog }}
     steps:
       - name: Checkout default branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.repository.default_branch }}
@@ -92,7 +92,7 @@ jobs:
       docker_version: ${{ steps.update.outputs.docker_version }}
     steps:
       - name: Checkout default branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event.repository.default_branch }}
@@ -173,7 +173,7 @@ jobs:
           echo "docker_version=$(cat .docker_version)" >> "$GITHUB_OUTPUT"
 
       - name: Commit changes to branch
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           branch: ha-addon-${{ steps.update.outputs.docker_version }}
           create_branch: true

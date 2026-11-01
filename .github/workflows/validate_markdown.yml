@@ -7,10 +7,10 @@ jobs:
     name: Markdown Lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
-    - uses: tj-actions/changed-files@v45
+    - uses: tj-actions/changed-files@v47
       id: changed-files
       with:
         files: '**/*.md'
@@ -26,5 +26,5 @@ jobs:
     name: Check links
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - uses: tcort/github-action-markdown-link-check@v1
