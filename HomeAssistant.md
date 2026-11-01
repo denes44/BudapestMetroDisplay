@@ -6,6 +6,7 @@
 you can skip to the next chapter.**
 
 Otherwise you should follow these steps:
+
 1. Select the [esphome-latest](https://github.com/denes44/BudapestMetroDisplay/releases/tag/esphome-latest)
 firmware from the GitHub Releases
 1. Download factory firmware binary file called `metro-display-esp32s3.factory.bin`

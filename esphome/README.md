@@ -19,7 +19,7 @@ You can use the device 3 different ways:
 The default firmware to use is **metro-display-esp32s3.factory.bin**.
 
 You can download the latest firmware from GitHub Releases:
-https://github.com/denes44/BudapestMetroDisplay/releases/tag/esphome-latest
+<https://github.com/denes44/BudapestMetroDisplay/releases/tag/esphome-latest>
 
 With this firmware you can use [Improv via BLE](https://esphome.io/components/esp32_improv)
 or [Improv via Serial](https://esphome.io/components/improv_serial)

@@ -7,24 +7,17 @@ jobs:
     name: Markdown Lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    - uses: DavidAnson/markdownlint-cli2-action@696eb3f2509270d7b882d2aa68347bc676e7af34 # v25.0.0
       with:
-        fetch-depth: 0
-    - uses: tj-actions/changed-files@v47
-      id: changed-files
-      with:
-        files: '**/*.md'
-        separator: ","
-    - uses: DavidAnson/markdownlint-cli2-action@v17
-      if: steps.changed-files.outputs.any_changed == 'true'
-      with:
-        globs: ${{ steps.changed-files.outputs.all_changed_files }}
-        separator: ","
-        fix: true
+        globs: |
+          **/*.md
+          !.github/pull_request_template.md
+        fix: false
         config: '.github/rules/custom.markdownlint.jsonc'
   markdown-link-check:
     name: Check links
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
-    - uses: tcort/github-action-markdown-link-check@v1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    - uses: tcort/github-action-markdown-link-check@e047c5b37f24ab722bbef1a27b6fab7f96bc4068 # v1.1.3

@@ -35,9 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for ambient light sensor *(from hardver version ABA)*
   - Only sensor value is supplied, no in-device backlight control yet
 - Factory resetting the device is now possible
-    - From the Web GUI
-    - Or by power-cycling the device 5 times with less then 10s between
-	  the power cycles
+  - From the Web GUI
+  - Or by power-cycling the device 5 times with less then 10s between
+    the power cycles
 
 ### Changed
 
@@ -104,7 +104,6 @@ made to the device
 - Added configuration for importing the device to the ESP Home dashboard
 - Added option to check for firmware updates from github
 
-
 ### Changed
 
 - Rearranged the order of the entities in the web server view
@@ -115,7 +114,7 @@ made to the device
 
 - Configuration for the hardware LED display as a light with sACN (E1.31) support
 - Test functionately for visually testing the LEDs on the hardware
-    - Can be turned on by software or with the `BOOT` hardware button
+  - Can be turned on by software or with the `BOOT` hardware button
 - Default values for the LEDs which is loaded after startup (and after turning of the test mode)
 - Buttons for restart, restart in safe mode and shutdown
 - Sensor for WiFi signal strength and connection status

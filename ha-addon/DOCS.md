@@ -102,9 +102,11 @@ The **minimum value for the FPS is 1**.
 ### LED settings
 
 You can specify the dim ratio for the display.
+
 ```text
 LED_DIM_RATIO = 0.25 # Dim ratio for the background brightness of the LEDs (0 means totally off)
 ```
+
 It defines the brightness relative to the maximum brightness, when there is no
 vehicles at the stop. It's a **value between 0.0 and 1.0**.
 Value 0 means the LEDs will be off when there is no vehicle at the stop,
@@ -115,11 +117,11 @@ the dimmer colors wrong, because they LEDs can only turn on above 11% brightness
 
 ```text
 LED color
-	100%, 50%, 0%
+    100%, 50%, 0%
 With LED_DIM_RATO 0.25
-	25%, 12%, 0%
+    25%, 12%, 0%
 But if your global brightness is 75%
-	19%, 9%, 0%
+    19%, 9%, 0%
 Green LED is under 11%, so it will stay OFF
 ```
 
@@ -147,13 +149,14 @@ from the device would fall below 11%, the application will send out 11% instead.
 Set the `ESPHOME_USED` variable to **True if you want to turn on this function.**
 
 Using the previous example:
+
 ```text
 LED color
-	100%, 50%, 0%
+    100%, 50%, 0%
 With LED_DIM_RATO 0.25
-	25%, 12%, 0%
+    25%, 12%, 0%
 If your global brightness is 75%
-	19%, 9%, 0%
+    19%, 9%, 0%
 With brightness compensation
-	19%, 11%, 0%
+    19%, 11%, 0%
 ```
